@@ -206,10 +206,15 @@ export default function DashboardPage() {
                 <div className="space-y-2">
                 {[
                     'Creative direction across all titles',
-                    'Studio operations & infrastructure',
-                    'Business development',
-                    'Code & Blender / asset work',
-                    'Hiring & team building',
+                    'Gameplay programming & technical architecture',
+                    'Business development & legal (DUNS, developer accounts, LLC)',
+                    '3D modeling, texturing and asset creation',
+                    'Studio operatoins & infrastructure',
+                    'Finance & accounting',
+                    'Hiring, recruiting, team building',
+                    'Marketing & community strategy',
+                    'Voice acting & audio direction',
+                    'Website & intenral tools development',
                 ].map((item) => (
                     <p key={item} className="text-sm text-neutral-300 flex items-start gap-2">
                     <span className="text-cyan-400 mt-1">•</span>
