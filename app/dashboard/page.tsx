@@ -88,7 +88,10 @@ export default function DashboardPage() {
                   <p className="text-xs text-text-secondary">Studio Head / Creative Director</p>
                 </div>
               </div>
-              <p className="text-xs text-green-400 mb-1">In Motion — 5m ago</p>
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                <p className="text-xs text-text-secondary">Online</p>
+              </div>
               <p className="text-xs text-text-secondary mb-1">Lvl 0 · {personalXP} / 500 XP</p>
               <div className="w-full h-1.5 bg-elevated rounded-full overflow-hidden">
                 <div className="h-full bg-brand" style={{ width: `${Math.min((personalXP / 500) * 100, 100)}%` }} />
