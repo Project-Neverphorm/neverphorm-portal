@@ -117,7 +117,7 @@ export default function DashboardPage() {
               <span className="text-xs text-cyan-400">About Studio Levels →</span>
             </div>
             <div className="flex items-end gap-4 mb-4">
-              <span className="text-6xl font-bold">Lvl 0</span>
+              <span className="text-6xl font-bold text-cyan-400">Lvl 0</span>
               <span className="text-neutral-400 text-sm pb-2">Starting Fresh — Keep going, team!</span>
             </div>
             <div className="w-full h-2 bg-neutral-800 rounded-full overflow-hidden">
