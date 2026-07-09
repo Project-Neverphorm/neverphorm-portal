@@ -134,6 +134,9 @@ export default function Navbar() {
                 <a href="https://drive.google.com" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-neutral-700">
                   Google Drive
                 </a>
+                <a href="https://discord.com" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-neutral-700">
+                  Discord
+                </a>
               </div>
             )}
           </div>
