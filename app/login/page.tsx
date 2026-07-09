@@ -37,12 +37,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black">
+    <div className="min-h-screen flex items-center justify-center bg-background">
       <form
         onSubmit={handleLogin}
-        className="bg-neutral-900 p-8 rounded-lg w-full max-w-sm"
+        className="bg-surface p-8 rounded-lg w-full max-w-sm"
       >
-        <h1 className="text-2xl font-bold text-white mb-6">
+        <h1 className="text-2xl font-bold text-foreground mb-6">
           Project Neverphorm Portal
         </h1>
 
@@ -51,7 +51,7 @@ export default function LoginPage() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full mb-4 px-4 py-2 rounded bg-neutral-800 text-white"
+          className="w-full mb-4 px-4 py-2 rounded bg-elevated text-foreground"
           required
         />
 
@@ -60,7 +60,7 @@ export default function LoginPage() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full mb-4 px-4 py-2 rounded bg-neutral-800 text-white"
+          className="w-full mb-4 px-4 py-2 rounded bg-elevated text-foreground"
           required
         />
 
@@ -71,7 +71,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-foreground py-2 rounded"
         >
           {loading ? 'Logging in...' : 'Log In'}
         </button>

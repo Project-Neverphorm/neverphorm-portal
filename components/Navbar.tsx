@@ -79,7 +79,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="relative bg-neutral-900 text-white px-6 py-4 flex items-center justify-between">
+      <nav className="relative bg-surface text-foreground px-6 py-4 flex items-center justify-between">
         <Link href="/dashboard" className="font-bold text-lg">
           Project Neverphorm
         </Link>
@@ -92,7 +92,7 @@ export default function Navbar() {
           >
             <button className="hover:text-neutral-300">Studio Center</button>
             {openDropdown === 'studio' && (
-              <div className="absolute top-full left-0 bg-neutral-800 rounded shadow-lg py-2 w-40 z-50">
+              <div className="absolute top-full left-0 bg-elevated rounded shadow-lg py-2 w-40 z-50">
                 <Link href="/dashboard/education" className="block px-4 py-2 hover:bg-neutral-700">
                   Education
                 </Link>
@@ -124,17 +124,17 @@ export default function Navbar() {
           >
             <button className="hover:text-neutral-300">Links</button>
             {openDropdown === 'links' && (
-              <div className="absolute top-full left-0 bg-neutral-800 rounded shadow-lg py-2 w-48 z-50">
+              <div className="absolute top-full left-0 bg-elevated rounded shadow-lg py-2 w-48 z-50">
                 <a href="https://projectneverphorm.com" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-neutral-700">
                   Studio Website
                 </a>
-                <a href="https://notion.so" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-neutral-700">
+                <a href="https://app.notion.com/p/Studio-Hub-3928c49cb9f880468c1ff6d340dcf9e3" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-neutral-700">
                   Notion Workspace
                 </a>
                 <a href="https://drive.google.com" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-neutral-700">
                   Google Drive
                 </a>
-                <a href="https://discord.com" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-neutral-700">
+                <a href="https://discord.gg/s7cKSNTzEh" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-neutral-700">
                   Discord
                 </a>
               </div>
@@ -148,7 +148,7 @@ export default function Navbar() {
           >
             <button className="hover:text-neutral-300">Account</button>
             {openDropdown === 'account' && (
-              <div className="absolute top-full right-0 bg-neutral-800 rounded shadow-lg py-2 w-40 z-50">
+              <div className="absolute top-full right-0 bg-elevated rounded shadow-lg py-2 w-40 z-50">
                 <Link href="/dashboard/account" className="block px-4 py-2 hover:bg-neutral-700">
                   Account
                 </Link>
@@ -163,7 +163,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-4">
           <div className="text-right">
             <p className="text-sm font-semibold">{profile?.full_name || 'Loading...'}</p>
-            <p className="text-xs text-neutral-400">{profile?.title}</p>
+            <p className="text-xs text-text-secondary">{profile?.title}</p>
           </div>
           <button
             onClick={handleLogout}
@@ -181,8 +181,8 @@ export default function Navbar() {
         </button>
 
         {mobileMenuOpen && (
-          <div className="absolute top-16 left-0 w-full bg-neutral-900 flex flex-col gap-3 p-4 md:hidden z-50">
-            <p className="text-neutral-400 text-xs uppercase">Studio Center</p>
+          <div className="absolute top-16 left-0 w-full bg-surface flex flex-col gap-3 p-4 md:hidden z-50">
+            <p className="text-text-secondary text-xs uppercase">Studio Center</p>
             <Link href="/dashboard/education" className="pl-2">Education</Link>
             <Link href="/dashboard/resources" className="pl-2">Resource</Link>
             <Link href="/dashboard/training" className="pl-2">Training</Link>
@@ -197,19 +197,19 @@ export default function Navbar() {
               Calendar
             </button>
 
-            <p className="text-neutral-400 text-xs uppercase pt-2">Links</p>
+            <p className="text-text-secondary text-xs uppercase pt-2">Links</p>
             <a href="https://projectneverphorm.com" target="_blank" rel="noopener noreferrer" className="pl-2">Studio Website</a>
             <a href="https://notion.so" target="_blank" rel="noopener noreferrer" className="pl-2">Notion Workspace</a>
             <a href="https://drive.google.com" target="_blank" rel="noopener noreferrer" className="pl-2">Google Drive</a>
 
-            <p className="text-neutral-400 text-xs uppercase pt-2">Account</p>
+            <p className="text-text-secondary text-xs uppercase pt-2">Account</p>
             <Link href="/dashboard/account" className="pl-2">Account</Link>
             <Link href="/dashboard/preferences" className="pl-2">Preferences</Link>
 
             <p className="text-sm font-semibold pt-2 border-t border-neutral-700">
               {profile?.full_name}
             </p>
-            <p className="text-xs text-neutral-400">{profile?.title}</p>
+            <p className="text-xs text-text-secondary">{profile?.title}</p>
             <button onClick={handleLogout} className="text-xs text-red-500 text-left">
               Log Out
             </button>
@@ -219,11 +219,11 @@ export default function Navbar() {
 
       {openModal === 'purpose' && (
         <div
-          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-background/70 flex items-center justify-center z-50"
           onClick={() => setOpenModal(null)}
         >
           <div
-            className="bg-neutral-900 text-white p-8 rounded-lg max-w-md mx-4 max-h-[80vh] overflow-y-auto"
+            className="bg-surface text-foreground p-8 rounded-lg max-w-md mx-4 max-h-[80vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold mb-4">Dashboard Purpose</h2>
@@ -255,17 +255,17 @@ export default function Navbar() {
 
 {openModal === 'calendar' && (
   <div
-    className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+    className="fixed inset-0 bg-background/70 flex items-center justify-center z-50"
     onClick={() => { setOpenModal(null); setSelectedDates(null); }}
   >
     <div
-      className="bg-neutral-900 text-white p-6 rounded-lg max-w-2xl w-full mx-4 max-h-[85vh] overflow-y-auto"
+      className="bg-surface text-foreground p-6 rounded-lg max-w-2xl w-full mx-4 max-h-[85vh] overflow-y-auto"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
-          className="text-neutral-400 hover:text-white px-2"
+          className="text-text-secondary hover:text-foreground px-2"
         >
           ←
         </button>
@@ -274,13 +274,13 @@ export default function Navbar() {
         </h2>
         <button
           onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
-          className="text-neutral-400 hover:text-white px-2"
+          className="text-text-secondary hover:text-foreground px-2"
         >
           →
         </button>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 text-center text-xs text-neutral-500 mb-2">
+      <div className="grid grid-cols-7 gap-1 text-center text-xs text-text-muted mb-2">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => <div key={d}>{d}</div>)}
       </div>
 
@@ -304,13 +304,13 @@ export default function Navbar() {
               <button
                 key={dateStr}
                 onClick={() => setSelectedDates(dateStr)}
-                className={`aspect-square rounded text-sm p-1 flex flex-col items-center justify-start hover:bg-neutral-800 transition-colors ${
-                  selectedDates === dateStr ? 'bg-neutral-800 ring-1 ring-cyan-400' : ''
+                className={`aspect-square rounded text-sm p-1 flex flex-col items-center justify-start hover:bg-elevated transition-colors ${
+                  selectedDates === dateStr ? 'bg-elevated ring-1 ring-cyan-400' : ''
                 }`}
               >
                 <span>{day}</span>
                 {dayEvents.length > 0 && (
-                  <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full mt-1" />
+                  <span className="w-1.5 h-1.5 bg-brand rounded-full mt-1" />
                 )}
               </button>
             )
@@ -321,28 +321,28 @@ export default function Navbar() {
       </div>
 
       {selectedDates && (
-        <div className="mt-6 border-t border-neutral-800 pt-4">
+        <div className="mt-6 border-t border-border-default pt-4">
           <p className="text-sm font-semibold mb-2">{selectedDates}</p>
 
           <div className="space-y-2 mb-4">
             {CalendarEvents
               .filter((e) => e.event_date === selectedDates)
               .map((e) => (
-                <div key={e.id} className="flex items-center justify-between text-sm bg-neutral-800 rounded px-3 py-2">
+                <div key={e.id} className="flex items-center justify-between text-sm bg-elevated rounded px-3 py-2">
                   <span>{e.title}</span>
                   <button
                     onClick={async () => {
                       await supabase.from('calendar_events').delete().eq('id', e.id)
                       loadCalendarEvents()
                     }}
-                    className="text-neutral-500 hover:text-red-500"
+                    className="text-text-muted hover:text-red-500"
                   >
                     ✕
                   </button>
                 </div>
               ))}
             {CalendarEvents.filter((e) => e.event_date === selectedDates).length === 0 && (
-              <p className="text-xs text-neutral-500">No events for this day.</p>
+              <p className="text-xs text-text-muted">No events for this day.</p>
             )}
           </div>
 
@@ -354,7 +354,7 @@ export default function Navbar() {
               addEvent(selectedDates, label, type)
               e.target.value = ''
             }}
-            className="w-full bg-neutral-800 text-sm rounded px-3 py-2"
+            className="w-full bg-elevated text-sm rounded px-3 py-2"
           >
             <option value="">+ Add event...</option>
             <option value="pto|Out of Office">Mark myself out</option>
