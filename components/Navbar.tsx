@@ -12,6 +12,13 @@ type Profile = {
   title: string
   role: string
 }
+type CalendarEvent = {
+  id: string
+  event_date: string
+  title: string
+  type: string
+  created_by: string | null
+}
 
 export default function Navbar() {
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -19,6 +26,9 @@ export default function Navbar() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [openModal, setOpenModal] = useState<string | null>(null)
   const router = useRouter()
+  const [CalendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([])
+  const [selectedDates, setSelectedDates] = useState<string | null>(null)
+  const [currentMonth, setCurrentMonth] = useState(new Date())
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -40,6 +50,29 @@ export default function Navbar() {
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.push('/login')
+  }
+
+  const loadCalendarEvents = async () => {
+    const { data } = await supabase
+      .from('calendar_events')
+      .select('*')
+      .order('event_date', { ascending: true })
+      
+    if (data) setCalendarEvents(data)
+  }
+
+  const addEvent = async (dateStr: string, title: string, type: string) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    await supabase.from('calendar_events').insert({
+      event_date:dateStr,
+      title,
+      type,
+      created_by: user.id,
+    })
+
+    loadCalendarEvents()
   }
 
   const isManager = profile?.role === 'manager'
@@ -80,7 +113,7 @@ export default function Navbar() {
             Purpose
           </button>
 
-          <button onClick={() => setOpenModal('calendar')} className="hover:text-neutral-300">
+          <button onClick={() => {setOpenModal('calendar'); loadCalendarEvents(); }}className="hover:text-neutral-300">
             Calendar
           </button>
 
@@ -215,22 +248,121 @@ export default function Navbar() {
         </div>
       )}
 
-      {openModal === 'calendar' && (
-        <div
-          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
-          onClick={() => setOpenModal(null)}
+      {/* Calendar Modal */}
+
+{openModal === 'calendar' && (
+  <div
+    className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+    onClick={() => { setOpenModal(null); setSelectedDates(null); }}
+  >
+    <div
+      className="bg-neutral-900 text-white p-6 rounded-lg max-w-2xl w-full mx-4 max-h-[85vh] overflow-y-auto"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
+          className="text-neutral-400 hover:text-white px-2"
         >
-          <div
-            className="bg-neutral-900 text-white p-8 rounded-lg max-w-md mx-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-xl font-bold mb-4">Company Calendar</h2>
-            <p className="text-neutral-300 text-sm leading-relaxed">
-              Holiday and paid time off schedule coming soon.
-            </p>
+          ←
+        </button>
+        <h2 className="text-lg font-bold">
+          {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+        </h2>
+        <button
+          onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
+          className="text-neutral-400 hover:text-white px-2"
+        >
+          →
+        </button>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 text-center text-xs text-neutral-500 mb-2">
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => <div key={d}>{d}</div>)}
+      </div>
+
+      <div className="grid grid-cols-7 gap-1">
+        {(() => {
+          const year = currentMonth.getFullYear()
+          const month = currentMonth.getMonth()
+          const firstDay = new Date(year, month, 1).getDay()
+          const daysInMonth = new Date(year, month + 1, 0).getDate()
+          const cells = []
+
+          for (let i = 0; i < firstDay; i++) {
+            cells.push(<div key={`empty-${i}`} />)
+          }
+
+          for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+            const dayEvents = CalendarEvents.filter((e) => e.event_date === dateStr)
+
+            cells.push(
+              <button
+                key={dateStr}
+                onClick={() => setSelectedDates(dateStr)}
+                className={`aspect-square rounded text-sm p-1 flex flex-col items-center justify-start hover:bg-neutral-800 transition-colors ${
+                  selectedDates === dateStr ? 'bg-neutral-800 ring-1 ring-cyan-400' : ''
+                }`}
+              >
+                <span>{day}</span>
+                {dayEvents.length > 0 && (
+                  <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full mt-1" />
+                )}
+              </button>
+            )
+          }
+
+          return cells
+        })()}
+      </div>
+
+      {selectedDates && (
+        <div className="mt-6 border-t border-neutral-800 pt-4">
+          <p className="text-sm font-semibold mb-2">{selectedDates}</p>
+
+          <div className="space-y-2 mb-4">
+            {CalendarEvents
+              .filter((e) => e.event_date === selectedDates)
+              .map((e) => (
+                <div key={e.id} className="flex items-center justify-between text-sm bg-neutral-800 rounded px-3 py-2">
+                  <span>{e.title}</span>
+                  <button
+                    onClick={async () => {
+                      await supabase.from('calendar_events').delete().eq('id', e.id)
+                      loadCalendarEvents()
+                    }}
+                    className="text-neutral-500 hover:text-red-500"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            {CalendarEvents.filter((e) => e.event_date === selectedDates).length === 0 && (
+              <p className="text-xs text-neutral-500">No events for this day.</p>
+            )}
           </div>
+
+          <select
+            defaultValue=""
+            onChange={(e) => {
+              if (!e.target.value) return
+              const [type, label] = e.target.value.split('|')
+              addEvent(selectedDates, label, type)
+              e.target.value = ''
+            }}
+            className="w-full bg-neutral-800 text-sm rounded px-3 py-2"
+          >
+            <option value="">+ Add event...</option>
+            <option value="pto|Out of Office">Mark myself out</option>
+            {isManager && <option value="closure|Studio Closed">Studio Closed (company-wide)</option>}
+            {isManager && <option value="holiday|Holiday">Holiday</option>}
+          </select>
         </div>
       )}
+    </div>
+  </div>
+)}
     </>
   )
 }
