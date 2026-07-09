@@ -65,7 +65,7 @@ export default function Navbar() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    const error = await supabase.from('calendar_events').insert({
+    const { error } = await supabase.from('calendar_events').insert({
       event_date:dateStr,
       title,
       type,
@@ -74,7 +74,7 @@ export default function Navbar() {
 
     if (error) {
       console.error('Failed to add event:', error)
-      alert('Failed to add event: ${error.message}')
+      alert(`Failed to add event: ${error.message}`)
       return
     }
 
