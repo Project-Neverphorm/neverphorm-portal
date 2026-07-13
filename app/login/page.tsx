@@ -16,6 +16,7 @@ export default function LoginPage() {
   // router.push('/dashboard') -  if login succeeds, we redirect to /dashboard (which we'll build next).
   // className stuff is Tailwind,  utility classes that style directly in the markup instead of separate CSS files.
 
+  {/*}
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorMsg('')
@@ -33,6 +34,12 @@ export default function LoginPage() {
       return
     }
 
+    router.push('/dashboard')
+  }
+    */}
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
     router.push('/dashboard')
   }
 
