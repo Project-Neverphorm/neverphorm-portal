@@ -293,7 +293,7 @@ export default function EducationPage() {
                   <div className="flex flex-col gap-1">
                     {item.detail.docs.map((d) => (
                       
-                        key={d.url}
+                        <a key={d.url}
                         href={d.url}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -325,7 +325,7 @@ export default function EducationPage() {
                   <div className="flex flex-col gap-1">
                     {item.detail.videos.map((v) => (
                       
-                        key={v.url}
+                        <a key={v.url}
                         href={v.url}
                         target="_blank"
                         rel="noopener noreferrer"
