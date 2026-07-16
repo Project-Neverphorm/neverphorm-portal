@@ -1,489 +1,371 @@
-// app/dashboard/page.tsx
+// components/Navbar.tsx
 
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import Navbar from '@/components/Navbar'
-import type { User } from '@supabase/supabase-js'
 
-type Task = {
-  id: number
-  name: string
-  xp: number
-  assignedTo: string
+type Profile = {
+  full_name: string
+  title: string
+  role: string
+}
+type CalendarEvent = {
+  id: string
+  event_date: string
+  title: string
+  type: string
+  created_by: string | null
 }
 
-type ArchivedTask = Task & {
-  archivedAt: string
-  reason: 'completed' | 'deleted'
-}
-
-const TEAM_MEMBERS = ['Cody']
-
-const XP_TIERS = [
-  { value: 25, label: '25 XP — Light (quick, small)' },
-  { value: 30, label: '30 XP — Light-Medium' },
-  { value: 35, label: '35 XP — Medium' },
-  { value: 40, label: '40 XP — Medium-Heavy' },
-  { value: 45, label: '45 XP — Heavy (big, time-consuming)' },
-]
-
-const STORAGE_KEYS = {
-  tasks: 'neverphorm-tasks',
-  archived: 'neverphorm-archived-tasks',
-  nextId: 'neverphorm-next-id',
-}
-
-const DEFAULT_TASKS: Task[] = [
-  { id: 1, name: 'Confirm D-U-N-S number received', xp: 30, assignedTo: 'Cody' },
-  { id: 2, name: 'Complete Google Play developer account', xp: 25, assignedTo: 'Cody' },
-  { id: 3, name: 'Complete Apple developer account', xp: 25, assignedTo: 'Cody' },
-  { id: 4, name: 'Final build test on Android', xp: 30, assignedTo: 'Cody' },
-  { id: 5, name: 'Submit to Google Play', xp: 30, assignedTo: 'Cody' },
-  { id: 6, name: 'Submit to App Store', xp: 30, assignedTo: 'Cody' },
-]
-
-export default function DashboardPage() {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+export default function Navbar() {
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const [openModal, setOpenModal] = useState<string | null>(null)
   const router = useRouter()
+  const [CalendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([])
+  const [selectedDates, setSelectedDates] = useState<string | null>(null)
+  const [currentMonth, setCurrentMonth] = useState(new Date())
 
-  const [tasks, setTasks] = useState<Task[]>(DEFAULT_TASKS)
-  const [archivedTasks, setArchivedTasks] = useState<ArchivedTask[]>([])
-  const [nextId, setNextId] = useState(7)
-  const [hydrated, setHydrated] = useState(false)
-
-  const [showLogTask, setShowLogTask] = useState(false)
-  const [showArchive, setShowArchive] = useState(false)
-
-  const [newTaskName, setNewTaskName] = useState('')
-  const [newTaskMember, setNewTaskMember] = useState(TEAM_MEMBERS[0])
-  const [newTaskXP, setNewTaskXP] = useState(XP_TIERS[0].value)
-
-  const basePersonalXP = 0
-  const baseStudioXP = 0
-
-  // Load persisted state once, on mount, before anything writes back to storage.
   useEffect(() => {
-    try {
-      const storedTasks = localStorage.getItem(STORAGE_KEYS.tasks)
-      const storedArchived = localStorage.getItem(STORAGE_KEYS.archived)
-      const storedNextId = localStorage.getItem(STORAGE_KEYS.nextId)
+    const loadProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
 
-      if (storedTasks) setTasks(JSON.parse(storedTasks))
-      if (storedArchived) setArchivedTasks(JSON.parse(storedArchived))
-      if (storedNextId) setNextId(Number(storedNextId))
-    } catch (err) {
-      console.error('Failed to load saved tasks:', err)
+      const { data } = await supabase
+        .from('profiles')
+        .select('full_name, title, role')
+        .eq('id', user.id)
+        .single()
+
+      if (data) setProfile(data)
     }
-    setHydrated(true)
+
+    loadProfile()
   }, [])
 
-  // Persist on every change, but only after the initial load above has run —
-  // otherwise the default tasks would immediately overwrite whatever was saved.
-  useEffect(() => {
-    if (!hydrated) return
-    localStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(tasks))
-  }, [tasks, hydrated])
-
-  useEffect(() => {
-    if (!hydrated) return
-    localStorage.setItem(STORAGE_KEYS.archived, JSON.stringify(archivedTasks))
-  }, [archivedTasks, hydrated])
-
-  useEffect(() => {
-    if (!hydrated) return
-    localStorage.setItem(STORAGE_KEYS.nextId, String(nextId))
-  }, [nextId, hydrated])
-
-  // Checking a task off archives it as "completed" — disappears from
-  // Current Tasks, lands in the archive with a completion timestamp.
-  const completeTask = (id: number) => {
-    const task = tasks.find((t) => t.id === id)
-    if (!task) return
-
-    setArchivedTasks((prev) => [
-      { ...task, archivedAt: new Date().toISOString(), reason: 'completed' },
-      ...prev,
-    ])
-    setTasks((prev) => prev.filter((t) => t.id !== id))
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.push('/login')
   }
 
-  // Deleting a task (the red X) also archives it, but tagged "deleted" so
-  // it's clear later that this one wasn't actually finished.
-  const deleteTask = (id: number) => {
-    const task = tasks.find((t) => t.id === id)
-    if (!task) return
-
-    setArchivedTasks((prev) => [
-      { ...task, archivedAt: new Date().toISOString(), reason: 'deleted' },
-      ...prev,
-    ])
-    setTasks((prev) => prev.filter((t) => t.id !== id))
+  const loadCalendarEvents = async () => {
+    const { data } = await supabase
+      .from('calendar_events')
+      .select('*')
+      .order('event_date', { ascending: true })
+      
+    if (data) setCalendarEvents(data)
   }
 
-  const addTask = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newTaskName.trim()) return
+  const addEvent = async (dateStr: string, title: string, type: string) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
 
-    setTasks((prev) => [
-      ...prev,
-      { id: nextId, name: newTaskName.trim(), xp: newTaskXP, assignedTo: newTaskMember },
-    ])
-    setNextId((n) => n + 1)
-    setNewTaskName('')
-    setNewTaskXP(XP_TIERS[0].value)
-    setShowLogTask(false)
-  }
+    const { error } = await supabase.from('calendar_events').insert({
+      event_date:dateStr,
+      title,
+      type,
+      created_by: user.id,
+    })
 
-  const emptyArchive = () => {
-    if (archivedTasks.length === 0) return
-    const confirmed = window.confirm(
-      `Permanently clear ${archivedTasks.length} archived task${archivedTasks.length === 1 ? '' : 's'}? This can't be undone.`
-    )
-    if (confirmed) setArchivedTasks([])
-  }
-
-  // Only completed tasks count toward XP — deleted ones don't.
-  const completedCount = archivedTasks.filter((t) => t.reason === 'completed').length
-  const earnedXP = archivedTasks
-    .filter((t) => t.reason === 'completed')
-    .reduce((sum, t) => sum + t.xp, 0)
-  const personalXP = basePersonalXP + earnedXP
-  const studioXP = baseStudioXP + earnedXP
-
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-
-      if (!user) {
-        router.push('/login')
-        return
-      }
-
-      setUser(user)
-      setLoading(false)
+    if (error) {
+      console.error('Failed to add event:', error)
+      alert(`Failed to add event: ${error.message}`)
+      return
     }
 
-    checkUser()
-  }, [router])
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-foreground">Loading...</p>
-      </div>
-    )
+    loadCalendarEvents()
   }
 
+  const isManager = profile?.role === 'manager'
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Navbar />
+    <>
+      <nav className="relative bg-surface text-foreground px-6 py-4 flex items-center justify-between">
+        <Link href="/dashboard" className="font-bold text-lg">
+          Project Neverphorm
+        </Link>
 
-      <div className="flex">
-
-        {/* LEFT SIDEBAR: Team Members */}
-        <aside className="w-72 shrink-0 border-r border-border-default px-6 py-10 min-h-screen">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-sm uppercase tracking-wide text-text-secondary">Team</h2>
-            <span className="text-xs text-brand">View All →</span>
+        <div className="hidden md:flex items-center gap-6 text-sm">
+          <div
+            className="relative"
+            onMouseEnter={() => setOpenDropdown('studio')}
+            onMouseLeave={() => setOpenDropdown(null)}
+          >
+            <button className="hover:text-neutral-300">Studio Center</button>
+            {openDropdown === 'studio' && (
+              <div className="absolute top-full left-0 bg-elevated rounded shadow-lg py-2 w-40 z-50">
+                <Link href="/dashboard/education" className="block px-4 py-2 hover:bg-neutral-700">
+                  Education
+                </Link>
+                <Link href="/dashboard/resources" className="block px-4 py-2 hover:bg-neutral-700">
+                  Resource
+                </Link>
+                <Link href="/dashboard/training" className="block px-4 py-2 hover:bg-neutral-700">
+                  Training
+                </Link>
+              </div>
+            )}
           </div>
 
-          <div className="space-y-6">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-full bg-brand text-black font-bold flex items-center justify-center shrink-0">
-                  CM
-                </div>
-                <div>
-                  <p className="font-semibold text-sm">Cody</p>
-                  <p className="text-xs text-text-secondary">Studio Head / Creative Director</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5 mb-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
-                <p className="text-xs text-text-secondary">Online</p>
-              </div>
-              <p className="text-xs text-text-secondary mb-1">Lvl 0 · {personalXP} / 500 XP</p>
-              <div className="w-full h-1.5 bg-elevated rounded-full overflow-hidden">
-                <div className="h-full bg-brand" style={{ width: `${Math.min((personalXP / 500) * 100, 100)}%` }} />
-              </div>
-            </div>
-          </div>
-
-          <button className="mt-8 w-full text-sm text-text-secondary hover:text-foreground border border-neutral-700 rounded px-4 py-2">
-            + Invite Member
+          <button onClick={() => setOpenModal('purpose')} className="hover:text-neutral-300">
+            Purpose
           </button>
-        </aside>
 
-        {/* MAIN CONTENT */}
-        <main className="flex-1 px-10 py-10">
+          <button onClick={() => {setOpenModal('calendar'); loadCalendarEvents(); }}className="hover:text-neutral-300">
+            Calendar
+          </button>
 
-          {/* Header */}
-          <div className="mb-10">
-            <h1 className="text-2xl font-bold">Welcome back, Cody</h1>
-            <p className="text-text-secondary text-sm mt-1">Here&apos;s where things stand.</p>
+          <div
+            className="relative"
+            onMouseEnter={() => setOpenDropdown('links')}
+            onMouseLeave={() => setOpenDropdown(null)}
+          >
+            <button className="hover:text-neutral-300">Links</button>
+            {openDropdown === 'links' && (
+              <div className="absolute top-full left-0 bg-elevated rounded shadow-lg py-2 w-48 z-50">
+                <a href="https://projectneverphorm.com" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-neutral-700">
+                  Studio Website
+                </a>
+                <a href="https://app.notion.com/p/Studio-Hub-3928c49cb9f880468c1ff6d340dcf9e3" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-neutral-700">
+                  Notion Workspace
+                </a>
+                <a href="https://drive.google.com" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-neutral-700">
+                  Google Drive
+                </a>
+                <a href="https://discord.gg/s7cKSNTzEh" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-neutral-700">
+                  Discord
+                </a>
+              </div>
+            )}
           </div>
 
-          {/* Studio Progress - full width */}
-          <div className="border-b border-border-default pb-10 mb-10">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm uppercase tracking-wide text-text-secondary">Studio Progress</h2>
-              <span className="text-xs text-brand">About Studio Levels →</span>
-            </div>
-            <div className="flex items-end gap-4 mb-4">
-              <span className="text-6xl font-bold text-brand">Lvl 0</span>
-              <span className="text-text-secondary text-sm pb-2">Starting Fresh — Keep going, team!</span>
-            </div>
-            <div className="w-full h-2 bg-elevated rounded-full overflow-hidden">
-              <div className="h-full bg-brand" style={{ width: `${Math.min((studioXP / 2500) * 100, 100)}%` }} />
-            </div>
-            <p className="text-sm text-text-secondary mt-2">{studioXP} / 2500 XP</p>
-          </div>
-
-          {/* Three-column stats - spread across full main width */}
-          <div className="grid grid-cols-3 gap-10 border-b border-border-default pb-10 mb-10">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-text-secondary mb-2">Next Goal</p>
-              <p className="font-semibold">Complete Current Task Boxes</p>
-              <p className="text-sm text-text-secondary mt-1">+2,500 XP Team Goal</p>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-wide text-text-secondary mb-2">Level Up Reward</p>
-              <p className="font-semibold">Studio Level 1</p>
-              <p className="text-sm text-brand mt-1">✓ Custom Studio Mug</p>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-wide text-text-secondary mb-2">Next Unlock</p>
-              <p className="font-semibold">Reward Slot</p>
-              <p className="text-sm text-text-secondary mt-1">Unlock after Level 1</p>
-            </div>
-          </div>
-
-          {/* Tasks + Responsibilities + Admin/Team Task Boxes */}
-          <div className="grid grid-cols-4 gap-12">
-
-            {/* My Current Tasks - takes half width */}
-            <div className="col-span-2">
-              <div className="flex items-center justify-between mb-1">
-                <h2 className="text-sm uppercase tracking-wide text-text-secondary">My Current Tasks</h2>
-                <span className="text-xs text-text-secondary">🎯 Target: Ongoing</span>
+          <div
+            className="relative"
+            onMouseEnter={() => setOpenDropdown('account')}
+            onMouseLeave={() => setOpenDropdown(null)}
+          >
+            <button className="hover:text-neutral-300">Account</button>
+            {openDropdown === 'account' && (
+              <div className="absolute top-full right-0 bg-elevated rounded shadow-lg py-2 w-40 z-50">
+                <Link href="/dashboard/account" className="block px-4 py-2 hover:bg-neutral-700">
+                  Account
+                </Link>
+                <Link href="/dashboard/preferences" className="block px-4 py-2 hover:bg-neutral-700">
+                  Preferences
+                </Link>
               </div>
-              <p className="text-2xl font-bold mb-1">Current Tasks</p>
-              <p className="text-brand text-sm mb-3">Assigned to Cody</p>
-
-              <div className="w-full h-2 bg-elevated rounded-full overflow-hidden mb-2">
-                <div className="h-full bg-brand" style={{ width: `${Math.min((personalXP / 500) * 100, 100)}%` }} />
-              </div>
-              <p className="text-sm text-text-secondary mb-6">{personalXP} / 500 XP · {completedCount} tasks completed</p>
-
-              <div className="divide-y divide-neutral-800 max-h-80 overflow-y-auto pr-2">
-                {tasks.length === 0 && (
-                  <p className="text-sm text-text-secondary py-4">No active tasks. Log one from the admin panel.</p>
-                )}
-                {tasks.map((task) => (
-                  <div key={task.id} className="flex items-center justify-between py-3 group">
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => completeTask(task.id)}
-                        aria-label={`Mark "${task.name}" complete`}
-                        className="w-5 h-5 rounded border border-neutral-600 hover:border-brand flex items-center justify-center shrink-0 transition-colors"
-                      />
-                      <p className="text-sm">{task.name}</p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-sm font-semibold text-brand">+{task.xp} XP</span>
-                      <button
-                        onClick={() => deleteTask(task.id)}
-                        aria-label={`Delete "${task.name}"`}
-                        className="text-neutral-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Responsibilities */}
-            <div>
-              <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">Responsibilities</h2>
-              <div className="space-y-2">
-                {[
-                  'Creative direction across all titles',
-                  'Gameplay programming & technical architecture',
-                  'Business development & legal (DUNS, developer accounts, LLC)',
-                  '3D modeling, texturing and asset creation',
-                  'Studio operatoins & infrastructure',
-                  'Finance & accounting',
-                  'Hiring, recruiting, team building',
-                  'Marketing & community strategy',
-                  'Voice acting & audio direction',
-                  'Website & intenral tools development',
-                ].map((item) => (
-                  <p key={item} className="text-sm text-neutral-300 flex items-start gap-2">
-                    <span className="text-brand mt-1">•</span>
-                    {item}
-                  </p>
-                ))}
-              </div>
-            </div>
-
-            {/* Admin panel + Team Task Boxes */}
-            <div>
-              <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">Admin</h2>
-              <div className="flex flex-col gap-2 mb-8">
-                <button
-                  onClick={() => setShowLogTask(true)}
-                  className="text-sm text-left border border-neutral-700 hover:border-brand rounded px-4 py-2 transition-colors"
-                >
-                  + Log Task
-                </button>
-                <button
-                  onClick={() => setShowArchive(true)}
-                  className="text-sm text-left border border-neutral-700 hover:border-brand rounded px-4 py-2 transition-colors flex items-center justify-between"
-                >
-                  <span>Archived Tasks</span>
-                  <span className="text-text-secondary">{archivedTasks.length}</span>
-                </button>
-              </div>
-
-              <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">Team Task Boxes</h2>
-              <div className="border-l-2 border-brand pl-4">
-                <div className="flex items-center justify-between">
-                  <p className="font-semibold">Cody</p>
-                  <span className="text-sm text-text-secondary">{personalXP}/500</span>
-                </div>
-                <p className="text-brand text-sm">Current Tasks</p>
-                <p className="text-xs text-text-secondary mb-2">🎯 Target: Ongoing</p>
-                <div className="w-full h-2 bg-elevated rounded-full overflow-hidden mb-1">
-                  <div className="h-full bg-brand" style={{ width: `${Math.min((personalXP / 500) * 100, 100)}%` }} />
-                </div>
-                <p className="text-xs text-text-secondary">{completedCount} tasks complete</p>
-              </div>
-            </div>
-
-          </div>
-
-        </main>
-      </div>
-
-      {/* LOG TASK MODAL */}
-      {showLogTask && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
-          <div className="w-full max-w-sm bg-elevated border border-border-default rounded-lg p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold">Log a new task</h3>
-              <button
-                onClick={() => setShowLogTask(false)}
-                aria-label="Close"
-                className="text-text-secondary hover:text-foreground"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={addTask} className="space-y-4">
-              <div>
-                <label className="block text-xs text-text-secondary mb-1.5">Task name</label>
-                <input
-                  type="text"
-                  value={newTaskName}
-                  onChange={(e) => setNewTaskName(e.target.value)}
-                  placeholder="e.g. Update store listing screenshots"
-                  required
-                  className="w-full bg-background border border-border-default rounded px-3 py-2 text-sm outline-none focus:border-brand"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs text-text-secondary mb-1.5">Assign to</label>
-                <select
-                  value={newTaskMember}
-                  onChange={(e) => setNewTaskMember(e.target.value)}
-                  className="w-full bg-background border border-border-default rounded px-3 py-2 text-sm outline-none focus:border-brand"
-                >
-                  {TEAM_MEMBERS.map((member) => (
-                    <option key={member} value={member}>{member}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs text-text-secondary mb-1.5">XP value</label>
-                <select
-                  value={newTaskXP}
-                  onChange={(e) => setNewTaskXP(Number(e.target.value))}
-                  className="w-full bg-background border border-border-default rounded px-3 py-2 text-sm outline-none focus:border-brand"
-                >
-                  {XP_TIERS.map((tier) => (
-                    <option key={tier.value} value={tier.value}>{tier.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-brand text-black font-semibold rounded py-2 text-sm mt-2"
-              >
-                Add task
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ARCHIVED TASKS MODAL */}
-      {showArchive && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
-          <div className="w-full max-w-md bg-elevated border border-border-default rounded-lg p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold">Archived tasks</h3>
-              <button
-                onClick={() => setShowArchive(false)}
-                aria-label="Close"
-                className="text-text-secondary hover:text-foreground"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="max-h-80 overflow-y-auto divide-y divide-neutral-800 mb-4">
-              {archivedTasks.length === 0 && (
-                <p className="text-sm text-text-secondary py-4">Nothing archived yet.</p>
-              )}
-              {archivedTasks.map((task) => (
-                <div key={task.id} className="py-3">
-                  <div className="flex items-center justify-between">
-                    <p className={`text-sm ${task.reason === 'completed' ? 'line-through text-text-muted' : ''}`}>
-                      {task.name}
-                    </p>
-                    <span className="text-sm text-neutral-600">+{task.xp} XP</span>
-                  </div>
-                  <p className="text-xs text-text-secondary mt-1">
-                    {task.assignedTo} · {new Date(task.archivedAt).toLocaleDateString()}
-                    {task.reason === 'deleted' && (
-                      <span className="text-red-400 ml-1">— was deleted</span>
-                    )}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {archivedTasks.length > 0 && (
-              <button
-                onClick={emptyArchive}
-                className="w-full border border-red-500/40 text-red-500 hover:bg-red-500/10 rounded py-2 text-sm transition-colors"
-              >
-                Empty archive
-              </button>
             )}
           </div>
         </div>
+
+        <div className="hidden md:flex items-center gap-4">
+          <div className="text-right">
+            <p className="text-sm font-semibold">{profile?.full_name || 'Loading...'}</p>
+            <p className="text-xs text-text-secondary">{profile?.title}</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="text-xs bg-red-600 hover:bg-red-700 px-3 py-1 rounded"
+          >
+            Log Out
+          </button>
+        </div>
+
+        <button
+          className="md:hidden"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          ☰
+        </button>
+
+        {mobileMenuOpen && (
+          <div className="absolute top-16 left-0 w-full bg-surface flex flex-col gap-3 p-4 md:hidden z-50">
+            <p className="text-text-secondary text-xs uppercase">Studio Center</p>
+            <Link href="/dashboard/education" className="pl-2">Education</Link>
+            <Link href="/dashboard/resources" className="pl-2">Resource</Link>
+            <Link href="/dashboard/training" className="pl-2">Training</Link>
+
+            <button onClick={() => { setOpenModal('purpose'); setMobileMenuOpen(false) }} className="text-left">
+              Purpose
+            </button>
+            <button onClick={() => { setOpenModal('calendar'); setMobileMenuOpen(false) }} className="text-left">
+              Calendar
+            </button>
+
+            <p className="text-text-secondary text-xs uppercase pt-2">Links</p>
+            <a href="https://projectneverphorm.com" target="_blank" rel="noopener noreferrer" className="pl-2">Studio Website</a>
+            <a href="https://notion.so" target="_blank" rel="noopener noreferrer" className="pl-2">Notion Workspace</a>
+            <a href="https://drive.google.com" target="_blank" rel="noopener noreferrer" className="pl-2">Google Drive</a>
+
+            <p className="text-text-secondary text-xs uppercase pt-2">Account</p>
+            <Link href="/dashboard/account" className="pl-2">Account</Link>
+            <Link href="/dashboard/preferences" className="pl-2">Preferences</Link>
+
+            <p className="text-sm font-semibold pt-2 border-t border-neutral-700">
+              {profile?.full_name}
+            </p>
+            <p className="text-xs text-text-secondary">{profile?.title}</p>
+            <button onClick={handleLogout} className="text-xs text-red-500 text-left">
+              Log Out
+            </button>
+          </div>
+        )}
+      </nav>
+
+      {openModal === 'purpose' && (
+        <div
+          className="fixed inset-0 bg-background/70 flex items-center justify-center z-50"
+          onClick={() => setOpenModal(null)}
+        >
+          <div
+            className="bg-surface text-foreground p-8 rounded-lg max-w-md mx-4 max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-xl font-bold mb-4">Dashboard Purpose</h2>
+            <div className="text-neutral-300 text-sm leading-relaxed space-y-5">
+              <p>This dashboard exists to bring clarity, not pressure.</p>
+              <p>It helps everyone understand:</p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>What to work on</li>
+                <li>Where they are in their progress</li>
+                <li>Where the team is overall</li>
+              </ul>
+              <p>This is not a micromanagement tool. There are no penalties, no hidden tracking, and no expectations beyond doing your part.</p>
+              <p>Instead, this system is built to:</p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Provide direction</li>
+                <li>Encourage consistency</li>
+                <li>Recognize effort</li>
+                <li>Show progress</li>
+                <li>Keep everyone aligned</li>
+              </ul>
+              <p>Everyone works at a different pace, and that&apos;s okay. Tasks and XP are balanced so progress stays fair across all roles.</p>
+              <p>The goal is simple: make work feel clear, rewarding, and collaborative.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Calendar Modal */}
+
+{openModal === 'calendar' && (
+  <div
+    className="fixed inset-0 bg-background/70 flex items-center justify-center z-50"
+    onClick={() => { setOpenModal(null); setSelectedDates(null); }}
+  >
+    <div
+      className="bg-surface text-foreground p-6 rounded-lg max-w-2xl w-full mx-4 max-h-[85vh] overflow-y-auto"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
+          className="text-text-secondary hover:text-foreground px-2"
+        >
+          ←
+        </button>
+        <h2 className="text-lg font-bold">
+          {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+        </h2>
+        <button
+          onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
+          className="text-text-secondary hover:text-foreground px-2"
+        >
+          →
+        </button>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 text-center text-xs text-text-muted mb-2">
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => <div key={d}>{d}</div>)}
+      </div>
+
+      <div className="grid grid-cols-7 gap-1">
+        {(() => {
+          const year = currentMonth.getFullYear()
+          const month = currentMonth.getMonth()
+          const firstDay = new Date(year, month, 1).getDay()
+          const daysInMonth = new Date(year, month + 1, 0).getDate()
+          const cells = []
+
+          for (let i = 0; i < firstDay; i++) {
+            cells.push(<div key={`empty-${i}`} />)
+          }
+
+          for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+            const dayEvents = CalendarEvents.filter((e) => e.event_date === dateStr)
+
+            cells.push(
+              <button
+                key={dateStr}
+                onClick={() => setSelectedDates(dateStr)}
+                className={`aspect-square rounded text-sm p-1 flex flex-col items-center justify-start hover:bg-elevated transition-colors ${
+                  selectedDates === dateStr ? 'bg-elevated ring-1 ring-cyan-400' : ''
+                }`}
+              >
+                <span>{day}</span>
+                {dayEvents.length > 0 && (
+                  <span className="w-1.5 h-1.5 bg-brand rounded-full mt-1" />
+                )}
+              </button>
+            )
+          }
+
+          return cells
+        })()}
+      </div>
+
+      {selectedDates && (
+        <div className="mt-6 border-t border-border-default pt-4">
+          <p className="text-sm font-semibold mb-2">{selectedDates}</p>
+
+          <div className="space-y-2 mb-4">
+            {CalendarEvents
+              .filter((e) => e.event_date === selectedDates)
+              .map((e) => (
+                <div key={e.id} className="flex items-center justify-between text-sm bg-elevated rounded px-3 py-2">
+                  <span>{e.title}</span>
+                  <button
+                    onClick={async () => {
+                      await supabase.from('calendar_events').delete().eq('id', e.id)
+                      loadCalendarEvents()
+                    }}
+                    className="text-text-muted hover:text-red-500"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            {CalendarEvents.filter((e) => e.event_date === selectedDates).length === 0 && (
+              <p className="text-xs text-text-muted">No events for this day.</p>
+            )}
+          </div>
+
+          <select
+            defaultValue=""
+            onChange={(e) => {
+              if (!e.target.value) return
+              const [type, label] = e.target.value.split('|')
+              addEvent(selectedDates, label, type)
+              e.target.value = ''
+            }}
+            className="w-full bg-elevated text-sm rounded px-3 py-2"
+          >
+            <option value="">+ Add event...</option>
+            <option value="pto|Out of Office">Mark myself out</option>
+            {isManager && <option value="closure|Studio Closed">Studio Closed (company-wide)</option>}
+            {isManager && <option value="holiday|Holiday">Holiday</option>}
+          </select>
+        </div>
       )}
     </div>
+  </div>
+)}
+    </>
   )
 }
