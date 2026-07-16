@@ -9,15 +9,12 @@ import Navbar from '@/components/Navbar'
 import type { User } from '@supabase/supabase-js'
 
 type Task = {
-  id: number
+  id: string
   name: string
   xp: number
-  assignedTo: string
-}
-
-type ArchivedTask = Task & {
-  archivedAt: string
-  reason: 'completed' | 'deleted'
+  assigned_to: string
+  status: 'active' | 'completed' | 'deleted'
+  archived_at: string | null
 }
 
 const TEAM_MEMBERS = ['Cody']
@@ -30,30 +27,14 @@ const XP_TIERS = [
   { value: 45, label: '45 XP — Heavy (big, time-consuming)' },
 ]
 
-const STORAGE_KEYS = {
-  tasks: 'neverphorm-tasks',
-  archived: 'neverphorm-archived-tasks',
-  nextId: 'neverphorm-next-id',
-}
-
-const DEFAULT_TASKS: Task[] = [
-  { id: 1, name: 'Confirm D-U-N-S number received', xp: 30, assignedTo: 'Cody' },
-  { id: 2, name: 'Complete Google Play developer account', xp: 25, assignedTo: 'Cody' },
-  { id: 3, name: 'Complete Apple developer account', xp: 25, assignedTo: 'Cody' },
-  { id: 4, name: 'Final build test on Android', xp: 30, assignedTo: 'Cody' },
-  { id: 5, name: 'Submit to Google Play', xp: 30, assignedTo: 'Cody' },
-  { id: 6, name: 'Submit to App Store', xp: 30, assignedTo: 'Cody' },
-]
-
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  const [tasks, setTasks] = useState<Task[]>(DEFAULT_TASKS)
-  const [archivedTasks, setArchivedTasks] = useState<ArchivedTask[]>([])
-  const [nextId, setNextId] = useState(7)
-  const [hydrated, setHydrated] = useState(false)
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [archivedTasks, setArchivedTasks] = useState<Task[]>([])
+  const [tasksLoading, setTasksLoading] = useState(true)
 
   const [showLogTask, setShowLogTask] = useState(false)
   const [showArchive, setShowArchive] = useState(false)
@@ -65,91 +46,105 @@ export default function DashboardPage() {
   const basePersonalXP = 0
   const baseStudioXP = 0
 
-  // Load persisted state once, on mount, before anything writes back to storage.
-  useEffect(() => {
-    try {
-      const storedTasks = localStorage.getItem(STORAGE_KEYS.tasks)
-      const storedArchived = localStorage.getItem(STORAGE_KEYS.archived)
-      const storedNextId = localStorage.getItem(STORAGE_KEYS.nextId)
+  const loadTasks = async () => {
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('*')
+      .order('created_at', { ascending: true })
 
-      if (storedTasks) setTasks(JSON.parse(storedTasks))
-      if (storedArchived) setArchivedTasks(JSON.parse(storedArchived))
-      if (storedNextId) setNextId(Number(storedNextId))
-    } catch (err) {
-      console.error('Failed to load saved tasks:', err)
+    if (error) {
+      console.error('Failed to load tasks:', error)
+      return
     }
-    setHydrated(true)
+
+    if (data) {
+      setTasks(data.filter((t) => t.status === 'active'))
+      setArchivedTasks(
+        data
+          .filter((t) => t.status !== 'active')
+          .sort((a, b) => new Date(b.archived_at ?? 0).getTime() - new Date(a.archived_at ?? 0).getTime())
+      )
+    }
+    setTasksLoading(false)
+  }
+
+  useEffect(() => {
+    loadTasks()
   }, [])
 
-  // Persist on every change, but only after the initial load above has run —
-  // otherwise the default tasks would immediately overwrite whatever was saved.
-  useEffect(() => {
-    if (!hydrated) return
-    localStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(tasks))
-  }, [tasks, hydrated])
+  const completeTask = async (id: string) => {
+    const { error } = await supabase
+      .from('tasks')
+      .update({ status: 'completed', archived_at: new Date().toISOString() })
+      .eq('id', id)
 
-  useEffect(() => {
-    if (!hydrated) return
-    localStorage.setItem(STORAGE_KEYS.archived, JSON.stringify(archivedTasks))
-  }, [archivedTasks, hydrated])
-
-  useEffect(() => {
-    if (!hydrated) return
-    localStorage.setItem(STORAGE_KEYS.nextId, String(nextId))
-  }, [nextId, hydrated])
-
-  // Checking a task off archives it as "completed" — disappears from
-  // Current Tasks, lands in the archive with a completion timestamp.
-  const completeTask = (id: number) => {
-    const task = tasks.find((t) => t.id === id)
-    if (!task) return
-
-    setArchivedTasks((prev) => [
-      { ...task, archivedAt: new Date().toISOString(), reason: 'completed' },
-      ...prev,
-    ])
-    setTasks((prev) => prev.filter((t) => t.id !== id))
+    if (error) {
+      console.error('Failed to complete task:', error)
+      return
+    }
+    loadTasks()
   }
 
-  // Deleting a task (the red X) also archives it, but tagged "deleted" so
-  // it's clear later that this one wasn't actually finished.
-  const deleteTask = (id: number) => {
-    const task = tasks.find((t) => t.id === id)
-    if (!task) return
+  const deleteTask = async (id: string) => {
+    const { error } = await supabase
+      .from('tasks')
+      .update({ status: 'deleted', archived_at: new Date().toISOString() })
+      .eq('id', id)
 
-    setArchivedTasks((prev) => [
-      { ...task, archivedAt: new Date().toISOString(), reason: 'deleted' },
-      ...prev,
-    ])
-    setTasks((prev) => prev.filter((t) => t.id !== id))
+    if (error) {
+      console.error('Failed to delete task:', error)
+      return
+    }
+    loadTasks()
   }
 
-  const addTask = (e: React.FormEvent) => {
+  const addTask = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newTaskName.trim()) return
 
-    setTasks((prev) => [
-      ...prev,
-      { id: nextId, name: newTaskName.trim(), xp: newTaskXP, assignedTo: newTaskMember },
-    ])
-    setNextId((n) => n + 1)
+    const { data: { user } } = await supabase.auth.getUser()
+
+    const { error } = await supabase.from('tasks').insert({
+      name: newTaskName.trim(),
+      xp: newTaskXP,
+      assigned_to: newTaskMember,
+      created_by: user?.id,
+    })
+
+    if (error) {
+      console.error('Failed to add task:', error)
+      alert(`Failed to add task: ${error.message}`)
+      return
+    }
+
     setNewTaskName('')
     setNewTaskXP(XP_TIERS[0].value)
     setShowLogTask(false)
+    loadTasks()
   }
 
-  const emptyArchive = () => {
+  const emptyArchive = async () => {
     if (archivedTasks.length === 0) return
     const confirmed = window.confirm(
       `Permanently clear ${archivedTasks.length} archived task${archivedTasks.length === 1 ? '' : 's'}? This can't be undone.`
     )
-    if (confirmed) setArchivedTasks([])
+    if (!confirmed) return
+
+    const { error } = await supabase
+      .from('tasks')
+      .delete()
+      .in('status', ['completed', 'deleted'])
+
+    if (error) {
+      console.error('Failed to empty archive:', error)
+      return
+    }
+    loadTasks()
   }
 
-  // Only completed tasks count toward XP — deleted ones don't.
-  const completedCount = archivedTasks.filter((t) => t.reason === 'completed').length
+  const completedCount = archivedTasks.filter((t) => t.status === 'completed').length
   const earnedXP = archivedTasks
-    .filter((t) => t.reason === 'completed')
+    .filter((t) => t.status === 'completed')
     .reduce((sum, t) => sum + t.xp, 0)
   const personalXP = basePersonalXP + earnedXP
   const studioXP = baseStudioXP + earnedXP
@@ -157,20 +152,17 @@ export default function DashboardPage() {
   useEffect(() => {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-
       if (!user) {
         router.push('/login')
         return
       }
-
       setUser(user)
       setLoading(false)
     }
-
     checkUser()
   }, [router])
 
-  if (loading) {
+  if (loading || tasksLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <p className="text-foreground">Loading...</p>
@@ -184,7 +176,6 @@ export default function DashboardPage() {
 
       <div className="flex">
 
-        {/* LEFT SIDEBAR: Team Members */}
         <aside className="w-72 shrink-0 border-r border-border-default px-6 py-10 min-h-screen">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-sm uppercase tracking-wide text-text-secondary">Team</h2>
@@ -218,16 +209,13 @@ export default function DashboardPage() {
           </button>
         </aside>
 
-        {/* MAIN CONTENT */}
         <main className="flex-1 px-10 py-10">
 
-          {/* Header */}
           <div className="mb-10">
             <h1 className="text-2xl font-bold">Welcome back, Cody</h1>
             <p className="text-text-secondary text-sm mt-1">Here&apos;s where things stand.</p>
           </div>
 
-          {/* Studio Progress - full width */}
           <div className="border-b border-border-default pb-10 mb-10">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm uppercase tracking-wide text-text-secondary">Studio Progress</h2>
@@ -243,7 +231,6 @@ export default function DashboardPage() {
             <p className="text-sm text-text-secondary mt-2">{studioXP} / 2500 XP</p>
           </div>
 
-          {/* Three-column stats - spread across full main width */}
           <div className="grid grid-cols-3 gap-10 border-b border-border-default pb-10 mb-10">
             <div>
               <p className="text-xs uppercase tracking-wide text-text-secondary mb-2">Next Goal</p>
@@ -262,10 +249,8 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Tasks + Responsibilities + Admin/Team Task Boxes */}
           <div className="grid grid-cols-4 gap-12">
 
-            {/* My Current Tasks - takes half width */}
             <div className="col-span-2">
               <div className="flex items-center justify-between mb-1">
                 <h2 className="text-sm uppercase tracking-wide text-text-secondary">My Current Tasks</h2>
@@ -308,7 +293,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Responsibilities */}
             <div>
               <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">Responsibilities</h2>
               <div className="space-y-2">
@@ -332,7 +316,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Admin panel + Team Task Boxes */}
             <div>
               <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">Admin</h2>
               <div className="flex flex-col gap-2 mb-8">
@@ -371,19 +354,12 @@ export default function DashboardPage() {
         </main>
       </div>
 
-      {/* LOG TASK MODAL */}
       {showLogTask && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
           <div className="w-full max-w-sm bg-elevated border border-border-default rounded-lg p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-semibold">Log a new task</h3>
-              <button
-                onClick={() => setShowLogTask(false)}
-                aria-label="Close"
-                className="text-text-secondary hover:text-foreground"
-              >
-                ✕
-              </button>
+              <button onClick={() => setShowLogTask(false)} aria-label="Close" className="text-text-secondary hover:text-foreground">✕</button>
             </div>
 
             <form onSubmit={addTask} className="space-y-4">
@@ -425,10 +401,7 @@ export default function DashboardPage() {
                 </select>
               </div>
 
-              <button
-                type="submit"
-                className="w-full bg-brand text-black font-semibold rounded py-2 text-sm mt-2"
-              >
+              <button type="submit" className="w-full bg-brand text-black font-semibold rounded py-2 text-sm mt-2">
                 Add task
               </button>
             </form>
@@ -436,19 +409,12 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ARCHIVED TASKS MODAL */}
       {showArchive && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
           <div className="w-full max-w-md bg-elevated border border-border-default rounded-lg p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-semibold">Archived tasks</h3>
-              <button
-                onClick={() => setShowArchive(false)}
-                aria-label="Close"
-                className="text-text-secondary hover:text-foreground"
-              >
-                ✕
-              </button>
+              <button onClick={() => setShowArchive(false)} aria-label="Close" className="text-text-secondary hover:text-foreground">✕</button>
             </div>
 
             <div className="max-h-80 overflow-y-auto divide-y divide-neutral-800 mb-4">
@@ -458,16 +424,14 @@ export default function DashboardPage() {
               {archivedTasks.map((task) => (
                 <div key={task.id} className="py-3">
                   <div className="flex items-center justify-between">
-                    <p className={`text-sm ${task.reason === 'completed' ? 'line-through text-text-muted' : ''}`}>
+                    <p className={`text-sm ${task.status === 'completed' ? 'line-through text-text-muted' : ''}`}>
                       {task.name}
                     </p>
                     <span className="text-sm text-neutral-600">+{task.xp} XP</span>
                   </div>
                   <p className="text-xs text-text-secondary mt-1">
-                    {task.assignedTo} · {new Date(task.archivedAt).toLocaleDateString()}
-                    {task.reason === 'deleted' && (
-                      <span className="text-red-400 ml-1">— was deleted</span>
-                    )}
+                    {task.assigned_to} · {task.archived_at ? new Date(task.archived_at).toLocaleDateString() : ''}
+                    {task.status === 'deleted' && <span className="text-red-400 ml-1">— was deleted</span>}
                   </p>
                 </div>
               ))}
