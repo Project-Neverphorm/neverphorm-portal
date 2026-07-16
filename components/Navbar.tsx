@@ -112,9 +112,6 @@ export default function Navbar() {
             )}
           </div>
 
-          {isManager && <Link href="/dashboard/log-tasks" className="hover:text-neutral-300">Log Tasks</Link>}
-          {isManager && <Link href="/dashboard/archived-tasks" className="hover:text-neutral-300">Archived Tasks</Link>}
-
           <button onClick={() => setOpenModal('purpose')} className="hover:text-neutral-300">
             Purpose
           </button>
