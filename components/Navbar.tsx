@@ -193,9 +193,6 @@ export default function Navbar() {
             <Link href="/dashboard/resources" className="pl-2">Resource</Link>
             <Link href="/dashboard/training" className="pl-2">Training</Link>
 
-            {isManager && <Link href="/dashboard/log-tasks">Log Tasks</Link>}
-            {isManager && <Link href="/dashboard/archived-tasks">Archived Tasks</Link>}
-
             <button onClick={() => { setOpenModal('purpose'); setMobileMenuOpen(false) }} className="text-left">
               Purpose
             </button>
