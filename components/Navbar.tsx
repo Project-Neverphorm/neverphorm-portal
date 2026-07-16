@@ -120,6 +120,10 @@ export default function Navbar() {
             Calendar
           </button>
 
+          <Link href="/dashboard/cms" className="hover:text-neutral-300">
+            CMS
+          </Link>
+
           <div
             className="relative"
             onMouseEnter={() => setOpenDropdown('links')}
@@ -196,6 +200,9 @@ export default function Navbar() {
             <button onClick={() => { setOpenModal('calendar'); setMobileMenuOpen(false) }} className="text-left">
               Calendar
             </button>
+            <Link href="/dashboard/cms" className="pl-2" onClick={() => setMobileMenuOpen(false)}>
+              CMS
+            </Link>
 
             <p className="text-text-secondary text-xs uppercase pt-2">Links</p>
             <a href="https://projectneverphorm.com" target="_blank" rel="noopener noreferrer" className="pl-2">Studio Website</a>
