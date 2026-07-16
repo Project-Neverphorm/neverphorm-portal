@@ -16,7 +16,8 @@ type Task = {
 }
 
 type ArchivedTask = Task & {
-  completedAt: string
+  archivedAt: string
+  reason: 'completed' | 'deleted'
 }
 
 const TEAM_MEMBERS = ['Cody']
@@ -29,22 +30,30 @@ const XP_TIERS = [
   { value: 45, label: '45 XP — Heavy (big, time-consuming)' },
 ]
 
+const STORAGE_KEYS = {
+  tasks: 'neverphorm-tasks',
+  archived: 'neverphorm-archived-tasks',
+  nextId: 'neverphorm-next-id',
+}
+
+const DEFAULT_TASKS: Task[] = [
+  { id: 1, name: 'Confirm D-U-N-S number received', xp: 30, assignedTo: 'Cody' },
+  { id: 2, name: 'Complete Google Play developer account', xp: 25, assignedTo: 'Cody' },
+  { id: 3, name: 'Complete Apple developer account', xp: 25, assignedTo: 'Cody' },
+  { id: 4, name: 'Final build test on Android', xp: 30, assignedTo: 'Cody' },
+  { id: 5, name: 'Submit to Google Play', xp: 30, assignedTo: 'Cody' },
+  { id: 6, name: 'Submit to App Store', xp: 30, assignedTo: 'Cody' },
+]
+
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: 1, name: 'Confirm D-U-N-S number received', xp: 30, assignedTo: 'Cody' },
-    { id: 2, name: 'Complete Google Play developer account', xp: 25, assignedTo: 'Cody' },
-    { id: 3, name: 'Complete Apple developer account', xp: 25, assignedTo: 'Cody' },
-    { id: 4, name: 'Final build test on Android', xp: 30, assignedTo: 'Cody' },
-    { id: 5, name: 'Submit to Google Play', xp: 30, assignedTo: 'Cody' },
-    { id: 6, name: 'Submit to App Store', xp: 30, assignedTo: 'Cody' },
-  ])
-
+  const [tasks, setTasks] = useState<Task[]>(DEFAULT_TASKS)
   const [archivedTasks, setArchivedTasks] = useState<ArchivedTask[]>([])
   const [nextId, setNextId] = useState(7)
+  const [hydrated, setHydrated] = useState(false)
 
   const [showLogTask, setShowLogTask] = useState(false)
   const [showArchive, setShowArchive] = useState(false)
@@ -56,20 +65,62 @@ export default function DashboardPage() {
   const basePersonalXP = 0
   const baseStudioXP = 0
 
-  // Checking a task off archives it immediately — it disappears from
-  // Current Tasks and lands in the archive with a completion timestamp.
+  // Load persisted state once, on mount, before anything writes back to storage.
+  useEffect(() => {
+    try {
+      const storedTasks = localStorage.getItem(STORAGE_KEYS.tasks)
+      const storedArchived = localStorage.getItem(STORAGE_KEYS.archived)
+      const storedNextId = localStorage.getItem(STORAGE_KEYS.nextId)
+
+      if (storedTasks) setTasks(JSON.parse(storedTasks))
+      if (storedArchived) setArchivedTasks(JSON.parse(storedArchived))
+      if (storedNextId) setNextId(Number(storedNextId))
+    } catch (err) {
+      console.error('Failed to load saved tasks:', err)
+    }
+    setHydrated(true)
+  }, [])
+
+  // Persist on every change, but only after the initial load above has run —
+  // otherwise the default tasks would immediately overwrite whatever was saved.
+  useEffect(() => {
+    if (!hydrated) return
+    localStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(tasks))
+  }, [tasks, hydrated])
+
+  useEffect(() => {
+    if (!hydrated) return
+    localStorage.setItem(STORAGE_KEYS.archived, JSON.stringify(archivedTasks))
+  }, [archivedTasks, hydrated])
+
+  useEffect(() => {
+    if (!hydrated) return
+    localStorage.setItem(STORAGE_KEYS.nextId, String(nextId))
+  }, [nextId, hydrated])
+
+  // Checking a task off archives it as "completed" — disappears from
+  // Current Tasks, lands in the archive with a completion timestamp.
   const completeTask = (id: number) => {
     const task = tasks.find((t) => t.id === id)
     if (!task) return
 
     setArchivedTasks((prev) => [
-      { ...task, completedAt: new Date().toISOString() },
+      { ...task, archivedAt: new Date().toISOString(), reason: 'completed' },
       ...prev,
     ])
     setTasks((prev) => prev.filter((t) => t.id !== id))
   }
 
+  // Deleting a task (the red X) also archives it, but tagged "deleted" so
+  // it's clear later that this one wasn't actually finished.
   const deleteTask = (id: number) => {
+    const task = tasks.find((t) => t.id === id)
+    if (!task) return
+
+    setArchivedTasks((prev) => [
+      { ...task, archivedAt: new Date().toISOString(), reason: 'deleted' },
+      ...prev,
+    ])
     setTasks((prev) => prev.filter((t) => t.id !== id))
   }
 
@@ -95,9 +146,11 @@ export default function DashboardPage() {
     if (confirmed) setArchivedTasks([])
   }
 
-  // XP is earned once a task is archived — active tasks no longer carry
-  // a "done" flag, since completing one moves it straight to the archive.
-  const earnedXP = archivedTasks.reduce((sum, t) => sum + t.xp, 0)
+  // Only completed tasks count toward XP — deleted ones don't.
+  const completedCount = archivedTasks.filter((t) => t.reason === 'completed').length
+  const earnedXP = archivedTasks
+    .filter((t) => t.reason === 'completed')
+    .reduce((sum, t) => sum + t.xp, 0)
   const personalXP = basePersonalXP + earnedXP
   const studioXP = baseStudioXP + earnedXP
 
@@ -209,7 +262,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Tasks + Team Task Boxes + Responsibilities */}
+          {/* Tasks + Responsibilities + Admin/Team Task Boxes */}
           <div className="grid grid-cols-4 gap-12">
 
             {/* My Current Tasks - takes half width */}
@@ -224,7 +277,7 @@ export default function DashboardPage() {
               <div className="w-full h-2 bg-elevated rounded-full overflow-hidden mb-2">
                 <div className="h-full bg-brand" style={{ width: `${Math.min((personalXP / 500) * 100, 100)}%` }} />
               </div>
-              <p className="text-sm text-text-secondary mb-6">{personalXP} / 500 XP · {archivedTasks.length} tasks completed</p>
+              <p className="text-sm text-text-secondary mb-6">{personalXP} / 500 XP · {completedCount} tasks completed</p>
 
               <div className="divide-y divide-neutral-800 max-h-80 overflow-y-auto pr-2">
                 {tasks.length === 0 && (
@@ -309,7 +362,7 @@ export default function DashboardPage() {
                 <div className="w-full h-2 bg-elevated rounded-full overflow-hidden mb-1">
                   <div className="h-full bg-brand" style={{ width: `${Math.min((personalXP / 500) * 100, 100)}%` }} />
                 </div>
-                <p className="text-xs text-text-secondary">{archivedTasks.length} tasks complete</p>
+                <p className="text-xs text-text-secondary">{completedCount} tasks complete</p>
               </div>
             </div>
 
@@ -405,11 +458,16 @@ export default function DashboardPage() {
               {archivedTasks.map((task) => (
                 <div key={task.id} className="py-3">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm line-through text-text-muted">{task.name}</p>
+                    <p className={`text-sm ${task.reason === 'completed' ? 'line-through text-text-muted' : ''}`}>
+                      {task.name}
+                    </p>
                     <span className="text-sm text-neutral-600">+{task.xp} XP</span>
                   </div>
                   <p className="text-xs text-text-secondary mt-1">
-                    {task.assignedTo} · completed {new Date(task.completedAt).toLocaleDateString()}
+                    {task.assignedTo} · {new Date(task.archivedAt).toLocaleDateString()}
+                    {task.reason === 'deleted' && (
+                      <span className="text-red-400 ml-1">— was deleted</span>
+                    )}
                   </p>
                 </div>
               ))}
