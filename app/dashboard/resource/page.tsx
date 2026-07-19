@@ -14,7 +14,7 @@ const devStack: Record<string, string[]> = {
   'Planning & Workflow': ['IET', 'Trello', 'Notion', 'Google Drive', 'Discord', 'DocuSign', 'Microsoft 365'],
 }
 
-export default function ResourcesPage() {
+export default function ResourcePage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
