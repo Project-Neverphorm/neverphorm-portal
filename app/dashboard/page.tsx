@@ -17,6 +17,13 @@ type Task = {
   archived_at: string | null
 }
 
+type XPEntry = {
+  id: string
+  task_name: string
+  xp: number
+  assigned_to: string
+}
+
 const TEAM_MEMBERS = ['Cody']
 
 const XP_TIERS = [
@@ -34,6 +41,7 @@ export default function DashboardPage() {
 
   const [tasks, setTasks] = useState<Task[]>([])
   const [archivedTasks, setArchivedTasks] = useState<Task[]>([])
+  const [xpLog, setXpLog] = useState<XPEntry[]>([])
   const [tasksLoading, setTasksLoading] = useState(true)
 
   const [showLogTask, setShowLogTask] = useState(false)
@@ -54,10 +62,7 @@ export default function DashboardPage() {
 
     if (error) {
       console.error('Failed to load tasks:', error)
-      return
-    }
-
-    if (data) {
+    } else if (data) {
       setTasks(data.filter((t) => t.status === 'active'))
       setArchivedTasks(
         data
@@ -65,6 +70,14 @@ export default function DashboardPage() {
           .sort((a, b) => new Date(b.archived_at ?? 0).getTime() - new Date(a.archived_at ?? 0).getTime())
       )
     }
+
+    const { data: xpData, error: xpError } = await supabase.from('xp_log').select('*')
+    if (xpError) {
+      console.error('Failed to load XP log:', xpError)
+    } else if (xpData) {
+      setXpLog(xpData)
+    }
+
     setTasksLoading(false)
   }
 
@@ -73,15 +86,29 @@ export default function DashboardPage() {
   }, [])
 
   const completeTask = async (id: string) => {
-    const { error } = await supabase
+    const task = tasks.find((t) => t.id === id)
+    if (!task) return
+
+    const { error: updateError } = await supabase
       .from('tasks')
       .update({ status: 'completed', archived_at: new Date().toISOString() })
       .eq('id', id)
 
-    if (error) {
-      console.error('Failed to complete task:', error)
+    if (updateError) {
+      console.error('Failed to complete task:', updateError)
       return
     }
+
+    const { error: xpError } = await supabase.from('xp_log').insert({
+      task_name: task.name,
+      xp: task.xp,
+      assigned_to: task.assigned_to,
+    })
+
+    if (xpError) {
+      console.error('Failed to log XP:', xpError)
+    }
+
     loadTasks()
   }
 
@@ -126,7 +153,7 @@ export default function DashboardPage() {
   const emptyArchive = async () => {
     if (archivedTasks.length === 0) return
     const confirmed = window.confirm(
-      `Permanently clear ${archivedTasks.length} archived task${archivedTasks.length === 1 ? '' : 's'}? This can't be undone.`
+      `Permanently clear ${archivedTasks.length} archived task${archivedTasks.length === 1 ? '' : 's'}? Your XP total is safe and won't be affected — this only clears the task history list.`
     )
     if (!confirmed) return
 
@@ -143,9 +170,7 @@ export default function DashboardPage() {
   }
 
   const completedCount = archivedTasks.filter((t) => t.status === 'completed').length
-  const earnedXP = archivedTasks
-    .filter((t) => t.status === 'completed')
-    .reduce((sum, t) => sum + t.xp, 0)
+  const earnedXP = xpLog.reduce((sum, entry) => sum + entry.xp, 0)
   const personalXP = basePersonalXP + earnedXP
   const studioXP = baseStudioXP + earnedXP
 
