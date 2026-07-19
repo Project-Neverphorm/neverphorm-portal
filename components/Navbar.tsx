@@ -102,7 +102,7 @@ export default function Navbar() {
                 <Link href="/dashboard/education" className="block px-4 py-2 hover:bg-neutral-700">
                   Education
                 </Link>
-                <Link href="/dashboard/resources" className="block px-4 py-2 hover:bg-neutral-700">
+                <Link href="/dashboard/resource" className="block px-4 py-2 hover:bg-neutral-700">
                   Resource
                 </Link>
                 <Link href="/dashboard/training" className="block px-4 py-2 hover:bg-neutral-700">
@@ -191,7 +191,7 @@ export default function Navbar() {
           <div className="absolute top-16 left-0 w-full bg-surface flex flex-col gap-3 p-4 md:hidden z-50">
             <p className="text-text-secondary text-xs uppercase">Studio Center</p>
             <Link href="/dashboard/education" className="pl-2">Education</Link>
-            <Link href="/dashboard/resources" className="pl-2">Resource</Link>
+            <Link href="/dashboard/resource" className="pl-2">Resource</Link>
             <Link href="/dashboard/training" className="pl-2">Training</Link>
 
             <button onClick={() => { setOpenModal('purpose'); setMobileMenuOpen(false) }} className="text-left">
