@@ -248,7 +248,7 @@ export default function DashboardPage() {
             </div>
             <div className="flex items-end gap-4 mb-4">
               <span className="text-6xl font-bold text-brand">Lvl 0</span>
-              <span className="text-green-500 text-sm pb-2">Starting Fresh. Keep going, team!</span>
+              <span className="text-green-200 text-sm pb-2">Starting Fresh. Keep going, team!</span>
             </div>
             <div className="w-full h-2 bg-elevated rounded-full overflow-hidden">
               <div className="h-full bg-brand" style={{ width: `${Math.min((studioXP / 2500) * 100, 100)}%` }} />
