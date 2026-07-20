@@ -58,7 +58,7 @@ export default function ResourcePage() {
         <div className="border border-border-default rounded-lg p-6 mb-10">
           <p className="text-sm text-text-secondary leading-relaxed">
             The development stack depends on the project. Unity and Unreal are both used, since the choice of engine
-            comes down to what each game needs — they&apos;re tools, not a fixed pipeline. Everything else in the
+            comes down to what each game needs, they&apos;re tools, not a fixed pipeline. Everything else in the
             stack is flexible for future team members to bring their own preferred tools; engine choice per game is
             the one thing that doesn&apos;t flex.
           </p>
