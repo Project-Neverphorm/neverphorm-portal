@@ -17,7 +17,8 @@ type CalendarEvent = {
   event_date: string
   title: string
   type: string
-  created_by: string | null
+  member_id?: string | null
+  member_name?: string | null
 }
 
 export default function Navbar() {
@@ -29,22 +30,18 @@ export default function Navbar() {
   const [CalendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([])
   const [selectedDates, setSelectedDates] = useState<string | null>(null)
   const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [teamMembers, setTeamMembers] = useState<{ id: string; full_name: string }[]>([])
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   useEffect(() => {
-    const loadProfile = async () => {
+    const init = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data } = await supabase
-        .from('profiles')
-        .select('full_name, title, role')
-        .eq('id', user.id)
-        .single()
-
-      if (data) setProfile(data)
+      setCurrentUserId(user?.id ?? null)
+  
+      const { data: profiles } = await supabase.from('profiles').select('id, full_name')
+      setTeamMembers(profiles ?? [])
     }
-
-    loadProfile()
+    init()
   }, [])
 
   const handleLogout = async () => {
@@ -61,23 +58,13 @@ export default function Navbar() {
     if (data) setCalendarEvents(data)
   }
 
-  const addEvent = async (dateStr: string, title: string, type: string) => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    const { error } = await supabase.from('calendar_events').insert({
-      event_date:dateStr,
+  const addEvent = async (date: string, title: string, type: string, memberId?: string | null) => {
+    await supabase.from('calendar_events').insert({
+      event_date: date,
       title,
       type,
-      created_by: user.id,
+      member_id: memberId ?? null,
     })
-
-    if (error) {
-      console.error('Failed to add event:', error)
-      alert(`Failed to add event: ${error.message}`)
-      return
-    }
-
     loadCalendarEvents()
   }
 
@@ -119,7 +106,7 @@ export default function Navbar() {
             Purpose
           </button>
 
-          <button onClick={() => {setOpenModal('calendar'); loadCalendarEvents(); }}className="hover:text-neutral-300">
+          <button onClick={() => setOpenModal('calendar')} className="hover:text-neutral-300">
             Calendar
           </button>
 
@@ -262,7 +249,7 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* Calendar Modal */}
+{/* Calendar Modal */}
 
 {openModal === 'calendar' && (
   <div
@@ -340,7 +327,12 @@ export default function Navbar() {
               .filter((e) => e.event_date === selectedDates)
               .map((e) => (
                 <div key={e.id} className="flex items-center justify-between text-sm bg-elevated rounded px-3 py-2">
-                  <span>{e.title}</span>
+                  <div className="flex flex-col">
+                    <span>{e.title}</span>
+                    {e.member_name && (
+                      <span className="text-xs text-text-muted">{e.member_name}</span>
+                    )}
+                  </div>
                   <button
                     onClick={async () => {
                       await supabase.from('calendar_events').delete().eq('id', e.id)
@@ -357,12 +349,31 @@ export default function Navbar() {
             )}
           </div>
 
+          {isManager && (
+            <select
+              defaultValue=""
+              onChange={(e) => {
+                if (!e.target.value) return
+                const memberId = e.target.value
+                const memberName = teamMembers.find((m) => m.id === memberId)?.full_name ?? 'Team member'
+                addEvent(selectedDates, `${memberName} - Out`, 'pto', memberId)
+                e.target.value = ''
+              }}
+              className="w-full bg-elevated text-sm rounded px-3 py-2 mb-2"
+            >
+              <option value="">+ Mark someone out...</option>
+              {teamMembers.map((m) => (
+                <option key={m.id} value={m.id}>{m.full_name}</option>
+              ))}
+            </select>
+          )}
+
           <select
             defaultValue=""
             onChange={(e) => {
               if (!e.target.value) return
               const [type, label] = e.target.value.split('|')
-              addEvent(selectedDates, label, type)
+              addEvent(selectedDates, label, type, currentUserId)
               e.target.value = ''
             }}
             className="w-full bg-elevated text-sm rounded px-3 py-2"

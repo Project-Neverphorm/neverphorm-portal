@@ -595,7 +595,7 @@ export default function EducationPage() {
           </button>
           {!itemsCollapsed && !category && (
             <p className="text-sm text-text-secondary">
-              Select a {section === 'departments' ? 'department' : 'vendor'} to see what&apos;s inside.
+              Select a {section === 'departments' ? 'department ' : 'vendor '} to see what&apos;s inside.
             </p>
           )}
           {!itemsCollapsed && category && (
