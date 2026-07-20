@@ -108,6 +108,9 @@ export default function Navbar() {
                 <Link href="/dashboard/training" className="block px-4 py-2 hover:bg-neutral-700">
                   Training
                 </Link>
+                <Link href="/dashboard/pipeline" className="block px-4 py-2 hover:bg-neutral-700">
+                  Pipeline
+                </Link>
               </div>
             )}
           </div>
@@ -193,6 +196,7 @@ export default function Navbar() {
             <Link href="/dashboard/education" className="pl-2">Education</Link>
             <Link href="/dashboard/resource" className="pl-2">Resource</Link>
             <Link href="/dashboard/training" className="pl-2">Training</Link>
+            <Link href="/dashboard/pipeline" className="pl-2">Pipeline</Link>
 
             <button onClick={() => { setOpenModal('purpose'); setMobileMenuOpen(false) }} className="text-left">
               Purpose
