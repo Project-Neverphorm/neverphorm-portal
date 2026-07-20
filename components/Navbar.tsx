@@ -40,6 +40,15 @@ export default function Navbar() {
   
       const { data: profiles } = await supabase.from('profiles').select('id, full_name')
       setTeamMembers(profiles ?? [])
+  
+      if (user) {
+        const { data: myProfile } = await supabase
+          .from('profiles')
+          .select('full_name, title, role')
+          .eq('id', user.id)
+          .single()
+        setProfile(myProfile)
+      }
     }
     init()
   }, [])
