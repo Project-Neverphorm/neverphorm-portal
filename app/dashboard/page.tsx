@@ -255,10 +255,6 @@ export default function DashboardPage() {
               )
             })}
           </div>
-
-          <button className="mt-8 w-full text-sm text-text-secondary hover:text-foreground border border-neutral-700 rounded px-4 py-2">
-            + Invite Member
-          </button>
         </aside>
 
         <main className="flex-1 px-10 py-10">
