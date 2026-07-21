@@ -120,31 +120,31 @@ export default function DashboardPage() {
     archivedTasks.filter((t) => t.assigned_to_id === memberId && t.status === 'completed').length
 
   const completeTask = async (id: string) => {
-    const task = tasks.find((t) => t.id === id)
-    if (!task) return
+  const task = tasks.find((t) => t.id === id)
+  if (!task) return
 
-    const { error: updateError } = await supabase
-      .from('tasks')
-      .update({ status: 'completed', archived_at: new Date().toISOString() })
-      .eq('id', id)
+  const { error: updateError } = await supabase
+    .from('tasks')
+    .update({ status: 'completed', archived_at: new Date().toISOString() })
+    .eq('id', id)
 
-    if (updateError) {
-      console.error('Failed to complete task:', updateError)
-      return
-    }
-
-    const { error: xpError } = await supabase.from('xp_log').insert({
-      task_name: task.name,
-      xp: task.xp,
-      assigned_to_id: task.assigned_to_id,
-    })
-
-    if (xpError) {
-      console.error('Failed to log XP:', xpError)
-    }
-
-    loadTasks()
+  if (updateError) {
+    alert(`Failed to complete task: ${updateError.message}`)
+    return
   }
+
+  const { error: xpError } = await supabase.from('xp_log').insert({
+    task_name: task.name,
+    xp: task.xp,
+    assigned_to_id: task.assigned_to_id,
+  })
+
+  if (xpError) {
+    alert(`Task completed, but XP failed to log: ${xpError.message}`)
+  }
+
+  loadTasks()
+}
 
   const deleteTask = async (id: string) => {
     const { error } = await supabase
