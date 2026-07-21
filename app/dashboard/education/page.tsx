@@ -41,23 +41,7 @@ const departments: Category[] = [
     id: 'art',
     name: 'Art',
     items: [
-      {
-        id: '3d-artist',
-        name: '3D Artist',
-        detail: {
-          overview:
-            'Builds the 3D models used in-game — characters, props, environments, and vehicles — from concept art or reference into game-ready assets.',
-          responsibilities: [
-            'Model characters, props, and environment pieces to spec',
-            'Keep polycounts within budget for the target platform',
-            'UV unwrap models cleanly for texturing',
-            'Collaborate with texture/animation artists to hand off rigged-ready meshes',
-            'Maintain a consistent art style across all modeled assets',
-          ],
-          docs: [{ label: 'Blender Manual', url: 'https://docs.blender.org/manual/en/latest/' }],
-          tips: ['Keep a personal library of reusable base meshes to speed up blocking'],
-        },
-      },
+      { id: '3d-artist', name: '3D Artist', detail: null },
       { id: 'animator', name: 'Animator', detail: null },
       { id: 'concept-artist', name: 'Concept Artist', detail: null },
       { id: 'environment-artist', name: 'Environment Artist', detail: null },
