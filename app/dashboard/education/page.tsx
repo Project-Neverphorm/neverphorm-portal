@@ -351,6 +351,46 @@ const tools: Category[] = [
   },
 ]
 
+// ============================================================
+// Supabase content wiring
+// ============================================================
+
+type EducationContentRow = {
+  id: string
+  category_id: string
+  section_type: 'departments' | 'tools'
+  name: string
+  overview: string | null
+  why_chosen: string | null
+  responsibilities: string[] | null
+  sections: DetailSection[] | null
+  docs: { label: string; url: string }[] | null
+  tips: string[] | null
+  videos: { label: string; url: string }[] | null
+}
+
+function rowToDetail(row: EducationContentRow): Detail {
+  return {
+    overview: row.overview ?? '',
+    whyChosen: row.why_chosen ?? undefined,
+    responsibilities: row.responsibilities ?? undefined,
+    sections: row.sections ?? undefined,
+    docs: row.docs ?? undefined,
+    tips: row.tips ?? undefined,
+    videos: row.videos ?? undefined,
+  }
+}
+
+function mergeDetails(tree: Category[], detailMap: Map<string, Detail>): Category[] {
+  return tree.map((category) => ({
+    ...category,
+    items: category.items.map((item) => ({
+      ...item,
+      detail: detailMap.get(item.id) ?? item.detail,
+    })),
+  }))
+}
+
 function DetailPanel({ item }: { item: Item }) {
   const sections = item.detail?.sections
   const [activeSection, setActiveSection] = useState<string | undefined>(sections?.[0]?.id)
@@ -479,6 +519,7 @@ function DetailPanel({ item }: { item: Item }) {
 export default function EducationPage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [contentLoading, setContentLoading] = useState(true)
   const router = useRouter()
 
   const [section, setSection] = useState<'departments' | 'tools'>('departments')
@@ -488,7 +529,13 @@ export default function EducationPage() {
   const [vendorsCollapsed, setVendorsCollapsed] = useState(false)
   const [itemsCollapsed, setItemsCollapsed] = useState(false)
 
-  const tree = section === 'departments' ? departments : tools
+  // Content fetched from Supabase, keyed by item id
+  const [detailMap, setDetailMap] = useState<Map<string, Detail>>(new Map())
+
+  const mergedDepartments = mergeDetails(departments, detailMap)
+  const mergedTools = mergeDetails(tools, detailMap)
+
+  const tree = section === 'departments' ? mergedDepartments : mergedTools
   const category = tree.find((c) => c.id === categoryId) ?? null
   const item = category?.items.find((i) => i.id === itemId) ?? null
 
@@ -512,6 +559,26 @@ export default function EducationPage() {
     }
     checkUser()
   }, [router])
+
+  useEffect(() => {
+    const loadContent = async () => {
+      const { data, error } = await supabase.from('education_content').select('*')
+
+      if (error) {
+        console.error('Failed to load education content:', error)
+        setContentLoading(false)
+        return
+      }
+
+      const map = new Map<string, Detail>()
+      ;(data as EducationContentRow[]).forEach((row) => {
+        map.set(row.id, rowToDetail(row))
+      })
+      setDetailMap(map)
+      setContentLoading(false)
+    }
+    loadContent()
+  }, [])
 
   if (loading) {
     return (
@@ -623,7 +690,10 @@ export default function EducationPage() {
 
         {/* Detail panel */}
         <div className="flex-1 pl-8 overflow-y-auto">
-          {!item && (
+          {contentLoading && item === null && category && (
+            <p className="text-sm text-text-secondary">Loading content…</p>
+          )}
+          {!item && !contentLoading && (
             <p className="text-sm text-text-secondary">
               {category ? 'Select an item to see the full breakdown.' : 'Nothing selected yet.'}
             </p>
