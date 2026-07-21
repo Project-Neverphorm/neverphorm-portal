@@ -12,7 +12,7 @@ type Task = {
   id: string
   name: string
   xp: number
-  assigned_to: string
+  assigned_to_id: string
   status: 'active' | 'completed' | 'deleted'
   archived_at: string | null
 }
@@ -21,10 +21,14 @@ type XPEntry = {
   id: string
   task_name: string
   xp: number
-  assigned_to: string
+  assigned_to_id: string
 }
 
-const TEAM_MEMBERS = ['Cody']
+type TeamMember = {
+  id: string
+  full_name: string
+  title: string
+}
 
 const XP_TIERS = [
   { value: 25, label: '25 XP — Light (quick, small)' },
@@ -36,9 +40,11 @@ const XP_TIERS = [
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
+  const [myProfile, setMyProfile] = useState<TeamMember | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
   const [tasks, setTasks] = useState<Task[]>([])
   const [archivedTasks, setArchivedTasks] = useState<Task[]>([])
   const [xpLog, setXpLog] = useState<XPEntry[]>([])
@@ -48,11 +54,14 @@ export default function DashboardPage() {
   const [showArchive, setShowArchive] = useState(false)
 
   const [newTaskName, setNewTaskName] = useState('')
-  const [newTaskMember, setNewTaskMember] = useState(TEAM_MEMBERS[0])
+  const [newTaskMemberId, setNewTaskMemberId] = useState('')
   const [newTaskXP, setNewTaskXP] = useState(XP_TIERS[0].value)
 
-  const basePersonalXP = 0
-  const baseStudioXP = 0
+  const loadTeam = async () => {
+    const { data } = await supabase.from('profiles').select('id, full_name, title')
+    setTeamMembers(data ?? [])
+    if (data && data.length > 0) setNewTaskMemberId((prev) => prev || data[0].id)
+  }
 
   const loadTasks = async () => {
     const { data, error } = await supabase
@@ -82,8 +91,33 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.push('/login')
+        return
+      }
+      setUser(user)
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id, full_name, title')
+        .eq('id', user.id)
+        .single()
+      setMyProfile(profile)
+
+      setLoading(false)
+    }
+    checkUser()
+    loadTeam()
     loadTasks()
-  }, [])
+  }, [router])
+
+  const xpForMember = (memberId: string) =>
+    xpLog.filter((e) => e.assigned_to_id === memberId).reduce((sum, e) => sum + e.xp, 0)
+
+  const completedCountForMember = (memberId: string) =>
+    archivedTasks.filter((t) => t.assigned_to_id === memberId && t.status === 'completed').length
 
   const completeTask = async (id: string) => {
     const task = tasks.find((t) => t.id === id)
@@ -102,7 +136,7 @@ export default function DashboardPage() {
     const { error: xpError } = await supabase.from('xp_log').insert({
       task_name: task.name,
       xp: task.xp,
-      assigned_to: task.assigned_to,
+      assigned_to_id: task.assigned_to_id,
     })
 
     if (xpError) {
@@ -127,14 +161,12 @@ export default function DashboardPage() {
 
   const addTask = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newTaskName.trim()) return
-
-    const { data: { user } } = await supabase.auth.getUser()
+    if (!newTaskName.trim() || !newTaskMemberId) return
 
     const { error } = await supabase.from('tasks').insert({
       name: newTaskName.trim(),
       xp: newTaskXP,
-      assigned_to: newTaskMember,
+      assigned_to_id: newTaskMemberId,
       created_by: user?.id,
     })
 
@@ -169,24 +201,6 @@ export default function DashboardPage() {
     loadTasks()
   }
 
-  const completedCount = archivedTasks.filter((t) => t.status === 'completed').length
-  const earnedXP = xpLog.reduce((sum, entry) => sum + entry.xp, 0)
-  const personalXP = basePersonalXP + earnedXP
-  const studioXP = baseStudioXP + earnedXP
-
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push('/login')
-        return
-      }
-      setUser(user)
-      setLoading(false)
-    }
-    checkUser()
-  }, [router])
-
   if (loading || tasksLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -194,6 +208,11 @@ export default function DashboardPage() {
       </div>
     )
   }
+
+  const myTasks = tasks.filter((t) => t.assigned_to_id === user?.id)
+  const myXP = xpForMember(user?.id ?? '')
+  const myCompletedCount = completedCountForMember(user?.id ?? '')
+  const studioXP = xpLog.reduce((sum, entry) => sum + entry.xp, 0)
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -208,25 +227,33 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-6">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-full bg-brand text-black font-bold flex items-center justify-center shrink-0">
-                  CM
+            {teamMembers.map((member) => {
+              const memberXP = xpForMember(member.id)
+              const initials = member.full_name
+                .split(' ')
+                .map((n) => n[0])
+                .join('')
+                .toUpperCase()
+                .slice(0, 2)
+
+              return (
+                <div key={member.id}>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-full bg-brand text-black font-bold flex items-center justify-center shrink-0">
+                      {initials}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm">{member.full_name}</p>
+                      <p className="text-xs text-text-secondary">{member.title}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-text-secondary mb-1">Lvl 0 · {memberXP} / 500 XP</p>
+                  <div className="w-full h-1.5 bg-elevated rounded-full overflow-hidden">
+                    <div className="h-full bg-brand" style={{ width: `${Math.min((memberXP / 500) * 100, 100)}%` }} />
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-sm">Cody</p>
-                  <p className="text-xs text-text-secondary">Studio Head / Creative Director</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5 mb-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
-                <p className="text-xs text-text-secondary">Online</p>
-              </div>
-              <p className="text-xs text-text-secondary mb-1">Lvl 0 · {personalXP} / 500 XP</p>
-              <div className="w-full h-1.5 bg-elevated rounded-full overflow-hidden">
-                <div className="h-full bg-brand" style={{ width: `${Math.min((personalXP / 500) * 100, 100)}%` }} />
-              </div>
-            </div>
+              )
+            })}
           </div>
 
           <button className="mt-8 w-full text-sm text-text-secondary hover:text-foreground border border-neutral-700 rounded px-4 py-2">
@@ -237,7 +264,7 @@ export default function DashboardPage() {
         <main className="flex-1 px-10 py-10">
 
           <div className="mb-10">
-            <h1 className="text-2xl font-bold">Welcome back, Cody</h1>
+            <h1 className="text-2xl font-bold">Welcome back, {myProfile?.full_name ?? 'there'}</h1>
             <p className="text-text-secondary text-sm mt-1">Here&apos;s where things stand.</p>
           </div>
 
@@ -282,18 +309,18 @@ export default function DashboardPage() {
                 <span className="text-xs text-text-secondary">🎯 Target: Ongoing</span>
               </div>
               <p className="text-2xl font-bold mb-1">Current Tasks</p>
-              <p className="text-brand text-sm mb-3">Assigned to Cody</p>
+              <p className="text-brand text-sm mb-3">Assigned to {myProfile?.full_name}</p>
 
               <div className="w-full h-2 bg-elevated rounded-full overflow-hidden mb-2">
-                <div className="h-full bg-brand" style={{ width: `${Math.min((personalXP / 500) * 100, 100)}%` }} />
+                <div className="h-full bg-brand" style={{ width: `${Math.min((myXP / 500) * 100, 100)}%` }} />
               </div>
-              <p className="text-sm text-text-secondary mb-6">{personalXP} / 500 XP · {completedCount} tasks completed</p>
+              <p className="text-sm text-text-secondary mb-6">{myXP} / 500 XP · {myCompletedCount} tasks completed</p>
 
               <div className="divide-y divide-neutral-800 max-h-80 overflow-y-auto pr-2">
-                {tasks.length === 0 && (
+                {myTasks.length === 0 && (
                   <p className="text-sm text-text-secondary py-4">No active tasks. Log one from the admin panel.</p>
                 )}
-                {tasks.map((task) => (
+                {myTasks.map((task) => (
                   <div key={task.id} className="flex items-center justify-between py-3 group">
                     <div className="flex items-center gap-3">
                       <button
@@ -326,12 +353,12 @@ export default function DashboardPage() {
                   'Gameplay programming & technical architecture',
                   'Business development & legal (DUNS, developer accounts, LLC)',
                   '3D modeling, texturing and asset creation',
-                  'Studio operatoins & infrastructure',
+                  'Studio operations & infrastructure',
                   'Finance & accounting',
                   'Hiring, recruiting, team building',
                   'Marketing & community strategy',
                   'Voice acting & audio direction',
-                  'Website & intenral tools development',
+                  'Website & internal tools development',
                 ].map((item) => (
                   <p key={item} className="text-sm text-neutral-300 flex items-start gap-2">
                     <span className="text-brand mt-1">•</span>
@@ -360,18 +387,30 @@ export default function DashboardPage() {
               </div>
 
               <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">Team Task Boxes</h2>
-              <div className="border-l-2 border-brand pl-4">
-                <div className="flex items-center justify-between">
-                  <p className="font-semibold">Cody</p>
-                  <span className="text-sm text-text-secondary">{personalXP}/500</span>
-                </div>
-                <p className="text-brand text-sm">Current Tasks</p>
-                <p className="text-xs text-text-secondary mb-2">🎯 Target: Ongoing</p>
-                <div className="w-full h-2 bg-elevated rounded-full overflow-hidden mb-1">
-                  <div className="h-full bg-brand" style={{ width: `${Math.min((personalXP / 500) * 100, 100)}%` }} />
-                </div>
-                <p className="text-xs text-text-secondary">{completedCount} tasks complete</p>
-              </div>
+              {teamMembers
+                .filter((member) => member.id !== user?.id)
+                .map((member) => {
+                  const memberXP = xpForMember(member.id)
+                  const memberCompleted = completedCountForMember(member.id)
+
+                  return (
+                    <div key={member.id} className="border-l-2 border-brand pl-4 mb-6">
+                      <div className="flex items-center justify-between">
+                        <p className="font-semibold">{member.full_name}</p>
+                        <span className="text-sm text-text-secondary">{memberXP}/500</span>
+                      </div>
+                      <p className="text-brand text-sm">Current Tasks</p>
+                      <p className="text-xs text-text-secondary mb-2">🎯 Target: Ongoing</p>
+                      <div className="w-full h-2 bg-elevated rounded-full overflow-hidden mb-1">
+                        <div className="h-full bg-brand" style={{ width: `${Math.min((memberXP / 500) * 100, 100)}%` }} />
+                      </div>
+                      <p className="text-xs text-text-secondary">{memberCompleted} tasks complete</p>
+                    </div>
+                  )
+                })}
+              {teamMembers.filter((m) => m.id !== user?.id).length === 0 && (
+                <p className="text-xs text-text-secondary">No other team members yet.</p>
+              )}
             </div>
 
           </div>
@@ -403,12 +442,12 @@ export default function DashboardPage() {
               <div>
                 <label className="block text-xs text-text-secondary mb-1.5">Assign to</label>
                 <select
-                  value={newTaskMember}
-                  onChange={(e) => setNewTaskMember(e.target.value)}
+                  value={newTaskMemberId}
+                  onChange={(e) => setNewTaskMemberId(e.target.value)}
                   className="w-full bg-background border border-border-default rounded px-3 py-2 text-sm outline-none focus:border-brand"
                 >
-                  {TEAM_MEMBERS.map((member) => (
-                    <option key={member} value={member}>{member}</option>
+                  {teamMembers.map((member) => (
+                    <option key={member.id} value={member.id}>{member.full_name}</option>
                   ))}
                 </select>
               </div>
@@ -446,20 +485,23 @@ export default function DashboardPage() {
               {archivedTasks.length === 0 && (
                 <p className="text-sm text-text-secondary py-4">Nothing archived yet.</p>
               )}
-              {archivedTasks.map((task) => (
-                <div key={task.id} className="py-3">
-                  <div className="flex items-center justify-between">
-                    <p className={`text-sm ${task.status === 'completed' ? 'line-through text-text-muted' : ''}`}>
-                      {task.name}
+              {archivedTasks.map((task) => {
+                const member = teamMembers.find((m) => m.id === task.assigned_to_id)
+                return (
+                  <div key={task.id} className="py-3">
+                    <div className="flex items-center justify-between">
+                      <p className={`text-sm ${task.status === 'completed' ? 'line-through text-text-muted' : ''}`}>
+                        {task.name}
+                      </p>
+                      <span className="text-sm text-neutral-600">+{task.xp} XP</span>
+                    </div>
+                    <p className="text-xs text-text-secondary mt-1">
+                      {member?.full_name ?? 'Unknown'} · {task.archived_at ? new Date(task.archived_at).toLocaleDateString() : ''}
+                      {task.status === 'deleted' && <span className="text-red-400 ml-1">— was deleted</span>}
                     </p>
-                    <span className="text-sm text-neutral-600">+{task.xp} XP</span>
                   </div>
-                  <p className="text-xs text-text-secondary mt-1">
-                    {task.assigned_to} · {task.archived_at ? new Date(task.archived_at).toLocaleDateString() : ''}
-                    {task.status === 'deleted' && <span className="text-red-400 ml-1">— was deleted</span>}
-                  </p>
-                </div>
-              ))}
+                )
+              })}
             </div>
 
             {archivedTasks.length > 0 && (
