@@ -193,6 +193,7 @@ export default function PipelinePage() {
             <h1 className="text-2xl font-bold">Pipeline</h1>
             <p className="text-text-secondary text-sm mt-1">
               The full catalog. This is the long game. The first few are in order, the rest are not in order.
+              Some games did not make this list while realistically weighing out survivability and weakness of idea/concept.
             </p>
           </div>
           {isOwner && (
