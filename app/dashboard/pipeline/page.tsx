@@ -192,7 +192,7 @@ export default function PipelinePage() {
           <div>
             <h1 className="text-2xl font-bold">Pipeline</h1>
             <p className="text-text-secondary text-sm mt-1">
-              The full catalog. This is the long game. All are not in order.
+              The full catalog. This is the long game. The first few are in order, the rest are not in order.
             </p>
           </div>
           {isOwner && (
