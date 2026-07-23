@@ -353,6 +353,12 @@ export default function PipelinePage() {
                   placeholder="Price"
                   className="w-full bg-background border border-border-default rounded px-3 py-2 text-sm outline-none focus:border-brand"
                 />
+                <input
+                  value={form.platforms}
+                  onChange={(e) => setForm({ ...form, platforms: e.target.value })}
+                  placeholder="Platforms"
+                  className="w-full bg-background border border-border-default rounded px-3 py-2 text-sm outline-none focus:border-brand"
+                />
               </div>
               <div className="flex gap-2 pt-1">
                 <button onClick={saveNew} className="flex-1 bg-brand text-black font-semibold rounded py-2 text-sm">
