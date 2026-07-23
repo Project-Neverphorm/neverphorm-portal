@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
 import type { User } from '@supabase/supabase-js'
+import { Span } from 'next/dist/trace'
 
 type Game = {
   id: string
@@ -284,6 +285,7 @@ export default function PipelinePage() {
                   <div className="flex gap-4 text-xs text-text-secondary">
                     {game.engine && <span>{game.engine}</span>}
                     {game.price && <span>{game.price}</span>}
+                    {game.platforms && <span>{game.platforms}</span>}
                   </div>
 
                   {editMode && (
