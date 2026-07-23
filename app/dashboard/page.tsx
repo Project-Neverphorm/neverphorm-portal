@@ -49,6 +49,7 @@ export default function DashboardPage() {
   const [archivedTasks, setArchivedTasks] = useState<Task[]>([])
   const [xpLog, setXpLog] = useState<XPEntry[]>([])
   const [tasksLoading, setTasksLoading] = useState(true)
+  const [viewingMember, setViewingMember] = useState<TeamMember | null>(null)
 
   const [showLogTask, setShowLogTask] = useState(false)
   const [showArchive, setShowArchive] = useState(false)
@@ -401,19 +402,23 @@ export default function DashboardPage() {
                   const memberCompleted = completedCountForMember(member.id)
 
                   return (
-                    <div key={member.id} className="border-l-2 border-brand pl-4 mb-6">
-                      <div className="flex items-center justify-between">
-                        <p className="font-semibold">{member.full_name}</p>
-                        <span className="text-sm text-text-secondary">{memberXP}/500</span>
-                      </div>
-                      <p className="text-brand text-sm">Current Tasks</p>
-                      <p className="text-xs text-text-secondary mb-2">🎯 Target: Ongoing</p>
-                      <div className="w-full h-2 bg-elevated rounded-full overflow-hidden mb-1">
-                        <div className="h-full bg-brand" style={{ width: `${Math.min((memberXP / 500) * 100, 100)}%` }} />
-                      </div>
-                      <p className="text-xs text-text-secondary">{memberCompleted} tasks complete</p>
-                    </div>
-                  )
+                      <button
+                        key={member.id}
+                        onClick={() => setViewingMember(member)}
+                        className="w-full text-left border-l-2 border-brand pl-4 mb-6 py-1 rounded-r hover:bg-elevated/40 transition-colors"
+                      >
+                        <div className="flex items-center justify-between">
+                          <p className="font-semibold">{member.full_name}</p>
+                          <span className="text-sm text-text-secondary">{memberXP}/500</span>
+                        </div>
+                        <p className="text-brand text-sm">Current Tasks</p>
+                        <p className="text-xs text-text-secondary mb-2">🎯 Target: Ongoing</p>
+                        <div className="w-full h-2 bg-elevated rounded-full overflow-hidden mb-1">
+                          <div className="h-full bg-brand" style={{ width: `${Math.min((memberXP / 500) * 100, 100)}%` }} />
+                        </div>
+                        <p className="text-xs text-text-secondary">{memberCompleted} tasks complete</p>
+                      </button>
+                    )
                 })}
               {teamMembers.filter((m) => m.id !== user?.id).length === 0 && (
                 <p className="text-xs text-text-secondary">No other team members yet.</p>
@@ -519,6 +524,44 @@ export default function DashboardPage() {
                 Empty archive
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {viewingMember && (
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4"
+          onClick={() => setViewingMember(null)}
+        >
+          <div
+            className="w-full max-w-md bg-elevated border border-border-default rounded-lg p-6 max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="font-semibold">{viewingMember.full_name}</h3>
+                <p className="text-xs text-text-secondary">{viewingMember.title}</p>
+              </div>
+              <button onClick={() => setViewingMember(null)} aria-label="Close" className="text-text-secondary hover:text-foreground">✕</button>
+            </div>
+
+            <p className="text-sm text-text-secondary mb-4">
+              {xpForMember(viewingMember.id)} / 500 XP · {completedCountForMember(viewingMember.id)} tasks completed
+            </p>
+
+            <div className="divide-y divide-neutral-800">
+              {tasks.filter((t) => t.assigned_to_id === viewingMember.id).length === 0 && (
+                <p className="text-sm text-text-secondary py-4">No active tasks.</p>
+              )}
+              {tasks
+                .filter((t) => t.assigned_to_id === viewingMember.id)
+                .map((task) => (
+                  <div key={task.id} className="flex items-center justify-between py-3">
+                    <p className="text-sm">{task.name}</p>
+                    <span className="text-sm font-semibold text-brand">+{task.xp} XP</span>
+                  </div>
+                ))}
+            </div>
           </div>
         </div>
       )}
