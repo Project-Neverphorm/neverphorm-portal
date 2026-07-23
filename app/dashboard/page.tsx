@@ -57,6 +57,28 @@ export default function DashboardPage() {
   const [newTaskMemberId, setNewTaskMemberId] = useState('')
   const [newTaskXP, setNewTaskXP] = useState(XP_TIERS[0].value)
 
+  const RESPONSIBILITIES: Record<string, string[]> = {
+  'Studio Head & Creative Director': [
+    'Creative direction across all titles',
+    'Gameplay programming & technical architecture',
+    'Business development & legal (DUNS, developer accounts, LLC)',
+    '3D modeling, texturing and asset creation',
+    'Studio operations & infrastructure',
+    'Finance & accounting',
+    'Hiring, recruiting, team building',
+    'Marketing & community strategy',
+    'Voice acting & audio direction',
+    'Website & internal tools development',
+  ],
+  'Business Operations': [
+    'HR — onboarding, contracts, and team admin',
+    'Publisher relations & outreach',
+    'Marketing & launch coordination (release timing, store pages, PR pushes)',
+    'Accounting & bookkeeping',
+    'Legal & business affairs support',
+  ],
+}
+
   const loadTeam = async () => {
     const { data } = await supabase.from('profiles').select('id, full_name, title')
     setTeamMembers(data ?? [])
@@ -344,18 +366,7 @@ export default function DashboardPage() {
             <div>
               <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">Responsibilities</h2>
               <div className="space-y-2">
-                {[
-                  'Creative direction across all titles',
-                  'Gameplay programming & technical architecture',
-                  'Business development & legal (DUNS, developer accounts, LLC)',
-                  '3D modeling, texturing and asset creation',
-                  'Studio operations & infrastructure',
-                  'Finance & accounting',
-                  'Hiring, recruiting, team building',
-                  'Marketing & community strategy',
-                  'Voice acting & audio direction',
-                  'Website & internal tools development',
-                ].map((item) => (
+                {(RESPONSIBILITIES[myProfile?.title ?? ''] ?? []).map((item) => (
                   <p key={item} className="text-sm text-neutral-300 flex items-start gap-2">
                     <span className="text-brand mt-1">•</span>
                     {item}
