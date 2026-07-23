@@ -15,6 +15,7 @@ type Game = {
   description: string | null
   engine: string | null
   price: string | null
+  platforms: string | null
 }
 
 const STATUS_STYLES: Record<Game['status'], string> = {
@@ -31,6 +32,7 @@ const emptyForm = {
   description: '',
   engine: '',
   price: '',
+  platforms: '',
 }
 
 export default function PipelinePage() {
@@ -88,6 +90,7 @@ export default function PipelinePage() {
       description: game.description ?? '',
       engine: game.engine ?? '',
       price: game.price ?? '',
+      platforms: game.platforms ?? '',
     })
   }
 
@@ -248,6 +251,12 @@ export default function PipelinePage() {
                       value={form.price}
                       onChange={(e) => setForm({ ...form, price: e.target.value })}
                       placeholder="Price"
+                      className="w-full bg-background border border-border-default rounded px-3 py-2 text-sm outline-none focus:border-brand"
+                    />
+                    <input
+                      value={form.platforms}
+                      onChange={(e) => setForm({ ...form, platforms: e.target.value })}
+                      placeholder="Platforms"
                       className="w-full bg-background border border-border-default rounded px-3 py-2 text-sm outline-none focus:border-brand"
                     />
                   </div>
