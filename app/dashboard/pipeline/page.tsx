@@ -116,6 +116,7 @@ export default function PipelinePage() {
         description: form.description,
         engine: form.engine,
         price: form.price,
+        platforms: form.platforms,
       })
       .eq('id', id)
 
@@ -137,6 +138,7 @@ export default function PipelinePage() {
       description: form.description,
       engine: form.engine,
       price: form.price,
+      platforms: form.platforms,
       order_index: games.length,
     })
 
