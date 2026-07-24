@@ -224,19 +224,9 @@ const tools: Category[] = [
     items: [{ id: 'nodejs', name: 'Node.js', detail: null }],
   },
   {
-    id: 'expo',
-    name: 'Expo',
-    items: [{ id: 'expo-tool', name: 'Expo', detail: null }],
-  },
-  {
     id: 'supabase',
     name: 'Supabase',
     items: [{ id: 'supabase-tool', name: 'Supabase', detail: null }],
-  },
-  {
-    id: 'atlassian',
-    name: 'Atlassian',
-    items: [{ id: 'trello', name: 'Trello', detail: null }],
   },
   {
     id: 'notion-labs',
