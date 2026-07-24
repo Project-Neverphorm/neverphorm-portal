@@ -10,8 +10,8 @@ import type { User } from '@supabase/supabase-js'
 
 const devStack: Record<string, string[]> = {
   'Game Development': ['Unity', 'Unreal Engine', 'C++', 'C#', 'Maya', 'Blender', 'Autodesk Sketchbook', 'Substance Painter', 'Figma', 'GitHub', 'DaVinci'],
-  'Web & Systems': ['React', 'React Native', 'TailwindCSS', 'Vercel', 'Vite', 'VIM', 'Rebase', 'JavaScript', 'Expo', 'Supabase', 'Node.js', 'GitHub'],
-  'Planning & Workflow': ['IET', 'Trello', 'Notion', 'Google Drive', 'Discord', 'DocuSign', 'Microsoft 365'],
+  'Web & Systems': ['React', 'React Native', 'TailwindCSS', 'Vercel', 'Vite', 'VIM', 'Rebase', 'JavaScript', 'Supabase', 'Node.js', 'GitHub'],
+  'Planning & Workflow': ['IET', 'Notion', 'Google Drive', 'Discord', 'DocuSign', 'Microsoft 365'],
 }
 
 export default function ResourcePage() {
