@@ -261,7 +261,6 @@ const tools: Category[] = [
     id: 'independent-oss',
     name: 'Independent / Open Source',
     items: [
-      { id: 'vim', name: 'VIM', detail: null },
       { id: 'vite', name: 'Vite', detail: null },
       { id: 'git', name: 'Git', detail: null },
     ],
