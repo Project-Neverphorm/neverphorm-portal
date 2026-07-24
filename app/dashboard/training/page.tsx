@@ -192,7 +192,7 @@ export default function TrainingPage() {
           <div className="mb-10">
             <h1 className="text-2xl font-bold">Training</h1>
             <p className="text-text-secondary text-sm mt-1">
-              Everyone on the team — including leadership — is expected to complete the
+              Everyone on the team, including leadership, is expected to complete the
               pathways that apply to their role. This page is the single source of truth
               for what&apos;s required and how far along everyone is.
             </p>
