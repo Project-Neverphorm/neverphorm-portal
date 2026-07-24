@@ -266,11 +266,6 @@ const tools: Category[] = [
     ],
   },
   {
-    id: 'workflow-actions',
-    name: 'Workflow & Git Practices',
-    items: [{ id: 'rebase', name: 'Rebase', detail: null }],
-  },
-  {
     id: 'neverphorm-internal',
     name: 'Internal',
     items: [{ id: 'iet', name: 'IET', detail: null }],
