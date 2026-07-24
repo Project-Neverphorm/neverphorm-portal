@@ -196,6 +196,21 @@ export default function TrainingPage() {
               pathways that apply to their role. This page is the single source of truth
               for what&apos;s required and how far along everyone is.
             </p>
+            <p className="text-text-secondary text-sm mt-3">
+                Developers do <span className="text-foreground font-semibold">not</span> need
+                to complete the business pathways (HubSpot Academy, Business Management
+                Diploma), and business-side team members do{' '}
+                <span className="text-foreground font-semibold">not</span> need to complete
+                the game engine pathways (Unity, Unreal). Only complete the pathways that
+                apply to your role.
+            </p>
+            <p className="text-text-secondary text-sm mt-5">
+                Note that there are actual and legitimate certifications underneath the main pathways
+                as an option for your personal discretion and personal/professional growth. Mind you that
+                these are not paid by the studio but out of your pocket. It is to further your knowledge.
+                These are 100% optional, only reason why I added these to this page is for you to explore out of
+                your curiosity, possibly replacing your main job, and so on. 
+            </p>
           </div>
 
           <section id="pathways" className="mb-14">
