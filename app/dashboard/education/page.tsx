@@ -210,54 +210,7 @@ const tools: Category[] = [
     id: 'tailwind-labs',
     name: 'Tailwind Labs',
     items: [
-      {
-        id: 'tailwindcss',
-        name: 'TailwindCSS',
-        detail: {
-          overview:
-            'Utility-first CSS framework — compose styles directly in your markup using pre-built utility classes instead of writing custom CSS.',
-          sections: [
-            {
-              id: 'getting-started',
-              label: 'Getting Started',
-              content: [
-                'Install via npm: npm install tailwindcss @tailwindcss/vite',
-                'Add the Vite plugin to your config and import "tailwindcss" in your main CSS file.',
-                'Start applying utility classes directly in your JSX — no separate build step to configure.',
-              ],
-            },
-            {
-              id: 'v4-changes',
-              label: 'What Changed in v4',
-              content: [
-                'CSS-first config — theme values are now defined in CSS using @theme instead of tailwind.config.js.',
-                'New Rust-based engine ("Oxide") for dramatically faster builds.',
-                'OKLCH colors by default for a more vibrant, uniform palette.',
-              ],
-            },
-            {
-              id: 'tips-tricks',
-              label: 'Tips & Shortcuts',
-              content: [
-                'Install the Tailwind CSS IntelliSense extension in VS Code for autocomplete and hover previews.',
-                'Use arbitrary values for one-offs: top-[117px], bg-[#1da1f2]',
-                'group + group-hover lets you style children based on parent hover state with no JS.',
-                'Responsive prefixes are mobile-first: md:flex applies at medium screens and up.',
-              ],
-            },
-            {
-              id: 'why-chosen',
-              label: 'Why We Use It',
-              content: [
-                'Pairs natively with our Vite + React + Next.js stack.',
-                'Keeps styling co-located with components — good for a small team that needs to move fast.',
-              ],
-            },
-          ],
-          docs: [{ label: 'Official Docs', url: 'https://tailwindcss.com/docs' }],
-          videos: [],
-        },
-      },
+      { id: 'tailwindcss', name: 'TailwindCSS', detail: null },
     ],
   },
   {
