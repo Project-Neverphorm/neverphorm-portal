@@ -354,7 +354,7 @@ export default function TrainingPage() {
             <p className="text-sm text-neutral-300 leading-relaxed">
               These pathways exist so nobody on the team is left figuring out an engine or
               a business fundamental on their own. Complete the ones that apply to your
-              role — this page is the record of where everyone stands, checked off for
+              role, this page is the record of where everyone stands, checked off for
               good.
             </p>
           </div>
