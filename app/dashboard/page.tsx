@@ -53,6 +53,7 @@ export default function DashboardPage() {
 
   const [showLogTask, setShowLogTask] = useState(false)
   const [showArchive, setShowArchive] = useState(false)
+  const [showStudioLevels, setShowStudioLevels] = useState(false)
 
   const [newTaskName, setNewTaskName] = useState('')
   const [newTaskMemberId, setNewTaskMemberId] = useState('')
@@ -290,7 +291,9 @@ export default function DashboardPage() {
           <div className="border-b border-border-default pb-10 mb-10">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm uppercase tracking-wide text-text-secondary">Studio Progress</h2>
-              <span className="text-xs text-brand">About Studio Levels →</span>
+              <button
+                onClick={() => setShowStudioLevels(true)}
+                className="text-xs text-brand hover:underline">About Studio Levels</button>
             </div>
             <div className="flex items-end gap-4 mb-4">
               <span className="text-6xl font-bold text-brand">Lvl 0</span>
@@ -561,6 +564,37 @@ export default function DashboardPage() {
                     <span className="text-sm font-semibold text-brand">+{task.xp} XP</span>
                   </div>
                 ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showStudioLevels && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4"
+          onClick={() => setShowStudioLevels(false)}>
+          <div className="w-full max-w-md bg-elevated border border-border-default rounded-lg p-6 max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="font-semibold">About Studio Levels</h3>
+                <button onClick={() => setShowStudioLevels(false)} aria-label="Close" className="text-text-secondary hover:text-foreground">X</button>
+              </div>
+
+            <div className="space-y-4 text-sm text-neutral-300">
+              <p>
+                Every completed task earns XP, which feeds two separate progress bars: your own personal level and the studio&apos;s overall level.
+              </p>
+              <div>
+                <p className="font-semibold text-foreground md-1">Personal levels</p>
+                <p>Each team member levels up individually at 500 XP per level, tracked from the tasks assigned to them.</p>
+              </div>
+              <div>
+                <p className="font-semibold text-foreground md-1">Studio levels</p>
+                <p>The studio levels up as a team, combining everyone&apos;s XP. Studio Level 1 unlocks at 2,500 XP.</p>
+              </div>
+              <div>
+                <p className="font-semibold text-foreground md-1">Rewards</p>
+                <p>Each studio level unlocks a reward - Level 1 unlocks a custom studio mug and a new reward slot.</p>
+              </div>
             </div>
           </div>
         </div>
