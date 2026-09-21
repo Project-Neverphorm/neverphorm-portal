@@ -86,11 +86,11 @@ export default function DashboardPage() {
     'Press outreach & partnerships',
   ],
   'Graphic Designer': [
-    'Branding & visual identity',
+    'Achievement/trophy design & implementation',
+    'QA testing & bug reporting',
     'Marketing assets (social graphics, store page art)',
-    'UI/UX visual design support',
-    'Promotional and key art creation',
-  ],
+    'Branding & visual identity support',
+],
 }
 
   const loadTeam = async () => {
