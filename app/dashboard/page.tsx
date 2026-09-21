@@ -79,6 +79,18 @@ export default function DashboardPage() {
     'Accounting & bookkeeping',
     'Legal & business affairs support',
   ],
+  'Marketing Lead': [
+    'Social media & community strategy',
+    'Marketing & launch coordination (release timing, store pages, PR pushes)',
+    'Content calendar & promotional campaigns',
+    'Press outreach & partnerships',
+  ],
+  'Graphic Designer': [
+    'Branding & visual identity',
+    'Marketing assets (social graphics, store page art)',
+    'UI/UX visual design support',
+    'Promotional and key art creation',
+  ],
 }
 
   const loadTeam = async () => {
