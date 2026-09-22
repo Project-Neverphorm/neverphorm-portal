@@ -231,6 +231,7 @@ export default function PipelinePage() {
                     <option value="Planned">Planned</option>
                     <option value="In Development">In Development</option>
                     <option value="Released">Released</option>
+                    <option value="Paused">Paused</option>
                   </select>
                   <input
                     value={form.blurb}
