@@ -11,7 +11,7 @@ type Game = {
   id: string
   order_index: number
   title: string
-  status: 'Released' | 'In Development' | 'Planned' | 'Concept'
+  status: 'Released' | 'In Development' | 'Planned' | 'Concept' | 'Paused'
   blurb: string | null
   description: string | null
   engine: string | null
