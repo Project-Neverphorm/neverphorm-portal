@@ -48,6 +48,11 @@ export default function PipelinePage() {
   const [form, setForm] = useState(emptyForm)
   const router = useRouter()
 
+  const [hasSigned, setHasSigned] = useState<boolean | null>(null)
+  const [agreed, setAgreed] = useState(false)
+  const [fullName, setFullName] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
   const loadGames = async () => {
     const { data, error } = await supabase
       .from('pipeline_games')
@@ -71,6 +76,13 @@ export default function PipelinePage() {
       }
       setUser(user)
 
+      const { data: signature } = await supabase
+        .from('pipeline_nda_signatures')
+        .select('id')
+        .eq('user_id', user.id)
+        .single()
+      setHasSigned(!!signature)
+
       const { data: profile } = await supabase
         .from('profiles')
         .select('title')
@@ -81,6 +93,18 @@ export default function PipelinePage() {
     init()
     loadGames()
   }, [router])
+
+  const handleSign = async () => {
+    if (!agreed || fullName.trim().length < 2 || !user) return
+    setSubmitting(true)
+
+    const { error } = await supabase
+      .from('pipeline_nda_signatures')
+      .insert({ user_id: user.id, full_name: fullName.trim() })
+
+    if (!error) setHasSigned(true)
+    setSubmitting(false)
+  }
 
   const startEdit = (game: Game) => {
     setEditingId(game.id)
@@ -183,6 +207,59 @@ export default function PipelinePage() {
       </div>
     )
   }
+
+  // Signature Block
+  if (hasSigned === false) {
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <Navbar />
+      <main className="max-w-2xl mx-auto px-6 py-16">
+        <h1 className="text-2xl font-bold mb-4">Confidentiality Agreement</h1>
+        <div className="border border-border-default rounded-lg p-6 mb-6 text-sm text-neutral-300 space-y-3 bg-elevated/40">
+          <p>
+            The Pipeline section contains unreleased game concepts, titles, pricing,
+            platform plans, and production timelines internal to Project Neverphorm.
+          </p>
+          <p>
+            By signing below, you agree not to share, discuss, or disclose any
+            information from the Pipeline page outside the studio, including on social
+            media, with press, or with anyone not currently part of the team, unless
+            explicitly authorized by studio leadership.
+          </p>
+        </div>
+
+        <label className="flex items-start gap-2 mb-4 text-sm">
+          <input
+            type="checkbox"
+            checked={agreed}
+            onChange={(e) => setAgreed(e.target.checked)}
+            className="mt-1"
+          />
+          I have read and agree to keep this information confidential.
+        </label>
+
+        <label className="block text-xs text-text-secondary mb-1">
+          Type your full name to sign
+        </label>
+        <input
+          type="text"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          placeholder="Full name"
+          className="w-full bg-background border border-border-default rounded px-3 py-2 mb-4 text-sm outline-none focus:border-brand"
+        />
+
+        <button
+          onClick={handleSign}
+          disabled={!agreed || fullName.trim().length < 2 || submitting}
+          className="bg-brand text-black rounded px-4 py-2 text-sm font-semibold disabled:opacity-50"
+        >
+          {submitting ? 'Signing...' : 'Sign and Continue'}
+        </button>
+      </main>
+    </div>
+  )
+}
 
   return (
     <div className="min-h-screen bg-background text-foreground">
