@@ -24,6 +24,7 @@ const STATUS_STYLES: Record<Game['status'], string> = {
   'In Development': 'bg-brand/15 text-brand',
   'Planned': 'bg-neutral-500/15 text-neutral-300',
   'Concept': 'bg-neutral-700/40 text-neutral-500',
+  'Paused' : 'bg-purple-500/15 text-purple-400',
 }
 
 const emptyForm = {
