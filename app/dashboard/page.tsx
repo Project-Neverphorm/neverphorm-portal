@@ -90,7 +90,13 @@ export default function DashboardPage() {
     'QA testing & bug reporting',
     'Marketing assets (social graphics, store page art)',
     'Branding & visual identity support',
-],
+  ],
+  'UI/UX Designer': [
+    '2D UI/UX design across all titles',
+    'Menu, HUD, and interface layout design',
+    'Icon design & visual asset creation',
+    'UI style guides & consistency across the catalog',
+  ],
 }
 
   const loadTeam = async () => {
