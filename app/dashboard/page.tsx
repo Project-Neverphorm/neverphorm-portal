@@ -54,6 +54,7 @@ export default function DashboardPage() {
   const [showLogTask, setShowLogTask] = useState(false)
   const [showArchive, setShowArchive] = useState(false)
   const [showStudioLevels, setShowStudioLevels] = useState(false)
+  const [isManager, setIsManager] = useState(false)
 
   const [newTaskName, setNewTaskName] = useState('')
   const [newTaskMemberId, setNewTaskMemberId] = useState('')
@@ -143,10 +144,11 @@ export default function DashboardPage() {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('id, full_name, title')
+        .select('id, full_name, title, role')
         .eq('id', user.id)
         .single()
       setMyProfile(profile)
+      setIsManager(profile?.role === 'manager')
 
       setLoading(false)
     }
@@ -397,7 +399,8 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div>
+            {isManager && (
+              <div>
               <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">Admin</h2>
               <div className="flex flex-col gap-2 mb-8">
                 <button
@@ -445,6 +448,7 @@ export default function DashboardPage() {
                 <p className="text-xs text-text-secondary">No other team members yet.</p>
               )}
             </div>
+            )}
 
           </div>
 
