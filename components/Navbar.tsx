@@ -143,6 +143,9 @@ export default function Navbar() {
                 <a href="https://discord.gg/s7cKSNTzEh" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-neutral-700">
                   Discord
                 </a>
+                <a href="https://www.figma.com/files/team/1684411640265098802/folder/659134963?fuid=1684411638716782212" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-ne...">
+                  Figma
+                </a>
               </div>
             )}
           </div>
