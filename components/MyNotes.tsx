@@ -27,6 +27,7 @@ export default function MyNotes({ userId }: { userId: string }) {
         content: value,
         updated_at: new Date().toISOString(),
       })
+      if (error) console.error('Notes save failed:', error)
       setStatus(error ? 'error' : 'saved')
     }, 800)
   }
