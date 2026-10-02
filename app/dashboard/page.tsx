@@ -7,7 +7,6 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
 import type { User } from '@supabase/supabase-js'
-import MyNotes from '@/components/MyNotes'
 
 type Task = {
   id: string
@@ -397,8 +396,6 @@ export default function DashboardPage() {
                   </p>
                 ))}
               </div>
-
-              {user && <MyNotes userId={user.id} />}
             </div>
 
             {isManager && (
