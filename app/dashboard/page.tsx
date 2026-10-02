@@ -268,7 +268,6 @@ export default function DashboardPage() {
         <aside className="w-72 shrink-0 border-r border-border-default px-6 py-10 min-h-screen">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-sm uppercase tracking-wide text-text-secondary">Team</h2>
-            <span className="text-xs text-brand">View All →</span>
           </div>
 
           <div className="space-y-6">
