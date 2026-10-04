@@ -511,7 +511,7 @@ export default function EducationPage() {
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Navbar />
 
-      <div className="flex flex-1 gap-2 px-10 pt-8">
+      <div className="flex gap-2 px-10 pt-8">
         {(['departments', 'tools'] as const).map((s) => (
           <button
             key={s}
