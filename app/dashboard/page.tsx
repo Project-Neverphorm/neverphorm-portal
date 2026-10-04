@@ -15,6 +15,7 @@ type Task = {
   assigned_to_id: string
   status: 'active' | 'completed' | 'deleted'
   archived_at: string | null
+  description: string | null
 }
 
 type XPEntry = {
@@ -57,6 +58,7 @@ export default function DashboardPage() {
   const [isManager, setIsManager] = useState(false)
   const [description, setDescription] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null)
 
   const [newTaskName, setNewTaskName] = useState('')
   const [newTaskMemberId, setNewTaskMemberId] = useState('')
@@ -347,32 +349,46 @@ export default function DashboardPage() {
 
           <div className="grid grid-cols-4 gap-12">
 
-            <div className="col-span-2">
-              <div className="flex items-center justify-between mb-1">
-                <h2 className="text-sm uppercase tracking-wide text-text-secondary">My Current Tasks</h2>
-                <span className="text-xs text-text-secondary">🎯 Target: Ongoing</span>
-              </div>
-              <p className="text-2xl font-bold mb-1">Current Tasks</p>
-              <p className="text-brand text-sm mb-3">Assigned to {myProfile?.full_name}</p>
+          <div className="col-span-2">
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-sm uppercase tracking-wide text-text-secondary">My Current Tasks</h2>
+              <span className="text-xs text-text-secondary">🎯 Target: Ongoing</span>
+            </div>
+            <p className="text-2xl font-bold mb-1">Current Tasks</p>
+            <p className="text-brand text-sm mb-3">Assigned to {myProfile?.full_name}</p>
 
-              <div className="w-full h-2 bg-elevated rounded-full overflow-hidden mb-2">
-                <div className="h-full bg-brand" style={{ width: `${Math.min((myXP / 500) * 100, 100)}%` }} />
-              </div>
-              <p className="text-sm text-text-secondary mb-6">{myXP} / 500 XP · {myCompletedCount} tasks completed</p>
+            <div className="w-full h-2 bg-elevated rounded-full overflow-hidden mb-2">
+              <div className="h-full bg-brand" style={{ width: `${Math.min((myXP / 500) * 100, 100)}%` }} />
+            </div>
+            <p className="text-sm text-text-secondary mb-6">{myXP} / 500 XP · {myCompletedCount} tasks completed</p>
 
-              <div className="divide-y divide-neutral-800 max-h-80 overflow-y-auto pr-2">
-                {myTasks.length === 0 && (
-                  <p className="text-sm text-text-secondary py-4">No active tasks. Log one from the admin panel.</p>
-                )}
-                {myTasks.map((task) => (
-                  <div key={task.id} className="flex items-center justify-between py-3 group">
+            <div className="divide-y divide-neutral-800 max-h-80 overflow-y-auto pr-2">
+            {myTasks.length === 0 && (
+                <p className="text-sm text-text-secondary py-4">No active tasks. Log one from the admin panel.</p>
+              )}
+              {myTasks.map((task) => (
+                <div key={task.id} className="py-3 group">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => completeTask(task.id)}
                         aria-label={`Mark "${task.name}" complete`}
                         className="w-5 h-5 rounded border border-neutral-600 hover:border-brand flex items-center justify-center shrink-0 transition-colors"
                       />
-                      <p className="text-sm">{task.name}</p>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpandedTaskId(expandedTaskId === task.id ? null : task.id)
+                        }
+                        className="text-sm text-left hover:text-brand transition-colors"
+                      >
+                        {task.name}
+                        {task.description && (
+                          <span className="ml-2 text-xs text-text-secondary">
+                            {expandedTaskId === task.id ? '▴' : '▾'}
+                          </span>
+                        )}
+                      </button>
                     </div>
                     <div className="flex items-center gap-4">
                       <span className="text-sm font-semibold text-brand">+{task.xp} XP</span>
@@ -385,9 +401,16 @@ export default function DashboardPage() {
                       </button>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
+
+            {expandedTaskId === task.id && task.description && (
+              <p className="text-sm text-text-secondary mt-2 pl-8 whitespace-pre-wrap">
+                {task.description}
+              </p>
+        )}
+      </div>
+    ))}
+  </div>
+</div>
 
             <div>
               <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">Responsibilities</h2>
