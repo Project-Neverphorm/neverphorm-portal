@@ -268,12 +268,12 @@ export default function DashboardPage() {
   const studioLevel = getStudioLevelInfo(studioXP)
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Navbar />
 
-      <div className="flex">
+      <div className="flex flex-1">
 
-        <aside className="w-72 shrink-0 border-r border-border-default px-6 py-10 min-h-screen">
+        <aside className="w-72 shrink-0 border-r border-border-default px-6 py-10">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-sm uppercase tracking-wide text-text-secondary">Team</h2>
           </div>
@@ -482,10 +482,11 @@ export default function DashboardPage() {
             )}
 
           </div>
-          <Footer />
 
         </main>
       </div>
+
+      <Footer />
 
       {showLogTask && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
@@ -628,7 +629,7 @@ export default function DashboardPage() {
                 .map((task) => (
                   <div key={task.id} className="flex items-center justify-between py-3">
                     <p className="text-sm">{task.name}</p>
-                    <span className="text-sm font-semibold text-brand">+{task.xp} XP</span>
+                    <span className="text-sm font-semibold text-brand whitespace-nowrap">+{task.xp} XP</span>
                   </div>
                 ))}
             </div>
