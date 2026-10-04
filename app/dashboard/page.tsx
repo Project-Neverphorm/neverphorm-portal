@@ -452,6 +452,7 @@ export default function DashboardPage() {
                 .map((member) => {
                   const memberXP = xpForMember(member.id)
                   const memberCompleted = completedCountForMember(member.id)
+                  const memberLevel = getLevelInfo(memberXP)
 
                   return (
                       <button
@@ -461,12 +462,12 @@ export default function DashboardPage() {
                       >
                         <div className="flex items-center justify-between">
                           <p className="font-semibold">{member.full_name}</p>
-                          <span className="text-sm text-text-secondary">{memberXP}/500</span>
+                          <span className="text-sm text-text-secondary">{memberLevel.progress}/{memberLevel.needed}</span>
                         </div>
                         <p className="text-brand text-sm">Current Tasks</p>
                         <p className="text-xs text-text-secondary mb-2">🎯 Target: Ongoing</p>
                         <div className="w-full h-2 bg-elevated rounded-full overflow-hidden mb-1">
-                          <div className="h-full bg-brand" style={{ width: `${Math.min((memberXP / 500) * 100, 100)}%` }} />
+                        <div className="h-full bg-brand" style={{ width: `${Math.min(memberLevel.percent, 100)}%` }} />
                         </div>
                         <p className="text-xs text-text-secondary">{memberCompleted} tasks complete</p>
                       </button>
