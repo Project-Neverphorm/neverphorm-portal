@@ -122,6 +122,9 @@ export default function Navbar() {
           <Link href="/dashboard/cms" className="hover:text-neutral-300">
             CMS
           </Link>
+          <Link href="/dashboard/updates" className="hover:text-neutral-300">
+            Updates
+          </Link>
 
           <div
             className="relative"
@@ -205,6 +208,9 @@ export default function Navbar() {
             </button>
             <Link href="/dashboard/cms" className="pl-2" onClick={() => setMobileMenuOpen(false)}>
               CMS
+            </Link>
+            <Link href="/dashboard/updates" className="pl-2" onClick={() => setMobileMenuOpen(false)}>
+              Updates
             </Link>
 
             <p className="text-text-secondary text-xs uppercase pt-2">Links</p>
