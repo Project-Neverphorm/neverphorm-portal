@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
 import type { User } from '@supabase/supabase-js'
-import { getLevelInfo } from '@/lib/levels'
+import { getLevelInfo, getStudioLevelInfo } from '@/lib/levels'
 
 type Task = {
   id: string
@@ -264,6 +264,7 @@ export default function DashboardPage() {
   const myLevel = getLevelInfo(myXP)
   const myCompletedCount = completedCountForMember(user?.id ?? '')
   const studioXP = xpLog.reduce((sum, entry) => sum + entry.xp, 0)
+  const studioLevel = getStudioLevelInfo(studioXP)
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -323,20 +324,20 @@ export default function DashboardPage() {
                 className="text-xs text-brand hover:underline">About Studio Levels</button>
             </div>
             <div className="flex items-end gap-4 mb-4">
-              <span className="text-6xl font-bold text-brand">Lvl 0</span>
+              <span className="text-6xl font-bold text-brand">Lvl {studioLevel.level}</span>
               <span className="text-green-300 text-sm pb-2">Starting Fresh!</span>
             </div>
             <div className="w-full h-2 bg-elevated rounded-full overflow-hidden">
-              <div className="h-full bg-brand" style={{ width: `${Math.min((studioXP / 2500) * 100, 100)}%` }} />
+              <div className="h-full bg-brand" style={{ width: `${Math.min(studioLevel.percent, 100)}%` }} />
             </div>
-            <p className="text-sm text-text-secondary mt-2">{studioXP} / 2500 XP</p>
+              <p className="text-sm text-text-secondary mt-2">{studioLevel.progress} / {studioLevel.needed} XP</p>
           </div>
 
           <div className="grid grid-cols-3 gap-10 border-b border-border-default pb-10 mb-10">
             <div>
               <p className="text-xs uppercase tracking-wide text-text-secondary mb-2">Next Goal</p>
               <p className="font-semibold">Complete Current Task Boxes</p>
-              <p className="text-sm text-text-secondary mt-1">+2,500 XP Team Goal</p>
+              <p className="text-sm text-text-secondary mt-1">{studioLevel.needed - studioLevel.progress} XP to next level</p>
             </div>
             <div>
               <p className="text-xs uppercase tracking-wide text-text-secondary mb-2">Level Up Reward</p>
