@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
 import type { User } from '@supabase/supabase-js'
+import Footer from '@/components/Footer'
 
 type DetailSection = {
   id: string
@@ -319,7 +320,7 @@ function DetailPanel({ item }: { item: Item }) {
   }
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-2xl ">
       <h1 className="text-2xl font-bold mb-4">{item.name}</h1>
       {item.detail?.overview && (
         <p className="text-sm text-neutral-300 leading-relaxed mb-6">{item.detail.overview}</p>
@@ -507,7 +508,7 @@ export default function EducationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Navbar />
 
       <div className="flex gap-2 px-10 pt-8">
@@ -625,6 +626,8 @@ export default function EducationPage() {
           {item && item.detail && <DetailPanel item={item} />}
         </div>
       </div>
+
+      <Footer />
     </div>
   )
 }
