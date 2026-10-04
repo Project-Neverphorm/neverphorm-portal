@@ -55,6 +55,8 @@ export default function DashboardPage() {
   const [showArchive, setShowArchive] = useState(false)
   const [showStudioLevels, setShowStudioLevels] = useState(false)
   const [isManager, setIsManager] = useState(false)
+  const [description, setDescription] = useState("");
+  const [newTaskDescription, setNewTaskDescription] = useState("");
 
   const [newTaskName, setNewTaskName] = useState('')
   const [newTaskMemberId, setNewTaskMemberId] = useState('')
@@ -212,6 +214,7 @@ export default function DashboardPage() {
       xp: newTaskXP,
       assigned_to_id: newTaskMemberId,
       created_by: user?.id,
+      description: newTaskDescription.trim() || null,
     })
 
     if (error) {
@@ -219,7 +222,7 @@ export default function DashboardPage() {
       alert(`Failed to add task: ${error.message}`)
       return
     }
-
+    setNewTaskDescription('')
     setNewTaskName('')
     setNewTaskXP(XP_TIERS[0].value)
     setShowLogTask(false)
@@ -473,6 +476,19 @@ export default function DashboardPage() {
                   required
                   className="w-full bg-background border border-border-default rounded px-3 py-2 text-sm outline-none focus:border-brand"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs text-text-secondary mb-1.5">
+                  Description <span className="opacity-60">(optional)</span>
+                </label>
+                <textarea
+                  value={newTaskDescription}
+                  onChange={(e) => setNewTaskDescription(e.target.value)}
+                  placeholder="Details, steps, links, anything they need to know"
+                  rows={4}
+                  className="w-full bg-background border border-border-default rounded px-3 py-2 text-sm outline-none focus:border-brand resize-y"
+                  />
               </div>
 
               <div>
