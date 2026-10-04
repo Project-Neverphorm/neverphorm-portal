@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
 import type { User } from '@supabase/supabase-js'
 import { getLevelInfo, getStudioLevelInfo } from '@/lib/levels'
+import Footer from '@/components/Footer'
 
 type Task = {
   id: string
