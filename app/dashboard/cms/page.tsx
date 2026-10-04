@@ -192,7 +192,7 @@ export default function CMSPage() {
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
 
-      <div className="flex gap-2 px-10 pt-8">
+      <div className="flex flex-col gap-2 px-10 pt-8">
         {(['games', 'updates'] as const).map((t) => (
           <button
             key={t}
