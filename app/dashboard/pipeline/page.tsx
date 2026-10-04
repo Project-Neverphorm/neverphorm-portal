@@ -265,7 +265,7 @@ export default function PipelinePage() {
 }
 
   return (
-    <div className="min-h-screen flex flex-1 bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Navbar />
 
       <main className="flex-1 max-w-5xl mx-auto px-6 py-10">
