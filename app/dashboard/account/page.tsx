@@ -90,7 +90,7 @@ export default function AccountPage() {
     .slice(0, 2)
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Navbar />
 
       <main className="max-w-xl mx-auto px-6 py-10">
