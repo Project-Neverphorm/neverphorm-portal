@@ -411,11 +411,11 @@ export default function DashboardPage() {
               <p className="text-sm text-text-secondary mt-2 pl-8 whitespace-pre-wrap">
                 {task.description}
               </p>
-        )}
+              )}
+            </div>
+          ))}
+        </div>
       </div>
-    ))}
-  </div>
-</div>
 
             <div>
               <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">Responsibilities</h2>
@@ -482,6 +482,7 @@ export default function DashboardPage() {
             )}
 
           </div>
+          <Footer />
 
         </main>
       </div>
