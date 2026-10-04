@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
 import type { User } from '@supabase/supabase-js'
+import Footer from '@/components/Footer'
 
 type TeamMember = {
   id: string
@@ -184,10 +185,10 @@ export default function TrainingPage() {
   const myCompletedCount = completedCountForMember(user?.id ?? '')
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Navbar />
 
-      <div className="flex">
+      <div className="flex-1 flex">
         <main className="flex-1 px-10 py-10">
           <div className="mb-10">
             <h1 className="text-2xl font-bold">Training</h1>
@@ -360,6 +361,8 @@ export default function TrainingPage() {
           </div>
         </aside>
       </div>
+
+      <Footer />
     </div>
   )
 }
