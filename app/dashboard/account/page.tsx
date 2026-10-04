@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
 import type { User } from '@supabase/supabase-js'
+import Footer from '@/components/Footer'
 
 type Profile = {
   id: string
@@ -153,6 +154,8 @@ export default function AccountPage() {
           </form>
         </div>
       </main>
+
+      <Footer />
     </div>
   )
 }

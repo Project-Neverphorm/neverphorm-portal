@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
 import type { User } from '@supabase/supabase-js'
+import Footer from '@/components/Footer'
 
 type Game = {
   id: string
@@ -357,6 +358,8 @@ export default function CMSPage() {
           </div>
         </div>
       )}
+
+      <Footer />
     </div>
   )
 }
