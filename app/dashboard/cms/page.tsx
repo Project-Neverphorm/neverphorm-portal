@@ -189,10 +189,10 @@ export default function CMSPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Navbar />
 
-      <div className="flex flex-col gap-2 px-10 pt-8">
+      <div className="flex gap-2 px-10 pt-8">
         {(['games', 'updates'] as const).map((t) => (
           <button
             key={t}
@@ -206,7 +206,7 @@ export default function CMSPage() {
         ))}
       </div>
 
-      <div className="px-10 py-8">
+      <div className="px-10 py-8 flex-1">
 
         {tab === 'games' && (
           <div>
