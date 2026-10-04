@@ -653,11 +653,11 @@ export default function DashboardPage() {
               </p>
               <div>
                 <p className="font-semibold text-foreground md-1">Personal levels</p>
-                <p>Each team member levels up individually at 500 XP per level, tracked from the tasks assigned to them.</p>
+                <p>Each team member levels up individually from the tasks assigned to them. Level 1 takes 300 XP, and each level after needs 150 more than the last (300, 450, 600, and so on).</p>
               </div>
               <div>
                 <p className="font-semibold text-foreground md-1">Studio levels</p>
-                <p>The studio levels up as a team, combining everyone&apos;s XP. Studio Level 1 unlocks at 2,500 XP.</p>
+                <p>The studio levels up as a team, combining everyone&apos;s XP. Studio Level 1 takes 1,000 XP, and each level after needs 500 more than the last (1,000, 1,500, 2,000, and so on).</p>
               </div>
               <div>
                 <p className="font-semibold text-foreground md-1">Rewards</p>
