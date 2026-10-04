@@ -111,7 +111,7 @@ const departments: Category[] = [
       { id: 'it-support', name: 'IT Support', detail: null },
       { id: 'web-development', name: 'Web Development', detail: null },
       { id: 'dotnet-developer', name: '.NET Developer', detail: null },
-      { id: 'cloud-computing', name: 'Cloud Developer', detail: null },
+      { id: 'cloud-developer', name: 'Cloud Developer', detail: null },
       { id: 'devops-engineer', name: 'DevOps Engineer', detail: null },
       { id: 'engine-programmer', name: 'Engine Programmer', detail: null },
       { id: 'graphics-rendering-programmer', name: 'Graphics/Rendering Programmer', detail: null },
