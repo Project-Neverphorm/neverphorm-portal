@@ -527,7 +527,7 @@ export default function EducationPage() {
         ))}
       </div>
 
-      <div className="flex px-10 py-8 gap-0 min-h-[70vh]">
+      <div className="flex flex-1 px-10 py-8 gap-0">
         {/* Category column (Departments / Vendors & Engines) */}
         <div
           className={`shrink-0 border-r border-border-default transition-all ${
