@@ -93,7 +93,7 @@ export default function AccountPage() {
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Navbar />
 
-      <main className="max-w-xl mx-auto px-6 py-10">
+      <main className="flex-1 max-w-xl mx-auto px-6 py-10">
         <h1 className="text-2xl font-bold mb-1">Account</h1>
         <p className="text-text-secondary text-sm mb-10">Manage your login details.</p>
 
