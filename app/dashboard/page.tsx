@@ -8,7 +8,6 @@ import { supabase } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
 import type { User } from '@supabase/supabase-js'
 import { getLevelInfo, getStudioLevelInfo } from '@/lib/levels'
-import Footer from '@/components/Footer'
 
 type Task = {
   id: string
@@ -485,8 +484,6 @@ export default function DashboardPage() {
 
         </main>
       </div>
-
-      <Footer />
 
       {showLogTask && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
