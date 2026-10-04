@@ -126,7 +126,7 @@ const departments: Category[] = [
       { id: 'qa-tester', name: 'QA Tester', detail: null },
       { id: 'qa-lead', name: 'QA Lead', detail: null },
       { id: 'automation-engineer', name: 'Automation Engineer', detail: null },
-      { id: 'compliance-cert-tester', name: 'Compliance/Cert Tester (platform cert)', detail: null },
+      { id: 'compliance-certification-tester', name: 'Compliance Certification Tester', detail: null },
       { id: 'localization-qa', name: 'Localization QA', detail: null },
     ],
   },
