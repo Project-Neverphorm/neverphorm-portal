@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
 import type { User } from '@supabase/supabase-js'
 import { Span } from 'next/dist/trace'
+import Footer from '@/components/Footer'
 
 type Game = {
   id: string
@@ -211,9 +212,9 @@ export default function PipelinePage() {
   // Signature Block
   if (hasSigned === false) {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen flex flex-1 bg-background text-foreground">
       <Navbar />
-      <main className="max-w-2xl mx-auto px-6 py-16">
+      <main className="flex-1 max-w-2xl mx-auto px-6 py-16">
         <h1 className="text-2xl font-bold mb-4">Confidentiality Agreement</h1>
         <div className="border border-border-default rounded-lg p-6 mb-6 text-sm text-neutral-300 space-y-3 bg-elevated/40">
           <p>
@@ -257,15 +258,17 @@ export default function PipelinePage() {
           {submitting ? 'Signing...' : 'Sign and Continue'}
         </button>
       </main>
+
+      <Footer />
     </div>
   )
 }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen flex flex-1 bg-background text-foreground">
       <Navbar />
 
-      <main className="max-w-5xl mx-auto px-6 py-10">
+      <main className="flex-1 max-w-5xl mx-auto px-6 py-10">
         <div className="flex items-start justify-between mb-2">
           <div>
             <h1 className="text-2xl font-bold">Pipeline</h1>
@@ -454,6 +457,8 @@ export default function PipelinePage() {
           )}
         </div>
       </main>
+
+      <Footer />
     </div>
   )
 }
