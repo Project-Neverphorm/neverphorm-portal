@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
 import type { User } from '@supabase/supabase-js'
+import { getLevelInfo } from '@/lib/levels'
 
 type Task = {
   id: string
@@ -260,6 +261,7 @@ export default function DashboardPage() {
 
   const myTasks = tasks.filter((t) => t.assigned_to_id === user?.id)
   const myXP = xpForMember(user?.id ?? '')
+  const myLevel = getLevelInfo(myXP)
   const myCompletedCount = completedCountForMember(user?.id ?? '')
   const studioXP = xpLog.reduce((sum, entry) => sum + entry.xp, 0)
 
@@ -277,6 +279,7 @@ export default function DashboardPage() {
           <div className="space-y-6">
             {teamMembers.map((member) => {
               const memberXP = xpForMember(member.id)
+              const memberLevel = getLevelInfo(memberXP)
               const initials = member.full_name
                 .split(' ')
                 .map((n) => n[0])
@@ -295,9 +298,9 @@ export default function DashboardPage() {
                       <p className="text-xs text-text-secondary">{member.title}</p>
                     </div>
                   </div>
-                  <p className="text-xs text-text-secondary mb-1">Lvl 0 · {memberXP} / 500 XP</p>
+                  <p className="text-xs text-text-secondary mb-1">Lvl {memberLevel.level} · {memberLevel.progress} / {memberLevel.needed} XP</p>
                   <div className="w-full h-1.5 bg-elevated rounded-full overflow-hidden">
-                    <div className="h-full bg-brand" style={{ width: `${Math.min((memberXP / 500) * 100, 100)}%` }} />
+                    <div className="h-full bg-brand" style={{ width: `${Math.min(memberLevel.percent, 100)}%` }} />
                   </div>
                 </div>
               )
@@ -358,9 +361,9 @@ export default function DashboardPage() {
             <p className="text-brand text-sm mb-3">Assigned to {myProfile?.full_name}</p>
 
             <div className="w-full h-2 bg-elevated rounded-full overflow-hidden mb-2">
-              <div className="h-full bg-brand" style={{ width: `${Math.min((myXP / 500) * 100, 100)}%` }} />
-            </div>
-            <p className="text-sm text-text-secondary mb-6">{myXP} / 500 XP · {myCompletedCount} tasks completed</p>
+            <div className="h-full bg-brand" style={{ width: `${Math.min(myLevel.percent, 100)}%` }} />
+          </div>
+            <p className="text-sm text-text-secondary mb-6">Lvl {myLevel.level} · {myLevel.progress} / {myLevel.needed} XP · {myCompletedCount} tasks completed</p>
 
             <div className="divide-y divide-neutral-800 max-h-80 overflow-y-auto pr-2">
             {myTasks.length === 0 && (
