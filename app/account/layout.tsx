@@ -6,21 +6,25 @@ import { supabase } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import SectionSidebar, { SidebarItem } from '@/components/SectionSidebar'
+import {
+  UserIcon,
+  WalletIcon,
+  TrendingIcon,
+  AwardIcon,
+  FileIcon,
+  ShieldIcon,
+} from '@/components/account/icons'
 
 const accountTabs: SidebarItem[] = [
-  { label: 'Profile', href: '/account/profile' },
-  { label: 'Pay & Paystubs', href: '/account/pay' },
-  { label: 'Role & Growth', href: '/account/role' },
-  { label: 'Bonuses', href: '/account/bonuses' },
-  { label: 'Agreements', href: '/account/agreements' },
-  { label: 'Studio Policies', href: '/account/policies' },
+  { label: 'Profile', href: '/account/profile', icon: <UserIcon /> },
+  { label: 'Pay & Paystubs', href: '/account/pay', icon: <WalletIcon /> },
+  { label: 'Role & Growth', href: '/account/role', icon: <TrendingIcon /> },
+  { label: 'Bonuses', href: '/account/bonuses', icon: <AwardIcon /> },
+  { label: 'Agreements', href: '/account/agreements', icon: <FileIcon /> },
+  { label: 'Studio Policies', href: '/account/policies', icon: <ShieldIcon /> },
 ]
 
-export default function AccountLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function AccountLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const [checking, setChecking] = useState(true)
 
@@ -46,15 +50,18 @@ export default function AccountLayout({
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    // Full-height shell: navbar on top, sidebar pinned left, content scrolls on the right
+    <div className="h-screen flex flex-col bg-background text-foreground overflow-hidden">
       <Navbar />
 
-      <div className="flex-1 w-full max-w-6xl mx-auto px-6 py-10 flex flex-col gap-6 md:flex-row">
+      <div className="flex flex-1 min-h-0">
         <SectionSidebar title="Account" items={accountTabs} collapsible={false} />
-        <main className="flex-1 min-w-0">{children}</main>
-      </div>
 
-      <Footer />
+        <div className="flex-1 min-w-0 overflow-y-auto flex flex-col">
+          <main className="flex-1 w-full px-4 py-6 md:px-8 md:py-8">{children}</main>
+          <Footer />
+        </div>
+      </div>
     </div>
   )
 }
