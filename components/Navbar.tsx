@@ -161,11 +161,8 @@ export default function Navbar() {
             <button className="hover:text-neutral-300">Account</button>
             {openDropdown === 'account' && (
               <div className="absolute top-full right-0 bg-elevated rounded shadow-lg py-2 w-40 z-50">
-                <Link href="/dashboard/account" className="block px-4 py-2 hover:bg-neutral-700">
+                <Link href="/account" className="block px-4 py-2 hover:bg-neutral-700">
                   Account
-                </Link>
-                <Link href="/dashboard/preferences" className="block px-4 py-2 hover:bg-neutral-700">
-                  Preferences
                 </Link>
               </div>
             )}
@@ -219,8 +216,7 @@ export default function Navbar() {
             <a href="https://drive.google.com" target="_blank" rel="noopener noreferrer" className="pl-2">Google Drive</a>
 
             <p className="text-text-secondary text-xs uppercase pt-2">Account</p>
-            <Link href="/dashboard/account" className="pl-2">Account</Link>
-            <Link href="/dashboard/preferences" className="pl-2">Preferences</Link>
+            <Link href="/account" className="pl-2">Account</Link>
 
             <p className="text-sm font-semibold pt-2 border-t border-neutral-700">
               {profile?.full_name}
