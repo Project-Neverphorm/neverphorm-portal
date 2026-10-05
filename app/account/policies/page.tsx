@@ -15,14 +15,14 @@ const totalArticles = numbered.reduce((n, part) => n + part.articles.length, 0)
 
 export default function PoliciesPage() {
   return (
-    <div className="flex gap-10">
-      {/* Handbook content */}
-      <article className="flex-1 min-w-0 max-w-3xl">
+    <div className="flex gap-8">
+      {/* Handbook content: fills all available width */}
+      <article className="flex-1 min-w-0">
         {/* Cover */}
         <header className="mb-10 pb-8 border-b border-border-default">
           <p className="text-xs uppercase tracking-wide text-brand mb-2">Project Neverphorm LLC</p>
           <h1 className="text-3xl font-bold mb-3">Studio Handbook</h1>
-          <p className="text-text-secondary text-sm mb-5">
+          <p className="text-text-secondary text-sm mb-5 max-w-4xl">
             Every policy, expectation, and standard at the studio, all in one place. It&apos;s a long read
             on purpose. Read it fully once, then come back whenever you have a question.
           </p>
@@ -46,42 +46,48 @@ export default function PoliciesPage() {
               {part.title}
             </h2>
 
-            {part.articles.map((article) => (
-              <div key={article.id} id={article.id} className="mb-10 scroll-mt-6">
-                <p className="text-xs text-text-secondary mb-1">Article {article.number}</p>
-                <h3 className="text-xl font-bold mb-4">{article.title}</h3>
+            <div className="space-y-6">
+              {part.articles.map((article) => (
+                <div
+                  key={article.id}
+                  id={article.id}
+                  className="scroll-mt-6 bg-elevated border border-border-default rounded-lg p-6"
+                >
+                  <p className="text-xs text-text-secondary mb-1">Article {article.number}</p>
+                  <h3 className="text-xl font-bold mb-4">{article.title}</h3>
 
-                <div className="space-y-5">
-                  {article.sections.map((section, i) => (
-                    <div key={i}>
-                      {section.heading && (
-                        <h4 className="text-sm font-semibold mb-2">{section.heading}</h4>
-                      )}
-                      {section.body?.map((paragraph, j) => (
-                        <p key={j} className="text-sm leading-relaxed text-text-secondary mb-3 last:mb-0">
-                          {paragraph}
-                        </p>
-                      ))}
-                      {section.bullets && (
-                        <ul className={`space-y-2 ${section.body ? 'mt-3' : ''}`}>
-                          {section.bullets.map((bullet, j) => (
-                            <li key={j} className="flex gap-2 text-sm leading-relaxed text-text-secondary">
-                              <span className="text-brand shrink-0">•</span>
-                              <span>{bullet}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  ))}
+                  <div className="space-y-5">
+                    {article.sections.map((section, i) => (
+                      <div key={i}>
+                        {section.heading && (
+                          <h4 className="text-sm font-semibold mb-2">{section.heading}</h4>
+                        )}
+                        {section.body?.map((paragraph, j) => (
+                          <p key={j} className="text-sm leading-relaxed text-text-secondary mb-3 last:mb-0">
+                            {paragraph}
+                          </p>
+                        ))}
+                        {section.bullets && (
+                          <ul className={`grid gap-x-8 gap-y-2 lg:grid-cols-2 ${section.body ? 'mt-3' : ''}`}>
+                            {section.bullets.map((bullet, j) => (
+                              <li key={j} className="flex gap-2 text-sm leading-relaxed text-text-secondary">
+                                <span className="text-brand shrink-0">•</span>
+                                <span>{bullet}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </section>
         ))}
 
         {/* Sign-off */}
-        <div className="space-y-4 pt-8 border-t border-border-default">
+        <div className="grid gap-4 lg:grid-cols-2 pt-8 border-t border-border-default">
           <Card title="Acknowledgement">
             <p className="text-text-secondary mb-4">
               When the handbook is updated, everyone re-acknowledges the new version so we all stay on the
@@ -94,7 +100,7 @@ export default function PoliciesPage() {
             <Table headers={['Version', 'Date', 'What changed']} rows={changelog} />
           </Card>
 
-          <p className="text-xs text-text-secondary">
+          <p className="lg:col-span-2 text-xs text-text-secondary">
             This handbook is a guide to how the studio works and is not a contract. Your signed agreement
             controls if anything here conflicts with it. Policies will be reviewed by a lawyer before the
             studio hires salaried employees.
@@ -102,9 +108,9 @@ export default function PoliciesPage() {
         </div>
       </article>
 
-      {/* Desktop table of contents, sticks while you scroll */}
-      <aside className="hidden xl:block w-64 shrink-0">
-        <div className="sticky top-0 max-h-[calc(100vh-10rem)] overflow-y-auto bg-elevated border border-border-default rounded-lg p-4">
+      {/* Desktop table of contents, pinned to the right edge while you scroll */}
+      <aside className="hidden xl:block w-72 shrink-0">
+        <div className="sticky top-0 max-h-[calc(100vh-10rem)] overflow-y-auto [color-scheme:dark] bg-elevated border border-border-default rounded-lg p-4">
           <p className="text-xs uppercase tracking-wide text-text-secondary mb-2">Contents</p>
           <TableOfContents />
         </div>
