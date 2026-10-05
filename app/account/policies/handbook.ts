@@ -122,7 +122,7 @@ export const handbook: Part[] = [
           {
             heading: 'Accommodations',
             body: [
-              'If you need an accommodation because of a disability, religious practice, or anything else, talk to Cody or Business Operations. We will work with you to find something that works, and the conversation stays private.',
+              'If you need an accommodation because of a disability, religious practice, or anything else, talk to Cody (Owner) or Matt (Business Operations). We will work with you to find something that works, and the conversation stays private.',
             ],
           },
         ],
@@ -224,7 +224,7 @@ export const handbook: Part[] = [
         sections: [
           {
             body: [
-              'We are a remote-first creative studio, so there is no formal dress code for day-to-day work. Wear whatever helps you do your best work. That said, a few situations call for some basic standards.',
+              'We are a remote-first creative studio, so there is no formal dress code for day-to-day work. Wear whatever helps you do your best work. That said, a few situations call for some basic standards. Zero tolerance for wearing a blue vest (inside joke). ',
             ],
           },
           {
