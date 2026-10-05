@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import type { User } from '@supabase/supabase-js'
 import { Badge, Card, Field, ProgressBar, StatTile, Table, TabHeader } from '@/components/account/AccountUI'
 import { AwardIcon, CheckIcon, LinkIcon, StarIcon, ToolIcon } from '@/components/account/icons'
+import { getLevelInfo } from '@/lib/levels'
 
 type Profile = {
   id: string
@@ -30,16 +31,14 @@ const placeholder = {
     { label: 'ArtStation', value: 'artstation.com/username' },
     { label: 'Discord', value: 'username' },
   ],
-  level: 3,
-  xp: 640,
-  xpNext: 1000,
-  tasksDone: 24,
 }
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [totalXP, setTotalXP] = useState(0)
+  const [tasksDone, setTasksDone] = useState(0)
 
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -58,6 +57,21 @@ export default function ProfilePage() {
         .eq('id', user.id)
         .single()
       setProfile(profile)
+
+      // Real XP from the permanent ledger (same source as the dashboard).
+      // Each xp_log row = one completed task, and it survives archive cleanup.
+      const { data: xpRows, error: xpError } = await supabase
+        .from('xp_log')
+        .select('xp')
+        .eq('assigned_to_id', user.id)
+
+      if (xpError) {
+        console.error('Failed to load XP log:', xpError)
+      } else if (xpRows) {
+        setTotalXP(xpRows.reduce((sum: number, row: { xp: number }) => sum + row.xp, 0))
+        setTasksDone(xpRows.length)
+      }
+
       setLoading(false)
     }
     loadProfile()
@@ -94,6 +108,7 @@ export default function ProfilePage() {
     return <p className="text-text-secondary text-sm">Loading...</p>
   }
 
+  const levelInfo = getLevelInfo(totalXP)
   const name = profile?.full_name ?? 'Team member'
   const initials = (profile?.full_name ?? user?.email ?? '?')
     .split(' ')
@@ -160,9 +175,9 @@ export default function ProfilePage() {
 
       {/* Row 2: quick stats */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        <StatTile label="Level" value={placeholder.level} hint="Studio progression" icon={<StarIcon />} />
-        <StatTile label="Total XP" value={placeholder.xp} hint={`${placeholder.xpNext - placeholder.xp} XP to next level`} icon={<AwardIcon />} />
-        <StatTile label="Tasks done" value={placeholder.tasksDone} hint="All time" icon={<CheckIcon />} />
+        <StatTile label="Level" value={levelInfo.level} hint="Personal level" icon={<StarIcon />} />
+        <StatTile label="Total XP" value={totalXP} hint={`${levelInfo.needed - levelInfo.progress} XP to next level`} icon={<AwardIcon />} />
+        <StatTile label="Tasks done" value={tasksDone} hint="All time" icon={<CheckIcon />} />
         <StatTile label="Titles credited" value={1} hint="Shipped or in progress" icon={<ToolIcon />} />
       </div>
 
@@ -170,14 +185,15 @@ export default function ProfilePage() {
       <div className="grid gap-4 lg:grid-cols-3">
         <Card title="Level progress">
           <div className="flex items-end justify-between mb-2">
-            <p className="text-3xl font-bold">Lv {placeholder.level}</p>
+            <p className="text-3xl font-bold">Lvl {levelInfo.level}</p>
             <p className="text-text-secondary text-xs">
-              {placeholder.xp} / {placeholder.xpNext} XP
+              {levelInfo.progress} / {levelInfo.needed} XP
             </p>
           </div>
-          <ProgressBar value={placeholder.xp} max={placeholder.xpNext} />
+          <ProgressBar value={levelInfo.progress} max={levelInfo.needed} />
           <p className="text-text-secondary text-xs mt-3">
-            XP comes from completed tasks. Light tasks earn 25 XP, heavy tasks earn up to 45 XP.
+            XP comes from completed tasks (25 to 45 XP each). Level 1 takes 300 XP, and each level
+            after needs 150 more than the last.
           </p>
         </Card>
 
