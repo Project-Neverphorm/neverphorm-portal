@@ -170,7 +170,7 @@ export const handbook: Part[] = [
             heading: 'How to report',
             bullets: [
               'Talk to Cody directly, in person, by call, or by private message.',
-              'If the concern involves Cody, talk to Business Operations instead.',
+              'If the concern involves Cody, talk to Matt (Business Operations) instead.',
               'You can report something that happened to you or something you saw happen to someone else.',
               'You do not need proof to report. Just tell us what happened.',
             ],
@@ -230,8 +230,8 @@ export const handbook: Part[] = [
           {
             heading: 'Video calls and recordings',
             bullets: [
-              'Dress the way you would for a casual job: clean, appropriate clothing.',
-              'No clothing with offensive, hateful, sexual, or violent graphics or text.',
+              'Dress code is very lenient here, wear what makes you feel most comfortable.',
+              'If by chance we have a meeting on call, there is no need or requirement to wear anything fancy.',
               'Be aware of your background. Nothing inappropriate or confidential should be visible on camera.',
               'Cameras are encouraged for team meetings but not required.',
             ],
@@ -239,9 +239,8 @@ export const handbook: Part[] = [
           {
             heading: 'Public events, conventions, and press',
             bullets: [
-              'Business casual or studio merch is preferred when representing Project Neverphorm.',
+              'Business/formal casual or studio merch like a lanyard for example, is preferred when representing Project Neverphorm.',
               'Studio shirts or branded merch may be provided for events.',
-              'Follow any specific dress requirements set by the event organizer.',
             ],
           },
           {
@@ -264,7 +263,7 @@ export const handbook: Part[] = [
           {
             heading: 'Shift cap',
             body: [
-              'No studio work session should run longer than 7.5 hours in a single day. This cap is a founding rule. It exists before the studio has income on purpose, so it never becomes something we promise later and forget.',
+              'No studio work session should run longer than 7.5 hours in a single day (when we get to the point of full time that is). This cap is a founding rule. It exists before the studio has income on purpose, so it never becomes something we promise later and forget.',
             ],
           },
           {
@@ -276,6 +275,14 @@ export const handbook: Part[] = [
               'If you notice yourself or a teammate burning out, say something.',
             ],
           },
+          {
+            heading: 'Breaks & lunch',
+            bullets: [
+                'Take a lunch break of at least 30 minutes, up to an hour, whenever it fits your day.',
+                'If you work 5 hours or more in a session, take your break before the 5-hour mark.',
+                'Breaks are never counted against you. Step away, eat, and recharge.',
+            ],
+            },
           {
             heading: 'Flexible schedule',
             body: [
@@ -299,19 +306,19 @@ export const handbook: Part[] = [
           {
             heading: 'Personal and family time',
             body: [
-              'Illness, family emergencies, mental health days, school, and life events always come first. Take the time you need, no questions asked.',
+              'This is what we as a studio value the most hear and take seriously. Illness, family emergencies, mental health days, school, and life events always come first. Take the time you need, no questions asked. As long as it\'s all being said with honesty and integrity.',
             ],
           },
           {
             heading: 'Studio holidays',
             body: [
-              'The studio does not schedule meetings or deadlines on major holidays, including New Year\'s Day, Memorial Day, Independence Day, Labor Day, Thanksgiving, and the week between Christmas and New Year\'s. Religious and cultural holidays not listed here are respected too. Just let the team know.',
+              'What holidays? Most of the holidays will be time off automatically. This is based off the owner\'s own experience from warehouse and factory work. No work will be done on most and even more important holidays. A mandatory 2 weeks off at the end of (every) year starting week of Christmas and do not start work again until after New Years.',
             ],
           },
           {
             heading: 'Paid time off (salaried roles)',
             body: [
-              'Once the studio transitions to salaried roles, paid time off, sick leave, and holiday pay will be defined in writing and added to this handbook before the switch happens.',
+              'Once the studio transitions to salaried roles, paid time off, sick leave, and holiday pay will be defined in writing and added to this handbook before or as the switch happens.',
             ],
           },
         ],
@@ -333,10 +340,10 @@ export const handbook: Part[] = [
           {
             heading: 'Expectations',
             bullets: [
-              'Keep your task status updated in the portal.',
-              'Watch the task brief video before starting a task.',
+              'Keep your task status updated in the portal. This means making sure you\'ve marked a tasked as done. ',
+              'Watch the task brief video before starting a task. Not needed, rather prefered or overall at least handy.',
               'Flag blockers early. Being stuck is normal; staying stuck in silence is not.',
-              'Reply to direct questions when you can. There is no required response time, but a quick "I\'ll look tonight" helps.',
+              'Reply to direct questions when you can. There is no required response time, but a quick "I\'ll look tonight" or "I\'ll check tomorrow night" helps.',
               'Disagree openly and respectfully. Once a decision is made, commit to it.',
             ],
           },
@@ -348,10 +355,10 @@ export const handbook: Part[] = [
         sections: [
           {
             bullets: [
-              'Meetings are scheduled ahead of time and kept as short as possible.',
-              'Every meeting should have a purpose. If it can be a message, it should be a message.',
-              'If you cannot make it, let the team know. Important decisions will be shared afterward.',
-              'Playtests are part of the job for everyone. Honest, specific feedback is the most helpful thing you can give.',
+                'Meetings are scheduled ahead of time and kept as short as possible. This will depend on topic(s).',
+                'Every meeting should have a purpose. If it can be a message, it will be a message. Nobody\'s time is wasted here.',
+                'If you cannot make it, let the team know. Important decisions will be shared afterward.',
+                'Playtests are part of the job for everyone. Honest, specific feedback is the most helpful thing you can give.',
             ],
           },
         ],
@@ -367,8 +374,8 @@ export const handbook: Part[] = [
           },
           {
             bullets: [
-              'Do not work on confidential studio material in public places where screens can be seen.',
-              'Use a secure, password-protected internet connection. Avoid public Wi-Fi for studio accounts.',
+              'Public places like a library, cafe, a park, or basically anywhere that\'s comfortable is fine. As long as you don\'t share your screen.',
+              'Use a secure, password-protected internet connection. Avoid public Wi-Fi for studio accounts. Your personal phones hotspot will do the trick here.',
               'Lock your computer when you step away if others share the space.',
             ],
           },
@@ -385,7 +392,7 @@ export const handbook: Part[] = [
         sections: [
           {
             body: [
-              'You will see things before the public does: unannounced games, story details, mechanics, art, sales numbers, business plans, and team information. All of it is confidential unless the studio has publicly announced it.',
+              'You will see things before the public does: unannounced games, story details, mechanics, art, sales numbers, business plans, and team information. Besides team information, most of everything will be transparent and opened with the team from/by the owner. We work together, we collaborate together, most of the important pieces of information the team will know. All of it is confidential unless the studio has publicly announced it.',
             ],
           },
           {
@@ -438,7 +445,7 @@ export const handbook: Part[] = [
             bullets: [
               'Use studio accounts only for studio work.',
               'Never share your login with anyone, including teammates. Ask for your own access instead.',
-              'Turn on two-factor authentication (preferably an authenticator app) on every account that supports it.',
+              'Turn on two-factor authentication (preferably an authenticator app) on every account that supports it. We do not have 2FA yet, we will figure that one out as time goes.',
               'Never share verification codes. Nobody legitimate, including the studio, will ever ask you for one.',
               'Report anything suspicious right away: unexpected login codes, phishing emails, or strange account activity.',
               'Do not install pirated software or untrusted plugins on machines used for studio work.',
@@ -464,7 +471,7 @@ export const handbook: Part[] = [
           },
           {
             bullets: [
-              'Studio-provided equipment or licenses remain studio property and must be returned when you leave.',
+              'Studio-provided equipment or licenses remain studio property and must be returned when you leave. This does not partain the studio\'s current active status.',
               'Only use legally licensed software and assets in studio projects.',
               'Every third-party asset used in a game must have its license recorded so we can credit and stay compliant.',
             ],
@@ -483,7 +490,7 @@ export const handbook: Part[] = [
           {
             bullets: [
               'Never paste confidential studio material into an AI tool that may train on or store it, unless that tool has been approved.',
-              'Any AI-generated content that would ship in a game (art, audio, writing, voices) must be approved by Cody first and disclosed where storefronts require it.',
+              'Any AI-generated content that would ship in a game (art, audio, writing, voices) must be approved by Cody first and disclosed where storefronts require it. If possible... We do our best to avoid this.',
               'You are responsible for reviewing and understanding anything an AI tool helps you create.',
             ],
           },
@@ -673,6 +680,12 @@ export const handbook: Part[] = [
               'Collaborators on revenue share are responsible for their own taxes and will receive a 1099 form each year. Once on salary, taxes are withheld through payroll and you will receive a W-2.',
             ],
           },
+          {
+            heading: 'More information',
+            body: [
+              'All pay whether it is revenue share or salary can be discussed amongst each other. We will not be uptight about this. Even though, Cody, will be open about everything when time comes. As far as eventual salaries/wages go? We want to aim for enough income eventually where your role will be set to the competitive rate across the industry standard pays.',
+            ],
+          },
         ],
       },
       {
@@ -712,7 +725,7 @@ export const handbook: Part[] = [
         sections: [
           {
             bullets: [
-              'Get approval from Cody or Business Operations before spending money on behalf of the studio.',
+              'Get approval from Cody or Matt before spending money on behalf of the studio.',
               'Keep receipts for everything and submit them within 30 days.',
               'Approved expenses are reimbursed in the next payout cycle.',
               'Personal expenses are never charged to studio accounts.',
@@ -734,7 +747,7 @@ export const handbook: Part[] = [
               'Growth is based on consistency, quality, and helping the team, not hours worked.',
               'You can request a role change or express interest in a lead role at any time.',
               'Required engine training pathways must be completed for engine-based roles.',
-              'Optional certifications are encouraged for your own growth but are not paid for by the studio.',
+              'Optional certifications are encouraged for your own growth but are not paid for by the studio. The studio will pay for the said optional certifiications once there\'s enough to do so.',
             ],
           },
         ],
@@ -746,7 +759,7 @@ export const handbook: Part[] = [
           {
             bullets: [
               'Everyone who contributes to a game is credited in that game.',
-              'Team members who stay with the studio for 6 months get their own dev artifact added into a shipped game.',
+              'Credit scenes are not the only thing crediting each person. Each person picks and chooses a sentimental or "for fun" item to be modeled and placed in each game representing that persons footprint in the game.',
               'Every game uses the studio\'s Milestones achievement system, and team members are recognized in its design where appropriate.',
               'Wins get shared with the whole team, publicly when possible.',
             ],
@@ -804,7 +817,13 @@ export const handbook: Part[] = [
               'Try talking it out directly and respectfully first.',
               'If that does not work, bring it to Cody (or Business Operations if it involves Cody).',
               'Creative disagreements are healthy. Final creative calls are made by the Creative Director, and the reasoning will be explained.',
-              'Never take a disagreement public.',
+              'Never take a disagreement public or to heart. Your ideas, concepts, and or visions still matter as long as it fits somewhere, anywhere aligned with the core vision to the game.',
+            ],
+          },
+          {
+            heading: 'More on the creative collaboration',
+            body: [
+                'While your ideas, concepts, and visions matter, they at least need to fit the core vision and direction of whichever game being worked on. Keep in mind, if one idea/concept doesn\'t pass on the current game, it could pass for the next 1 or 3. Generally, we aim for almost any idea/concept to fit or tie into each title as creatively as we can, or see\'s fit.',
             ],
           },
         ],
@@ -821,6 +840,7 @@ export const handbook: Part[] = [
           {
             bullets: [
               'Take regular breaks, especially during long sessions.',
+              'No dedicated 15 minute or 20 minute breaks. Eat and or drink while you work, take a mental 20 minutes if needed. ',
               'Set up a comfortable workspace: good chair, screen at eye level, and decent lighting.',
               'Rest your eyes using the 20-20-20 rule: every 20 minutes, look at something 20 feet away for 20 seconds.',
               'If studio work is stressing you out, say so. Workload can always be adjusted.',
