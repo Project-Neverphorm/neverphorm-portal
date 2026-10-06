@@ -49,19 +49,20 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
     )
   }
 
-  return (
-    // Full-height shell: navbar on top, sidebar pinned left, content scrolls on the right
+    return (
+    // Full-height shell: navbar on top, sidebar + scrolling content in the middle, footer across the bottom
     <div className="h-screen flex flex-col bg-background text-foreground overflow-hidden">
       <Navbar />
 
       <div className="flex flex-1 min-h-0">
         <SectionSidebar title="Account" items={accountTabs} collapsible={false} />
 
-        <div className="flex-1 min-w-0 overflow-y-auto flex flex-col">
-          <main className="flex-1 w-full px-4 py-6 md:px-8 md:py-8">{children}</main>
-          <Footer />
-        </div>
+        <main className="flex-1 min-w-0 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
+          {children}
+        </main>
       </div>
+
+      <Footer />
     </div>
   )
 }
