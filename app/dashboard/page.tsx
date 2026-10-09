@@ -86,7 +86,7 @@ export default function DashboardPage() {
     'Accounting & bookkeeping',
     'Legal & business affairs support',
   ],
-  'Marketing Lead': [
+  'Marketing & Community': [
     'Social media & community strategy',
     'Marketing & launch coordination (release timing, store pages, PR pushes)',
     'Content calendar & promotional campaigns',
