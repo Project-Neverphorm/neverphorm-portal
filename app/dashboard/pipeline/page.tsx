@@ -27,12 +27,15 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
+type Scope = 'Tiny' | 'Small' | 'Medium' | 'Big' | 'Massive'
+
 type Game = {
   id: string
   order_index: number
   in_lineup: boolean
   title: string
   status: 'Released' | 'In Development' | 'Planned' | 'Concept' | 'Paused'
+  scope: Scope | null
   blurb: string | null
   description: string | null
   engine: string | null
@@ -43,6 +46,7 @@ type Game = {
 type FormState = {
   title: string
   status: Game['status']
+  scope: Scope | ''
   blurb: string
   description: string
   engine: string
@@ -62,9 +66,20 @@ const STATUS_STYLES: Record<Game['status'], string> = {
 
 const STATUSES: Game['status'][] = ['Concept', 'Planned', 'In Development', 'Released', 'Paused']
 
+const SCOPES: Scope[] = ['Tiny', 'Small', 'Medium', 'Big', 'Massive']
+
+const SCOPE_STYLES: Record<Scope, string> = {
+  'Tiny': 'border-neutral-600 text-neutral-400',
+  'Small': 'border-sky-500/50 text-sky-300',
+  'Medium': 'border-amber-500/50 text-amber-300',
+  'Big': 'border-orange-500/50 text-orange-300',
+  'Massive': 'border-red-500/50 text-red-300',
+}
+
 const emptyForm: FormState = {
   title: '',
   status: 'Planned',
+  scope: '',
   blurb: '',
   description: '',
   engine: '',
@@ -103,15 +118,27 @@ function GameForm({
         autoFocus={autoFocus}
         className={inputClass}
       />
-      <select
-        value={form.status}
-        onChange={(e) => setForm({ ...form, status: e.target.value as Game['status'] })}
-        className={inputClass}
-      >
-        {STATUSES.map((s) => (
-          <option key={s} value={s}>{s}</option>
-        ))}
-      </select>
+      <div className="grid grid-cols-2 gap-3">
+        <select
+          value={form.status}
+          onChange={(e) => setForm({ ...form, status: e.target.value as Game['status'] })}
+          className={inputClass}
+        >
+          {STATUSES.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+        <select
+          value={form.scope}
+          onChange={(e) => setForm({ ...form, scope: e.target.value as Scope | '' })}
+          className={inputClass}
+        >
+          <option value="">Scope...</option>
+          {SCOPES.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+      </div>
       <input
         value={form.blurb}
         onChange={(e) => setForm({ ...form, blurb: e.target.value })}
@@ -186,9 +213,16 @@ function GameView({
           )}
           <h3 className="font-semibold text-lg truncate">{game.title}</h3>
         </div>
-        <span className={`text-xs rounded-full px-2 py-1 shrink-0 ${STATUS_STYLES[game.status]}`}>
-          {game.status}
-        </span>
+        <div className="flex items-center gap-1.5 shrink-0">
+          {game.scope && (
+            <span className={`text-xs rounded-full px-2 py-0.5 border ${SCOPE_STYLES[game.scope]}`}>
+              {game.scope}
+            </span>
+          )}
+          <span className={`text-xs rounded-full px-2 py-1 ${STATUS_STYLES[game.status]}`}>
+            {game.status}
+          </span>
+        </div>
       </div>
       {game.blurb && <p className="text-brand text-sm mb-2">{game.blurb}</p>}
       {game.description && <p className="text-sm text-neutral-300 mb-3">{game.description}</p>}
@@ -408,6 +442,7 @@ export default function PipelinePage() {
     setForm({
       title: game.title,
       status: game.status,
+      scope: game.scope ?? '',
       blurb: game.blurb ?? '',
       description: game.description ?? '',
       engine: game.engine ?? '',
@@ -434,6 +469,7 @@ export default function PipelinePage() {
       .update({
         title: form.title,
         status: form.status,
+        scope: form.scope || null,
         blurb: form.blurb,
         description: form.description,
         engine: form.engine,
@@ -457,6 +493,7 @@ export default function PipelinePage() {
     const { error } = await supabase.from('pipeline_games').insert({
       title: form.title.trim(),
       status: form.status,
+      scope: form.scope || null,
       blurb: form.blurb,
       description: form.description,
       engine: form.engine,
