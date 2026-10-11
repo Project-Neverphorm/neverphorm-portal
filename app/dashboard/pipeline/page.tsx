@@ -550,11 +550,11 @@ export default function PipelinePage() {
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Navbar />
 
-      <main className="flex-1 w-full max-w-5xl mx-auto px-6 py-10">
+      <main className="flex-1 w-full px-6 lg:px-10 2xl:px-16 py-10">
         <div className="flex items-start justify-between gap-4 mb-2">
           <div>
             <h1 className="text-2xl font-bold">Pipeline</h1>
-            <p className="text-text-secondary text-sm mt-1">
+            <p className="text-text-secondary text-sm mt-1 max-w-3xl">
               The full catalog. This is the long game. The first few are in order, the rest are not in order.
               Some games did not make this list while realistically weighing out survivability and weakness of idea/concept.
             </p>
@@ -593,7 +593,7 @@ export default function PipelinePage() {
           onDragCancel={() => setActiveId(null)}
         >
           <SortableContext items={games.map((g) => g.id)} strategy={rectSortingStrategy}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 mt-4">
               {games.map((game, index) => (
                 <SortableGameCard
                   key={game.id}
