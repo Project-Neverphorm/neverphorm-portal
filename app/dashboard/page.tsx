@@ -456,6 +456,13 @@ export default function DashboardPage() {
                   </div>
                 ))}
               </div>
+
+              <div className="mt-6 border-l-2 border-brand bg-elevated/40 rounded-r px-4 py-3">
+                  <p className="text-xs uppercase tracking-wide text-brand mb-1">Before you check it off</p>
+                  <p className="text-sm text-neutral-300">
+                    Only check off a task once it&apos;s actually done. Checking tasks off is how everyone stays up to date visually with where the studio is at, so please keep it accurate. Thank you and good day!
+                  </p>
+              </div>
             </div>
 
             <div>
