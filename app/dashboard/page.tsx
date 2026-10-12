@@ -9,6 +9,8 @@ import Navbar from '@/components/Navbar'
 import type { User } from '@supabase/supabase-js'
 import { getLevelInfo, getStudioLevelInfo } from '@/lib/levels'
 import Footer from '@/components/Footer'
+import Link from 'next/link'
+import { UPDATES } from '@/lib/updates'
 
 type Task = {
   id: string
@@ -514,7 +516,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div>
+                        <div>
               <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">Responsibilities</h2>
               <div className="space-y-2">
                 {(RESPONSIBILITIES[myProfile?.title ?? ''] ?? []).map((item) => (
@@ -524,6 +526,41 @@ export default function DashboardPage() {
                   </p>
                 ))}
               </div>
+
+              {UPDATES.length > 0 && (() => {
+                const latest = UPDATES[0]
+                const postedAt = new Date(`${latest.date}T00:00:00`)
+                const isNew = Date.now() - postedAt.getTime() < 7 * 24 * 60 * 60 * 1000
+
+                return (
+                  <div className="mt-10 border border-border-default rounded-lg p-5 bg-elevated/40">
+                    <div className="flex items-center justify-between mb-3">
+                      <h2 className="text-sm uppercase tracking-wide text-text-secondary">What&apos;s New</h2>
+                      {isNew && (
+                        <span className="text-[10px] font-bold uppercase tracking-wide bg-brand text-black rounded px-1.5 py-0.5">
+                          New
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-text-secondary mb-1">
+                      {postedAt.toLocaleDateString('en-US', {
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </p>
+                    <p className="font-semibold mb-2">{latest.title}</p>
+                    <ul className="list-disc pl-5 space-y-1 text-sm text-text-secondary mb-4">
+                      {latest.changes.map((change) => (
+                        <li key={change}>{change}</li>
+                      ))}
+                    </ul>
+                    <Link href="/dashboard/updates" className="text-sm text-brand hover:underline">
+                      See all updates →
+                    </Link>
+                  </div>
+                )
+              })()}
             </div>
 
             {isManager && (
