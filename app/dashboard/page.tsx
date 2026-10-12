@@ -61,50 +61,51 @@ export default function DashboardPage() {
   const [description, setDescription] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null)
+  const [restoringId, setRestoringId] = useState<string | null>(null)
 
   const [newTaskName, setNewTaskName] = useState('')
   const [newTaskMemberId, setNewTaskMemberId] = useState('')
   const [newTaskXP, setNewTaskXP] = useState(XP_TIERS[0].value)
 
   const RESPONSIBILITIES: Record<string, string[]> = {
-  'Studio Head & Creative Director': [
-    'Creative direction across all titles',
-    'Gameplay programming & technical architecture',
-    'Business development & legal (DUNS, developer accounts, LLC)',
-    '3D modeling, texturing and asset creation',
-    'Studio operations & infrastructure',
-    'Finance & accounting',
-    'Hiring, recruiting, team building',
-    'Marketing & community strategy',
-    'Voice acting & audio direction',
-    'Website & internal tools development',
-  ],
-  'Business Operations': [
-    'HR — onboarding, contracts, and team admin',
-    'Publisher relations & outreach',
-    'Marketing & launch coordination (release timing, store pages, PR pushes)',
-    'Accounting & bookkeeping',
-    'Legal & business affairs support',
-  ],
-  'Marketing & Community': [
-    'Social media & community strategy',
-    'Marketing & launch coordination (release timing, store pages, PR pushes)',
-    'Content calendar & promotional campaigns',
-    'Press outreach & partnerships',
-  ],
-  'Graphic Designer': [
-    'Achievement/trophy design & implementation',
-    'QA testing & bug reporting',
-    'Marketing assets (social graphics, store page art)',
-    'Branding & visual identity support',
-  ],
-  'UI/UX Designer': [
-    '2D UI/UX design across all titles',
-    'Menu, HUD, and interface layout design',
-    'Icon design & visual asset creation',
-    'UI style guides & consistency across the catalog',
-  ],
-}
+    'Studio Head & Creative Director': [
+      'Creative direction across all titles',
+      'Gameplay programming & technical architecture',
+      'Business development & legal (DUNS, developer accounts, LLC)',
+      '3D modeling, texturing and asset creation',
+      'Studio operations & infrastructure',
+      'Finance & accounting',
+      'Hiring, recruiting, team building',
+      'Marketing & community strategy',
+      'Voice acting & audio direction',
+      'Website & internal tools development',
+    ],
+    'Business Operations': [
+      'HR — onboarding, contracts, and team admin',
+      'Publisher relations & outreach',
+      'Marketing & launch coordination (release timing, store pages, PR pushes)',
+      'Accounting & bookkeeping',
+      'Legal & business affairs support',
+    ],
+    'Marketing & Community': [
+      'Social media & community strategy',
+      'Marketing & launch coordination (release timing, store pages, PR pushes)',
+      'Content calendar & promotional campaigns',
+      'Press outreach & partnerships',
+    ],
+    'Graphic Designer': [
+      'Achievement/trophy design & implementation',
+      'QA testing & bug reporting',
+      'Marketing assets (social graphics, store page art)',
+      'Branding & visual identity support',
+    ],
+    'UI/UX Designer': [
+      '2D UI/UX design across all titles',
+      'Menu, HUD, and interface layout design',
+      'Icon design & visual asset creation',
+      'UI style guides & consistency across the catalog',
+    ],
+  }
 
   const loadTeam = async () => {
     const { data } = await supabase.from('profiles').select('id, full_name, title')
@@ -170,31 +171,31 @@ export default function DashboardPage() {
     archivedTasks.filter((t) => t.assigned_to_id === memberId && t.status === 'completed').length
 
   const completeTask = async (id: string) => {
-  const task = tasks.find((t) => t.id === id)
-  if (!task) return
+    const task = tasks.find((t) => t.id === id)
+    if (!task) return
 
-  const { error: updateError } = await supabase
-    .from('tasks')
-    .update({ status: 'completed', archived_at: new Date().toISOString() })
-    .eq('id', id)
+    const { error: updateError } = await supabase
+      .from('tasks')
+      .update({ status: 'completed', archived_at: new Date().toISOString() })
+      .eq('id', id)
 
-  if (updateError) {
-    alert(`Failed to complete task: ${updateError.message}`)
-    return
+    if (updateError) {
+      alert(`Failed to complete task: ${updateError.message}`)
+      return
+    }
+
+    const { error: xpError } = await supabase.from('xp_log').insert({
+      task_name: task.name,
+      xp: task.xp,
+      assigned_to_id: task.assigned_to_id,
+    })
+
+    if (xpError) {
+      alert(`Task completed, but XP failed to log: ${xpError.message}`)
+    }
+
+    loadTasks()
   }
-
-  const { error: xpError } = await supabase.from('xp_log').insert({
-    task_name: task.name,
-    xp: task.xp,
-    assigned_to_id: task.assigned_to_id,
-  })
-
-  if (xpError) {
-    alert(`Task completed, but XP failed to log: ${xpError.message}`)
-  }
-
-  loadTasks()
-}
 
   const deleteTask = async (id: string) => {
     const { error } = await supabase
@@ -206,6 +207,46 @@ export default function DashboardPage() {
       console.error('Failed to delete task:', error)
       return
     }
+    loadTasks()
+  }
+
+  const restoreTask = async (id: string, name: string) => {
+    const task = archivedTasks.find((t) => t.id === id)
+    if (!task) return
+
+    const wasCompleted = task.status === 'completed'
+    const message = wasCompleted
+      ? `Restore "${name}" to current tasks? This removes the ${task.xp} XP it awarded.`
+      : `Restore "${name}" to current tasks?`
+
+    if (!window.confirm(message)) return
+
+    setRestoringId(id)
+
+    const { error: updateError } = await supabase
+      .from('tasks')
+      .update({ status: 'active', archived_at: null })
+      .eq('id', id)
+
+    if (updateError) {
+      setRestoringId(null)
+      alert(`Failed to restore task: ${updateError.message}`)
+      return
+    }
+
+    if (wasCompleted) {
+      const { error: xpError } = await supabase.from('xp_log').insert({
+        task_name: `${task.name} (restored)`,
+        xp: -task.xp,
+        assigned_to_id: task.assigned_to_id,
+      })
+
+      if (xpError) {
+        alert(`Task restored, but XP rollback failed: ${xpError.message}`)
+      }
+    }
+
+    setRestoringId(null)
     loadTasks()
   }
 
@@ -331,7 +372,7 @@ export default function DashboardPage() {
             <div className="w-full h-2 bg-elevated rounded-full overflow-hidden">
               <div className="h-full bg-brand" style={{ width: `${Math.min(studioLevel.percent, 100)}%` }} />
             </div>
-              <p className="text-sm text-text-secondary mt-2">{studioLevel.progress} / {studioLevel.needed} XP</p>
+            <p className="text-sm text-text-secondary mt-2">{studioLevel.progress} / {studioLevel.needed} XP</p>
           </div>
 
           <div className="grid grid-cols-3 gap-10 border-b border-border-default pb-10 mb-10">
@@ -354,68 +395,68 @@ export default function DashboardPage() {
 
           <div className="grid grid-cols-4 gap-12">
 
-          <div className="col-span-2">
-            <div className="flex items-center justify-between mb-1">
-              <h2 className="text-sm uppercase tracking-wide text-text-secondary">My Current Tasks</h2>
-              <span className="text-xs text-text-secondary">🎯 Target: Ongoing</span>
-            </div>
-            <p className="text-2xl font-bold mb-1">Current Tasks</p>
-            <p className="text-brand text-sm mb-3">Assigned to {myProfile?.full_name}</p>
+            <div className="col-span-2">
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-sm uppercase tracking-wide text-text-secondary">My Current Tasks</h2>
+                <span className="text-xs text-text-secondary">🎯 Target: Ongoing</span>
+              </div>
+              <p className="text-2xl font-bold mb-1">Current Tasks</p>
+              <p className="text-brand text-sm mb-3">Assigned to {myProfile?.full_name}</p>
 
-            <div className="w-full h-2 bg-elevated rounded-full overflow-hidden mb-2">
-            <div className="h-full bg-brand" style={{ width: `${Math.min(myLevel.percent, 100)}%` }} />
-          </div>
-            <p className="text-sm text-text-secondary mb-6">Lvl {myLevel.level} · {myLevel.progress} / {myLevel.needed} XP · {myCompletedCount} tasks completed</p>
+              <div className="w-full h-2 bg-elevated rounded-full overflow-hidden mb-2">
+                <div className="h-full bg-brand" style={{ width: `${Math.min(myLevel.percent, 100)}%` }} />
+              </div>
+              <p className="text-sm text-text-secondary mb-6">Lvl {myLevel.level} · {myLevel.progress} / {myLevel.needed} XP · {myCompletedCount} tasks completed</p>
 
-            <div className="divide-y divide-neutral-800 max-h-80 overflow-y-auto pr-2">
-            {myTasks.length === 0 && (
-                <p className="text-sm text-text-secondary py-4">No active tasks. Log one from the admin panel.</p>
-              )}
-              {myTasks.map((task) => (
-                <div key={task.id} className="py-3 group">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => completeTask(task.id)}
-                        aria-label={`Mark "${task.name}" complete`}
-                        className="w-5 h-5 rounded border border-neutral-600 hover:border-brand flex items-center justify-center shrink-0 transition-colors"
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setExpandedTaskId(expandedTaskId === task.id ? null : task.id)
-                        }
-                        className="text-sm text-left hover:text-brand transition-colors"
-                      >
-                        {task.name}
-                        {task.description && (
-                          <span className="ml-2 text-xs text-text-secondary">
-                            {expandedTaskId === task.id ? '▴' : '▾'}
-                          </span>
-                        )}
-                      </button>
+              <div className="divide-y divide-neutral-800 max-h-80 overflow-y-auto pr-2">
+                {myTasks.length === 0 && (
+                  <p className="text-sm text-text-secondary py-4">No active tasks. Log one from the admin panel.</p>
+                )}
+                {myTasks.map((task) => (
+                  <div key={task.id} className="py-3 group">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => completeTask(task.id)}
+                          aria-label={`Mark "${task.name}" complete`}
+                          className="w-5 h-5 rounded border border-neutral-600 hover:border-brand flex items-center justify-center shrink-0 transition-colors"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setExpandedTaskId(expandedTaskId === task.id ? null : task.id)
+                          }
+                          className="text-sm text-left hover:text-brand transition-colors"
+                        >
+                          {task.name}
+                          {task.description && (
+                            <span className="ml-2 text-xs text-text-secondary">
+                              {expandedTaskId === task.id ? '▴' : '▾'}
+                            </span>
+                          )}
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm font-semibold text-brand">+{task.xp} XP</span>
+                        <button
+                          onClick={() => deleteTask(task.id)}
+                          aria-label={`Delete "${task.name}"`}
+                          className="text-neutral-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-sm font-semibold text-brand">+{task.xp} XP</span>
-                      <button
-                        onClick={() => deleteTask(task.id)}
-                        aria-label={`Delete "${task.name}"`}
-                        className="text-neutral-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        ✕
-                      </button>
-                    </div>
+
+                    {expandedTaskId === task.id && task.description && (
+                      <p className="text-sm text-text-secondary mt-2 pl-8 whitespace-pre-wrap">
+                        {task.description}
+                      </p>
+                    )}
                   </div>
-
-            {expandedTaskId === task.id && task.description && (
-              <p className="text-sm text-text-secondary mt-2 pl-8 whitespace-pre-wrap">
-                {task.description}
-              </p>
-              )}
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
 
             <div>
               <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">Responsibilities</h2>
@@ -431,32 +472,32 @@ export default function DashboardPage() {
 
             {isManager && (
               <div>
-              <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">Admin</h2>
-              <div className="flex flex-col gap-2 mb-8">
-                <button
-                  onClick={() => setShowLogTask(true)}
-                  className="text-sm text-left border border-neutral-700 hover:border-brand rounded px-4 py-2 transition-colors"
-                >
-                  + Log Task
-                </button>
-                <button
-                  onClick={() => setShowArchive(true)}
-                  className="text-sm text-left border border-neutral-700 hover:border-brand rounded px-4 py-2 transition-colors flex items-center justify-between"
-                >
-                  <span>Archived Tasks</span>
-                  <span className="text-text-secondary">{archivedTasks.length}</span>
-                </button>
-              </div>
+                <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">Admin</h2>
+                <div className="flex flex-col gap-2 mb-8">
+                  <button
+                    onClick={() => setShowLogTask(true)}
+                    className="text-sm text-left border border-neutral-700 hover:border-brand rounded px-4 py-2 transition-colors"
+                  >
+                    + Log Task
+                  </button>
+                  <button
+                    onClick={() => setShowArchive(true)}
+                    className="text-sm text-left border border-neutral-700 hover:border-brand rounded px-4 py-2 transition-colors flex items-center justify-between"
+                  >
+                    <span>Archived Tasks</span>
+                    <span className="text-text-secondary">{archivedTasks.length}</span>
+                  </button>
+                </div>
 
-              <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">Team Task Boxes</h2>
-              {teamMembers
-                .filter((member) => member.id !== user?.id)
-                .map((member) => {
-                  const memberXP = xpForMember(member.id)
-                  const memberCompleted = completedCountForMember(member.id)
-                  const memberLevel = getLevelInfo(memberXP)
+                <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">Team Task Boxes</h2>
+                {teamMembers
+                  .filter((member) => member.id !== user?.id)
+                  .map((member) => {
+                    const memberXP = xpForMember(member.id)
+                    const memberCompleted = completedCountForMember(member.id)
+                    const memberLevel = getLevelInfo(memberXP)
 
-                  return (
+                    return (
                       <button
                         key={member.id}
                         onClick={() => setViewingMember(member)}
@@ -469,16 +510,16 @@ export default function DashboardPage() {
                         <p className="text-brand text-sm">Current Tasks</p>
                         <p className="text-xs text-text-secondary mb-2">🎯 Target: Ongoing</p>
                         <div className="w-full h-2 bg-elevated rounded-full overflow-hidden mb-1">
-                        <div className="h-full bg-brand" style={{ width: `${Math.min(memberLevel.percent, 100)}%` }} />
+                          <div className="h-full bg-brand" style={{ width: `${Math.min(memberLevel.percent, 100)}%` }} />
                         </div>
                         <p className="text-xs text-text-secondary">{memberCompleted} tasks complete</p>
                       </button>
                     )
-                })}
-              {teamMembers.filter((m) => m.id !== user?.id).length === 0 && (
-                <p className="text-xs text-text-secondary">No other team members yet.</p>
-              )}
-            </div>
+                  })}
+                {teamMembers.filter((m) => m.id !== user?.id).length === 0 && (
+                  <p className="text-xs text-text-secondary">No other team members yet.</p>
+                )}
+              </div>
             )}
 
           </div>
@@ -519,7 +560,7 @@ export default function DashboardPage() {
                   placeholder="Details, steps, links, anything they need to know"
                   rows={4}
                   className="w-full bg-background border border-border-default rounded px-3 py-2 text-sm outline-none focus:border-brand resize-y"
-                  />
+                />
               </div>
 
               <div>
@@ -561,7 +602,9 @@ export default function DashboardPage() {
           <div className="w-full max-w-md bg-elevated border border-border-default rounded-lg p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-semibold">Archived tasks</h3>
-              <button onClick={() => setShowArchive(false)} aria-label="Close" className="text-text-secondary hover:text-foreground">✕</button>
+              <button onClick={() => setShowArchive(false)} aria-label="Close" className="text-text-secondary hover:text-foreground">
+                ✕
+              </button>
             </div>
 
             <div className="max-h-80 overflow-y-auto divide-y divide-neutral-800 mb-4">
@@ -578,10 +621,21 @@ export default function DashboardPage() {
                       </p>
                       <span className="text-sm text-neutral-600">+{task.xp} XP</span>
                     </div>
-                    <p className="text-xs text-text-secondary mt-1">
-                      {member?.full_name ?? 'Unknown'} · {task.archived_at ? new Date(task.archived_at).toLocaleDateString() : ''}
-                      {task.status === 'deleted' && <span className="text-red-400 ml-1">— was deleted</span>}
-                    </p>
+                    <div className="flex items-center justify-between mt-1">
+                      <p className="text-xs text-text-secondary">
+                        {member?.full_name ?? 'Unknown'} · {task.archived_at ? new Date(task.archived_at).toLocaleDateString() : ''}
+                        {task.status === 'deleted' && <span className="text-red-400 ml-1">(was deleted)</span>}
+                      </p>
+                      {isManager && (
+                        <button
+                          onClick={() => restoreTask(task.id, task.name)}
+                          disabled={restoringId === task.id}
+                          className="text-xs text-sky-400 hover:text-sky-300 disabled:opacity-50"
+                        >
+                          {restoringId === task.id ? 'Restoring...' : 'Restore'}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )
               })}
@@ -638,14 +692,18 @@ export default function DashboardPage() {
       )}
 
       {showStudioLevels && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4"
-          onClick={() => setShowStudioLevels(false)}>
-          <div className="w-full max-w-md bg-elevated border border-border-default rounded-lg p-6 max-h-[80vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}>
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="font-semibold">About Studio Levels</h3>
-                <button onClick={() => setShowStudioLevels(false)} aria-label="Close" className="text-text-secondary hover:text-foreground">X</button>
-              </div>
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4"
+          onClick={() => setShowStudioLevels(false)}
+        >
+          <div
+            className="w-full max-w-md bg-elevated border border-border-default rounded-lg p-6 max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-semibold">About Studio Levels</h3>
+              <button onClick={() => setShowStudioLevels(false)} aria-label="Close" className="text-text-secondary hover:text-foreground">X</button>
+            </div>
 
             <div className="space-y-4 text-sm text-neutral-300">
               <p>
