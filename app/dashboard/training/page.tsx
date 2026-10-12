@@ -31,6 +31,23 @@ type Pathway = {
   url: string
 }
 
+type LearnModule = {
+  id: string
+  title: string
+  summary: string | null
+  department: string | null
+  minutes: number
+  content: string
+  video_url: string | null
+  sort_order: number
+}
+
+type LearnCompletion = {
+  user_id: string
+  module_id: string
+  completed_at: string
+}
+
 // Required pathways — these get tracked with checkboxes and count toward
 // the progress tracker in the sidebar. Add/remove entries here as the
 // list of required pathways changes.
@@ -100,6 +117,12 @@ export default function TrainingPage() {
   const [progressLoading, setProgressLoading] = useState(true)
   const [savingKey, setSavingKey] = useState<string | null>(null)
 
+  const [modules, setModules] = useState<LearnModule[]>([])
+  const [completions, setCompletions] = useState<LearnCompletion[]>([])
+  const [quickLearnsLoading, setQuickLearnsLoading] = useState(true)
+  const [openModule, setOpenModule] = useState<LearnModule | null>(null)
+  const [completingId, setCompletingId] = useState<string | null>(null)
+
   const loadTeam = async () => {
     const { data } = await supabase.from('profiles').select('id, full_name, title')
     setTeamMembers(data ?? [])
@@ -113,6 +136,32 @@ export default function TrainingPage() {
       setProgress(data)
     }
     setProgressLoading(false)
+  }
+
+  const loadQuickLearns = async () => {
+    const { data: moduleData, error: moduleError } = await supabase
+      .from('learn_modules')
+      .select('*')
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: true })
+
+    if (moduleError) {
+      console.error('Failed to load quick learns:', moduleError)
+    } else if (moduleData) {
+      setModules(moduleData)
+    }
+
+    const { data: completionData, error: completionError } = await supabase
+      .from('learn_completions')
+      .select('*')
+
+    if (completionError) {
+      console.error('Failed to load quick learn completions:', completionError)
+    } else if (completionData) {
+      setCompletions(completionData)
+    }
+
+    setQuickLearnsLoading(false)
   }
 
   useEffect(() => {
@@ -138,6 +187,7 @@ export default function TrainingPage() {
     checkUser()
     loadTeam()
     loadProgress()
+    loadQuickLearns()
   }, [router])
 
   const isComplete = (userId: string, pathwayKey: string) =>
@@ -145,6 +195,12 @@ export default function TrainingPage() {
 
   const completedCountForMember = (userId: string) =>
     PATHWAYS.filter((p) => isComplete(userId, p.key)).length
+
+  const moduleCompletion = (userId: string, moduleId: string) =>
+    completions.find((c) => c.user_id === userId && c.module_id === moduleId)
+
+  const quickLearnCountForMember = (userId: string) =>
+    modules.filter((m) => moduleCompletion(userId, m.id)).length
 
   const togglePathway = async (pathwayKey: string) => {
     if (!user) return
@@ -174,7 +230,28 @@ export default function TrainingPage() {
     setSavingKey(null)
   }
 
-  if (loading || progressLoading) {
+  const completeModule = async (moduleId: string) => {
+    if (!user) return
+    setCompletingId(moduleId)
+
+    const { error } = await supabase.from('learn_completions').insert({
+      user_id: user.id,
+      module_id: moduleId,
+    })
+
+    // 23505 = already completed, safe to ignore
+    if (error && error.code !== '23505') {
+      console.error('Failed to complete quick learn:', error)
+      alert(`Failed to save: ${error.message}`)
+      setCompletingId(null)
+      return
+    }
+
+    await loadQuickLearns()
+    setCompletingId(null)
+  }
+
+  if (loading || progressLoading || quickLearnsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <p className="text-foreground">Loading...</p>
@@ -183,6 +260,8 @@ export default function TrainingPage() {
   }
 
   const myCompletedCount = completedCountForMember(user?.id ?? '')
+  const myQuickLearnCount = quickLearnCountForMember(user?.id ?? '')
+  const openCompletion = openModule ? moduleCompletion(user?.id ?? '', openModule.id) : undefined
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
@@ -198,19 +277,19 @@ export default function TrainingPage() {
               for what&apos;s required and how far along everyone is.
             </p>
             <p className="text-text-secondary text-sm mt-3">
-                Developers do <span className="text-foreground font-semibold">not</span> need
-                to complete the business pathways (HubSpot Academy, Business Management
-                Diploma), and business-side team members do{' '}
-                <span className="text-foreground font-semibold">not</span> need to complete
-                the game engine pathways (Unity, Unreal). Only complete the pathways that
-                apply to your role.
+              Developers do <span className="text-foreground font-semibold">not</span> need
+              to complete the business pathways (HubSpot Academy, Business Management
+              Diploma), and business-side team members do{' '}
+              <span className="text-foreground font-semibold">not</span> need to complete
+              the game engine pathways (Unity, Unreal). Only complete the pathways that
+              apply to your role.
             </p>
             <p className="text-text-secondary text-sm mt-5">
-                Note that there are actual and legitimate certifications underneath the main pathways
-                as an option for your personal discretion and personal/professional growth. Mind you that
-                these are not paid by the studio but out of your pocket. It is to further your knowledge.
-                These are 100% optional, only reason why I added these to this page is for you to explore out of
-                your curiosity, possibly replacing your main job, and so on. 
+              Note that there are actual and legitimate certifications underneath the main pathways
+              as an option for your personal discretion and personal/professional growth. Mind you that
+              these are not paid by the studio but out of your pocket. It is to further your knowledge.
+              These are 100% optional, only reason why I added these to this page is for you to explore out of
+              your curiosity, possibly replacing your main job, and so on.
             </p>
           </div>
 
@@ -260,8 +339,8 @@ export default function TrainingPage() {
 
                     <p className="text-sm text-neutral-300 mb-4">{pathway.description}</p>
 
-                    
-                      <a href={pathway.url}
+                    <a
+                      href={pathway.url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm text-brand hover:underline"
@@ -272,6 +351,60 @@ export default function TrainingPage() {
                 )
               })}
             </div>
+          </section>
+
+          <section id="quick-learns" className="mb-14">
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-sm uppercase tracking-wide text-text-secondary">Quick Learns</h2>
+              {modules.length > 0 && (
+                <span className="text-xs text-text-secondary">
+                  {myQuickLearnCount} / {modules.length} complete
+                </span>
+              )}
+            </div>
+            <p className="text-2xl font-bold mb-2">Bite-Sized Modules</p>
+            <p className="text-sm text-text-secondary mb-6">
+              Short 5 to 10 minute lessons. Once you finish one it stays checked off for good,
+              but you can open it again anytime for a refresher.
+            </p>
+
+            {modules.length === 0 ? (
+              <p className="text-sm text-text-secondary">No quick learns yet. Check back soon.</p>
+            ) : (
+              <div className="grid grid-cols-3 gap-6">
+                {modules.map((mod) => {
+                  const done = !!moduleCompletion(user?.id ?? '', mod.id)
+
+                  return (
+                    <button
+                      key={mod.id}
+                      onClick={() => setOpenModule(mod)}
+                      className={`text-left border rounded-lg p-5 transition-colors hover:border-brand ${
+                        done ? 'border-brand' : 'border-border-default'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <p className="text-xs text-text-secondary uppercase tracking-wide">
+                          {mod.department ?? 'Everyone'} · ~{mod.minutes} min
+                        </p>
+                        {done && (
+                          <span className="w-5 h-5 rounded bg-brand text-black text-xs flex items-center justify-center shrink-0">
+                            ✓
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="font-semibold mb-1">{mod.title}</h3>
+                      {mod.summary && (
+                        <p className="text-sm text-neutral-300 mb-3">{mod.summary}</p>
+                      )}
+                      <span className="text-sm text-brand">
+                        {done ? 'Review →' : 'Start →'}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
           </section>
 
           <section id="certification-links">
@@ -291,8 +424,8 @@ export default function TrainingPage() {
                   </p>
                   <h3 className="text-lg font-semibold mb-2">{cert.title}</h3>
                   <p className="text-sm text-neutral-300 mb-4">{cert.description}</p>
-                  
-                    <a href={cert.url}
+                  <a
+                    href={cert.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm text-brand hover:underline"
@@ -313,6 +446,7 @@ export default function TrainingPage() {
           <div className="space-y-6 mb-10">
             {teamMembers.map((member) => {
               const count = completedCountForMember(member.id)
+              const qlCount = quickLearnCountForMember(member.id)
               const initials = member.full_name
                 .split(' ')
                 .map((n) => n[0])
@@ -340,6 +474,20 @@ export default function TrainingPage() {
                       style={{ width: `${(count / PATHWAYS.length) * 100}%` }}
                     />
                   </div>
+
+                  {modules.length > 0 && (
+                    <>
+                      <p className="text-xs text-text-secondary mt-3 mb-1">
+                        {qlCount} / {modules.length} quick learns complete
+                      </p>
+                      <div className="w-full h-1.5 bg-elevated rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-brand/60"
+                          style={{ width: `${(qlCount / modules.length) * 100}%` }}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               )
             })}
@@ -363,6 +511,65 @@ export default function TrainingPage() {
       </div>
 
       <Footer />
+
+      {openModule && (
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4"
+          onClick={() => setOpenModule(null)}
+        >
+          <div
+            className="w-full max-w-2xl bg-elevated border border-border-default rounded-lg p-8 max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4 mb-6">
+              <div>
+                <p className="text-xs text-text-secondary uppercase tracking-wide mb-1">
+                  {openModule.department ?? 'Everyone'} · ~{openModule.minutes} min
+                </p>
+                <h3 className="text-xl font-bold">{openModule.title}</h3>
+              </div>
+              <button
+                onClick={() => setOpenModule(null)}
+                aria-label="Close"
+                className="text-text-secondary hover:text-foreground"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="text-sm text-neutral-300 leading-relaxed whitespace-pre-wrap mb-6">
+              {openModule.content}
+            </div>
+
+            {openModule.video_url && (
+              <a
+                href={openModule.video_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block text-sm text-brand hover:underline mb-6"
+              >
+                Watch the video →
+              </a>
+            )}
+
+            <div className="border-t border-border-default pt-5">
+              {openCompletion ? (
+                <p className="text-sm text-brand">
+                  ✓ Completed on {new Date(openCompletion.completed_at).toLocaleDateString()}
+                </p>
+              ) : (
+                <button
+                  onClick={() => completeModule(openModule.id)}
+                  disabled={completingId === openModule.id}
+                  className="w-full bg-brand text-black font-semibold rounded py-2 text-sm disabled:opacity-50"
+                >
+                  {completingId === openModule.id ? 'Saving...' : 'Mark complete'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
