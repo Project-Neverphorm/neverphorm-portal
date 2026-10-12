@@ -62,6 +62,10 @@ export default function DashboardPage() {
   const [newTaskDescription, setNewTaskDescription] = useState("");
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null)
   const [restoringId, setRestoringId] = useState<string | null>(null)
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editXP, setEditXP] = useState(XP_TIERS[0].value)
+  const [editDescription, setEditDescription] = useState('')
 
   const [newTaskName, setNewTaskName] = useState('')
   const [newTaskMemberId, setNewTaskMemberId] = useState('')
@@ -210,7 +214,7 @@ export default function DashboardPage() {
     loadTasks()
   }
 
-  const restoreTask = async (id: string, name: string) => {
+    const restoreTask = async (id: string, name: string) => {
     const task = archivedTasks.find((t) => t.id === id)
     if (!task) return
 
@@ -248,6 +252,51 @@ export default function DashboardPage() {
 
     setRestoringId(null)
     loadTasks()
+  }
+
+  const startEdit = (task: Task) => {
+    setEditingTaskId(task.id)
+    setEditName(task.name)
+    setEditXP(task.xp)
+    setEditDescription(task.description ?? '')
+  }
+
+  const cancelEdit = () => {
+    setEditingTaskId(null)
+    setEditName('')
+    setEditXP(XP_TIERS[0].value)
+    setEditDescription('')
+  }
+
+  const saveTaskEdit = async () => {
+    if (!editingTaskId || !editName.trim()) return
+
+    const { error } = await supabase
+      .from('tasks')
+      .update({
+        name: editName.trim(),
+        xp: editXP,
+        description: editDescription.trim() || null,
+      })
+      .eq('id', editingTaskId)
+
+    if (error) {
+      alert(`Failed to save task: ${error.message}`)
+      return
+    }
+
+    cancelEdit()
+    loadTasks()
+  }
+
+  const removeTaskFromModal = async (id: string, name: string) => {
+    if (!window.confirm(`Remove "${name}"? It'll move to the archive as deleted.`)) return
+    await deleteTask(id)
+  }
+
+  const closeMemberModal = () => {
+    cancelEdit()
+    setViewingMember(null)
   }
 
   const addTask = async (e: React.FormEvent) => {
@@ -663,7 +712,7 @@ export default function DashboardPage() {
       {viewingMember && (
         <div
           className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4"
-          onClick={() => setViewingMember(null)}
+          onClick={closeMemberModal}
         >
           <div
             className="w-full max-w-md bg-elevated border border-border-default rounded-lg p-6 max-h-[80vh] overflow-y-auto"
@@ -674,12 +723,17 @@ export default function DashboardPage() {
                 <h3 className="font-semibold">{viewingMember.full_name}</h3>
                 <p className="text-xs text-text-secondary">{viewingMember.title}</p>
               </div>
-              <button onClick={() => setViewingMember(null)} aria-label="Close" className="text-text-secondary hover:text-foreground">✕</button>
+              <button onClick={closeMemberModal} aria-label="Close" className="text-text-secondary hover:text-foreground">✕</button>
             </div>
 
-            <p className="text-sm text-text-secondary mb-4">
-              {xpForMember(viewingMember.id)} / 500 XP · {completedCountForMember(viewingMember.id)} tasks completed
-            </p>
+            {(() => {
+              const lvl = getLevelInfo(xpForMember(viewingMember.id))
+              return (
+                <p className="text-sm text-text-secondary mb-4">
+                  Lvl {lvl.level} · {lvl.progress} / {lvl.needed} XP · {completedCountForMember(viewingMember.id)} tasks completed
+                </p>
+              )
+            })()}
 
             <div className="divide-y divide-neutral-800">
               {tasks.filter((t) => t.assigned_to_id === viewingMember.id).length === 0 && (
@@ -687,12 +741,68 @@ export default function DashboardPage() {
               )}
               {tasks
                 .filter((t) => t.assigned_to_id === viewingMember.id)
-                .map((task) => (
-                  <div key={task.id} className="flex items-center justify-between py-3">
-                    <p className="text-sm">{task.name}</p>
-                    <span className="text-sm font-semibold text-brand whitespace-nowrap">+{task.xp} XP</span>
-                  </div>
-                ))}
+                .map((task) =>
+                  editingTaskId === task.id ? (
+                    <div key={task.id} className="py-3 space-y-2">
+                      <input
+                        type="text"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="w-full bg-background border border-border-default rounded px-3 py-2 text-sm outline-none focus:border-brand"
+                      />
+                      <textarea
+                        value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                        placeholder="Description (optional)"
+                        rows={3}
+                        className="w-full bg-background border border-border-default rounded px-3 py-2 text-sm outline-none focus:border-brand resize-y"
+                      />
+                      <select
+                        value={editXP}
+                        onChange={(e) => setEditXP(Number(e.target.value))}
+                        className="w-full bg-background border border-border-default rounded px-3 py-2 text-sm outline-none focus:border-brand"
+                      >
+                        {XP_TIERS.map((tier) => (
+                          <option key={tier.value} value={tier.value}>{tier.label}</option>
+                        ))}
+                      </select>
+                      <div className="flex gap-2 justify-end">
+                        <button
+                          onClick={cancelEdit}
+                          className="text-xs text-text-secondary hover:text-foreground px-3 py-1.5"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={saveTaskEdit}
+                          className="text-xs bg-brand text-black font-semibold rounded px-3 py-1.5"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div key={task.id} className="flex items-center justify-between gap-3 py-3">
+                      <p className="text-sm">{task.name}</p>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="text-sm font-semibold text-brand whitespace-nowrap">+{task.xp} XP</span>
+                        <button
+                          onClick={() => startEdit(task)}
+                          className="text-xs text-text-secondary hover:text-brand transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => removeTaskFromModal(task.id, task.name)}
+                          aria-label={`Remove "${task.name}"`}
+                          className="text-neutral-500 hover:text-red-500 transition-colors"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  )
+                )}
             </div>
           </div>
         </div>
