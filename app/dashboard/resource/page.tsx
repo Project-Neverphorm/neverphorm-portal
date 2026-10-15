@@ -35,7 +35,6 @@ type Resource = {
   skill_level: string | null
   engine: string | null
   tool: string | null
-  duration_minutes: number | null
   notes: string | null
   created_at: string
   resource_categories: { category_id: string }[]
@@ -49,7 +48,6 @@ type FormState = {
   skill_level: string
   engine: string
   tool: string
-  duration_minutes: string
   notes: string
   category_ids: string[]
 }
@@ -62,7 +60,6 @@ const emptyForm: FormState = {
   skill_level: '',
   engine: '',
   tool: '',
-  duration_minutes: '',
   notes: '',
   category_ids: [],
 }
@@ -198,7 +195,6 @@ export default function ResourcePage() {
       skill_level: r.skill_level ?? '',
       engine: r.engine ?? '',
       tool: r.tool ?? '',
-      duration_minutes: r.duration_minutes?.toString() ?? '',
       notes: r.notes ?? '',
       category_ids: r.resource_categories.map((rc) => rc.category_id),
     })
@@ -234,7 +230,6 @@ export default function ResourcePage() {
       skill_level: nullIfEmpty(form.skill_level),
       engine: nullIfEmpty(form.engine),
       tool: nullIfEmpty(form.tool),
-      duration_minutes: form.duration_minutes ? Number(form.duration_minutes) : null,
       notes: nullIfEmpty(form.notes),
     }
 
@@ -422,7 +417,7 @@ export default function ResourcePage() {
                 ))}
               </select>
               <select
-                className={inputClass}
+                className={`${inputClass} md:col-span-2`}
                 value={form.engine}
                 onChange={(e) => setForm({ ...form, engine: e.target.value })}
               >
@@ -431,14 +426,6 @@ export default function ResourcePage() {
                   <option key={en} value={en}>{en}</option>
                 ))}
               </select>
-              <input
-                className={inputClass}
-                type="number"
-                min={0}
-                placeholder="Duration (minutes)"
-                value={form.duration_minutes}
-                onChange={(e) => setForm({ ...form, duration_minutes: e.target.value })}
-              />
               <textarea
                 className={`${inputClass} md:col-span-2 min-h-28`}
                 placeholder="Notes, takeaways, timestamps"
@@ -450,6 +437,9 @@ export default function ResourcePage() {
             <div className="mt-5">
               <p className="mb-2 text-sm uppercase tracking-wide text-text-secondary">Categories</p>
               <div className="flex flex-wrap gap-2">
+                {categories.length === 0 && (
+                  <p className="text-sm text-text-secondary">No categories yet. Add one below.</p>
+                )}
                 {categories.map((c) => (
                   <button
                     key={c.id}
@@ -590,11 +580,7 @@ export default function ResourcePage() {
                       ) : (
                         <p className="font-semibold">{r.title}</p>
                       )}
-                      <p className="text-sm text-text-secondary">
-                        {[r.creator, r.duration_minutes ? `${r.duration_minutes} min` : null]
-                          .filter(Boolean)
-                          .join(' · ')}
-                      </p>
+                      {r.creator && <p className="text-sm text-text-secondary">{r.creator}</p>}
                     </div>
 
                     <button
