@@ -8,13 +8,40 @@ import { supabase } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
 import type { User } from '@supabase/supabase-js'
 
+/* ---------- static content ---------- */
+
 const devStack: Record<string, string[]> = {
   'Game Development': ['Unity', 'Unreal Engine', 'C++', 'C#', 'Maya', 'Blender', 'Autodesk Sketchbook', 'Substance Painter', 'Figma', 'GitHub', 'DaVinci'],
   'Web & Systems': ['React', 'React Native', 'TailwindCSS', 'Vercel', 'Vite', 'VIM', 'Rebase', 'JavaScript', 'Supabase', 'Node.js', 'GitHub'],
   'Planning & Workflow': ['IET', 'Notion', 'Google Drive', 'Discord', 'DocuSign', 'Microsoft 365'],
 }
 
+const PIPELINE = [
+  { name: 'Concept', desc: 'Sketches, references, silhouettes', parent: 'art' },
+  { name: 'Modeling', desc: 'Blockout, sculpting, base mesh', parent: 'art' },
+  { name: 'Retopology', desc: 'Clean, game-ready topology', parent: 'art' },
+  { name: 'UV Unwrapping', desc: 'Seams, islands, texel density', parent: 'art' },
+  { name: 'Texturing', desc: 'Baking, Substance, materials', parent: 'art' },
+  { name: 'Rigging', desc: 'Armature, weights, controls', parent: 'animation' },
+  { name: 'Animation', desc: 'Cycles, poses, root motion', parent: 'animation' },
+  { name: 'Export to Engine', desc: 'FBX settings, scale, import', parent: 'programming' },
+]
+
+const QUICK_LINKS = [
+  { name: 'Blender Manual', url: 'https://docs.blender.org/manual/en/latest/' },
+  { name: 'Unity Manual', url: 'https://docs.unity3d.com/Manual/index.html' },
+  { name: 'Unreal Docs', url: 'https://dev.epicgames.com/documentation/en-us/unreal-engine' },
+  { name: 'Substance 3D Painter Docs', url: 'https://helpx.adobe.com/substance-3d-painter/home.html' },
+  { name: 'Mixamo', url: 'https://www.mixamo.com' },
+  { name: 'Poly Haven', url: 'https://polyhaven.com' },
+  { name: 'Kenney Assets', url: 'https://kenney.nl/assets' },
+  { name: 'Sketchfab', url: 'https://sketchfab.com' },
+]
+
 const NEW_WINDOW_DAYS = 7
+const RECENT_COUNT = 6
+
+/* ---------- types ---------- */
 
 type Category = {
   id: string
@@ -50,6 +77,10 @@ const emptyForm: FormState = { title: '', url: '', creator: '', notes: '', categ
 
 /* ---------- styling helpers ---------- */
 
+const panelClass = 'rounded-xl border border-border-default bg-elevated/20 p-5'
+
+const panelSticky = 'min-[1800px]:sticky min-[1800px]:top-8 self-start'
+
 const inputClass =
   'w-full rounded-lg border border-border-default bg-elevated px-3 py-2.5 text-sm text-foreground placeholder:text-neutral-500 focus:outline-none focus:border-neutral-500'
 
@@ -79,14 +110,14 @@ const SearchIcon = () => (
   </svg>
 )
 
-const PlusIcon = () => (
-  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+const PlusIcon = ({ className = 'h-4 w-4' }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
     <path d="M12 5v14M5 12h14" />
   </svg>
 )
 
-const PlayIcon = () => (
-  <svg className="h-8 w-8" viewBox="0 0 24 24" fill="currentColor">
+const PlayIcon = ({ className = 'h-8 w-8' }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
     <path d="M8 5.5v13a1 1 0 0 0 1.5.86l10-6.5a1 1 0 0 0 0-1.72l-10-6.5A1 1 0 0 0 8 5.5Z" />
   </svg>
 )
@@ -107,6 +138,12 @@ const LinkIcon = () => (
   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
     <path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1 1" />
     <path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1-1" />
+  </svg>
+)
+
+const ExternalIcon = () => (
+  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+    <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
   </svg>
 )
 
@@ -158,6 +195,8 @@ function timeAgo(dateStr: string) {
   if (days < 365) return `${Math.floor(days / 30)}mo ago`
   return `${Math.floor(days / 365)}y ago`
 }
+
+/* ---------- page ---------- */
 
 export default function ResourcePage() {
   const router = useRouter()
@@ -231,6 +270,8 @@ export default function ResourcePage() {
     return () => window.removeEventListener('keydown', onKey)
   }, [editingId])
 
+  /* ---------- derived ---------- */
+
   const categoryById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories])
   const topLevel = categories.filter((c) => !c.parent_id)
   const activeParent = activeCategory
@@ -242,8 +283,12 @@ export default function ResourcePage() {
     return resources.filter((r) => r.resource_categories.some((rc) => ids.has(rc.category_id))).length
   }
 
+  const findCategoryByName = (name: string) =>
+    categories.find((c) => c.name.toLowerCase() === name.toLowerCase())
+
   const typesInUse = useMemo(() => Array.from(new Set(resources.map((r) => r.type))).sort(), [resources])
   const pinned = resources.filter((r) => r.pinned)
+  const recent = resources.slice(0, RECENT_COUNT)
   const newCount = resources.filter((r) => isNew(r.created_at)).length
   const totalTools = new Set(Object.values(devStack).flat()).size
 
@@ -270,8 +315,8 @@ export default function ResourcePage() {
     })
   }, [resources, categories, search, activeCategory, typeFilter, sortMode])
 
-  const showPinnedRow = pinned.length > 0 && !activeCategory && !search && !typeFilter
   const activeCategoryName = activeCategory ? categoryById.get(activeCategory)?.name : 'All Resources'
+  const hasFilters = !!(activeCategory || search || typeFilter)
 
   /* ---------- actions ---------- */
 
@@ -296,6 +341,12 @@ export default function ResourcePage() {
   function closeEditor() {
     setEditingId(null)
     setForm(emptyForm)
+  }
+
+  const clearFilters = () => {
+    setActiveCategory(null)
+    setSearch('')
+    setTypeFilter('')
   }
 
   const toggleFormCategory = (id: string) => {
@@ -404,21 +455,33 @@ export default function ResourcePage() {
     }
   }
 
-  const addCategory = async () => {
-    if (!newCategoryName.trim()) return
+  const insertCategory = async (name: string, parentId: string | null) => {
     const { error } = await supabase.from('categories').insert({
-      name: newCategoryName.trim(),
-      slug: slugify(newCategoryName),
-      parent_id: newCategoryParent || null,
+      name: name.trim(),
+      slug: slugify(name),
+      parent_id: parentId,
     })
     if (error) {
       setError(error.message)
-      return
+      return false
     }
-    setNewCategoryName('')
-    setNewCategoryParent('')
-    setShowNewCategory(false)
     await loadData()
+    return true
+  }
+
+  const addCategory = async () => {
+    if (!newCategoryName.trim()) return
+    const ok = await insertCategory(newCategoryName, newCategoryParent || null)
+    if (ok) {
+      setNewCategoryName('')
+      setNewCategoryParent('')
+      setShowNewCategory(false)
+    }
+  }
+
+  const createStageCategory = async (stage: (typeof PIPELINE)[number]) => {
+    const parent = categories.find((c) => c.slug === stage.parent && !c.parent_id)
+    await insertCategory(stage.name, parent?.id ?? null)
   }
 
   const deleteCategory = async (c: Category) => {
@@ -562,6 +625,42 @@ export default function ResourcePage() {
     )
   }
 
+  const renderMini = (r: Resource) => {
+    const thumb = youtubeThumb(r.url)
+    const inner = (
+      <>
+        <div className="flex aspect-video w-16 shrink-0 items-center justify-center overflow-hidden rounded-md bg-neutral-900">
+          {thumb ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={thumb} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <span className="text-neutral-700">
+              <PlayIcon className="h-4 w-4" />
+            </span>
+          )}
+        </div>
+        <div className="min-w-0">
+          <p className="line-clamp-1 text-sm group-hover/mini:underline">{r.title}</p>
+          <p className="text-xs text-text-secondary">
+            {[r.creator, timeAgo(r.created_at)].filter(Boolean).join(' · ')}
+          </p>
+        </div>
+      </>
+    )
+
+    const cls = 'group/mini flex items-center gap-3 rounded-lg p-1.5 transition-colors hover:bg-elevated/50'
+
+    return r.url ? (
+      <a key={r.id} href={r.url} target="_blank" rel="noopener noreferrer" className={cls}>
+        {inner}
+      </a>
+    ) : (
+      <div key={r.id} className={cls}>
+        {inner}
+      </div>
+    )
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -582,11 +681,7 @@ export default function ResourcePage() {
             <h1 className="text-3xl font-bold tracking-tight">Learning Library</h1>
             <p className="mt-2 max-w-xl text-sm text-text-secondary">
               Tutorials, guides, and references for everything we build.
-              {newCount > 0 && (
-                <span className="ml-1 text-blue-400">
-                  {newCount} new this week.
-                </span>
-              )}
+              {newCount > 0 && <span className="ml-1 text-blue-400">{newCount} new this week.</span>}
             </p>
           </div>
 
@@ -610,8 +705,8 @@ export default function ResourcePage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_320px]">
-          {/* LEFT: category nav */}
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_300px] min-[1800px]:grid-cols-[220px_minmax(0,1fr)_270px_290px_300px]">
+          {/* 1. Browse */}
           <nav className="self-start lg:sticky lg:top-8">
             <p className="mb-3 px-3 text-xs font-medium uppercase tracking-wider text-neutral-500">Browse</p>
 
@@ -719,28 +814,18 @@ export default function ResourcePage() {
             )}
           </nav>
 
-          {/* CENTER: library */}
+          {/* 2. Library */}
           <section className="min-w-0">
-            {showPinnedRow && (
-              <div className="mb-12">
-                <div className="mb-4 flex items-center gap-2">
-                  <span className="text-amber-400">
-                    <PinIcon filled />
-                  </span>
-                  <h2 className="text-lg font-semibold">Start Here</h2>
-                  <span className="text-sm text-text-secondary">The essentials, pinned for the team</span>
-                </div>
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 2xl:grid-cols-4">
-                  {pinned.map(renderCard)}
-                </div>
-              </div>
-            )}
-
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">
                 {activeCategoryName}
                 <span className="ml-2 text-sm font-normal text-text-secondary">{filtered.length}</span>
               </h2>
+              {hasFilters && (
+                <button onClick={clearFilters} className="text-xs text-text-secondary hover:text-foreground">
+                  Clear filters
+                </button>
+              )}
             </div>
 
             <div className="mb-4 flex flex-col gap-3 sm:flex-row">
@@ -756,7 +841,7 @@ export default function ResourcePage() {
                 />
               </div>
               <select
-                className={`${inputClass} sm:w-44`}
+                className={`${inputClass} sm:w-40`}
                 value={sortMode}
                 onChange={(e) => setSortMode(e.target.value as SortMode)}
               >
@@ -767,7 +852,7 @@ export default function ResourcePage() {
             </div>
 
             {typesInUse.length > 1 && (
-              <div className="mb-8 flex flex-wrap gap-2">
+              <div className="mb-6 flex flex-wrap gap-2">
                 <button onClick={() => setTypeFilter('')} className={pillClass(typeFilter === '')}>
                   All types
                 </button>
@@ -803,46 +888,162 @@ export default function ResourcePage() {
                 )}
               </div>
             ) : (
-              <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 2xl:grid-cols-4">
+              <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 2xl:grid-cols-3">
                 {filtered.map(renderCard)}
               </div>
             )}
           </section>
 
-          {/* RIGHT: studio stack */}
-          <aside className="self-start rounded-xl border border-border-default bg-elevated/20 p-5 lg:col-span-2 xl:col-span-1 xl:sticky xl:top-8">
-            <div className="mb-4 flex items-baseline justify-between">
-              <h2 className="font-semibold">Studio Stack</h2>
-              <span className="text-xs text-text-secondary">{totalTools} tools</span>
-            </div>
+          {/* 3 to 5: side panels. Stack in one column on xl, spread into their own columns at 1800px+ */}
+          <div className="space-y-6 lg:col-span-2 lg:grid lg:grid-cols-3 lg:gap-6 lg:space-y-0 xl:col-span-1 xl:block xl:space-y-6 min-[1800px]:contents">
+            {/* 3. Character Pipeline */}
+            <section className={`${panelClass} ${panelSticky}`}>
+              <h2 className="font-semibold">Character Pipeline</h2>
+              <p className="mt-1 text-xs text-text-secondary">Concept to engine, in order. Click a step to filter.</p>
 
-            <p className="mb-6 border-l-2 border-neutral-700 pl-3 text-xs leading-relaxed text-text-secondary">
-              The development stack depends on the project. Unity and Unreal are both used, since the choice of engine
-              comes down to what each game needs, they&apos;re tools, not a fixed pipeline. Everything else in the
-              stack is flexible for future team members to bring their own preferred tools; engine choice per game is
-              the one thing that doesn&apos;t flex.
-            </p>
+              <ol className="mt-4 space-y-0.5">
+                {PIPELINE.map((stage, i) => {
+                  const cat = findCategoryByName(stage.name)
+                  const count = cat ? countFor(cat.id) : 0
+                  const active = !!cat && activeCategory === cat.id
 
-            <div className="space-y-5">
-              {Object.entries(devStack).map(([category, tools]) => (
-                <div key={category}>
-                  <h3 className="mb-2 text-[11px] font-medium uppercase tracking-wider text-neutral-500">{category}</h3>
-                  <div className="flex flex-wrap gap-1.5">
-                    {tools.map((tool) => (
-                      <button
-                        key={tool}
-                        onClick={() => setSearch(tool)}
-                        title={`Search the library for ${tool}`}
-                        className="rounded-md border border-neutral-800 bg-neutral-900 px-2 py-0.5 text-xs text-neutral-300 hover:border-neutral-600 hover:text-foreground"
+                  return (
+                    <li key={stage.name}>
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => (cat ? setActiveCategory(cat.id) : setSearch(stage.name))}
+                        onKeyDown={(e) => e.key === 'Enter' && (cat ? setActiveCategory(cat.id) : setSearch(stage.name))}
+                        className={`flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2 transition-colors ${
+                          active ? 'bg-elevated' : 'hover:bg-elevated/50'
+                        }`}
                       >
-                        {tool}
-                      </button>
-                    ))}
-                  </div>
+                        <span
+                          className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold tabular-nums ${
+                            count > 0 ? 'bg-foreground text-background' : 'border border-neutral-700 text-neutral-500'
+                          }`}
+                        >
+                          {i + 1}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-baseline justify-between gap-2">
+                            <span className="text-sm">{stage.name}</span>
+                            <span className="text-xs tabular-nums text-neutral-500">{count}</span>
+                          </div>
+                          <p className="text-xs text-text-secondary">{stage.desc}</p>
+                          {isAdmin && !cat && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                createStageCategory(stage)
+                              }}
+                              className="mt-1 flex items-center gap-1 text-[11px] text-neutral-500 hover:text-foreground"
+                            >
+                              <PlusIcon className="h-3 w-3" />
+                              Create category
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </li>
+                  )
+                })}
+              </ol>
+            </section>
+
+            {/* 4. Start Here + Recently Added */}
+            <section className={`${panelClass} ${panelSticky}`}>
+              <div className="flex items-center gap-2">
+                <span className="text-amber-400">
+                  <PinIcon filled />
+                </span>
+                <h2 className="font-semibold">Start Here</h2>
+              </div>
+              <p className="mt-1 text-xs text-text-secondary">The essentials, pinned for the team.</p>
+
+              <div className="mt-3 space-y-1">
+                {pinned.length === 0 ? (
+                  <p className="py-2 text-sm text-neutral-500">
+                    {isAdmin ? 'Pin resources from their cards to show them here.' : 'Nothing pinned yet.'}
+                  </p>
+                ) : (
+                  pinned.map(renderMini)
+                )}
+              </div>
+
+              <div className="mt-5 border-t border-neutral-800 pt-5">
+                <div className="flex items-baseline justify-between">
+                  <h2 className="font-semibold">Recently Added</h2>
+                  {newCount > 0 && <span className="text-xs text-blue-400">{newCount} this week</span>}
                 </div>
-              ))}
+                <div className="mt-3 space-y-1">
+                  {recent.length === 0 ? (
+                    <p className="py-2 text-sm text-neutral-500">Nothing yet.</p>
+                  ) : (
+                    recent.map(renderMini)
+                  )}
+                </div>
+              </div>
+            </section>
+
+            {/* 5. Studio Stack + Quick Links */}
+            <div className={`space-y-6 ${panelSticky}`}>
+              <section className={panelClass}>
+                <div className="mb-4 flex items-baseline justify-between">
+                  <h2 className="font-semibold">Studio Stack</h2>
+                  <span className="text-xs text-text-secondary">{totalTools} tools</span>
+                </div>
+
+                <p className="mb-6 border-l-2 border-neutral-700 pl-3 text-xs leading-relaxed text-text-secondary">
+                  The development stack depends on the project. Unity and Unreal are both used, since the choice of
+                  engine comes down to what each game needs, they&apos;re tools, not a fixed pipeline. Everything else in
+                  the stack is flexible for future team members to bring their own preferred tools; engine choice per
+                  game is the one thing that doesn&apos;t flex.
+                </p>
+
+                <div className="space-y-5">
+                  {Object.entries(devStack).map(([category, tools]) => (
+                    <div key={category}>
+                      <h3 className="mb-2 text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+                        {category}
+                      </h3>
+                      <div className="flex flex-wrap gap-1.5">
+                        {tools.map((tool) => (
+                          <button
+                            key={`${category}-${tool}`}
+                            onClick={() => setSearch(tool)}
+                            title={`Search the library for ${tool}`}
+                            className="rounded-md border border-neutral-800 bg-neutral-900 px-2 py-0.5 text-xs text-neutral-300 hover:border-neutral-600 hover:text-foreground"
+                          >
+                            {tool}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section className={panelClass}>
+                <h2 className="font-semibold">Quick Links</h2>
+                <p className="mt-1 text-xs text-text-secondary">Docs and asset sites we use constantly.</p>
+                <div className="mt-3 space-y-0.5">
+                  {QUICK_LINKS.map((link) => (
+                    <a
+                      key={link.url}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between rounded-lg px-2 py-1.5 text-sm text-text-secondary transition-colors hover:bg-elevated/50 hover:text-foreground"
+                    >
+                      <span>{link.name}</span>
+                      <ExternalIcon />
+                    </a>
+                  ))}
+                </div>
+              </section>
             </div>
-          </aside>
+          </div>
         </div>
       </main>
 
