@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
 import type { User } from '@supabase/supabase-js'
+import Footer from '@/components/Footer'
 
 /* ---------- static content ---------- */
 
@@ -670,10 +671,10 @@ export default function ResourcePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
       <Navbar />
 
-      <main className="w-full px-6 py-10 lg:px-10">
+      <main className="w-full flex-1 px-6 py-10 lg:px-10">
         {/* Header */}
         <header className="mb-10 flex flex-wrap items-end justify-between gap-6 border-b border-border-default pb-8">
           <div>
@@ -1047,6 +1048,8 @@ export default function ResourcePage() {
         </div>
       </main>
 
+      <Footer />
+
       {/* Editor modal */}
       {isAdmin && editingId !== null && (
         <div
@@ -1132,6 +1135,8 @@ export default function ResourcePage() {
           </div>
         </div>
       )}
+
+      
     </div>
   )
 }
