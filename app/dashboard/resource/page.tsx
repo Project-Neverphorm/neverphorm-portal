@@ -74,6 +74,13 @@ const chipClass = (active: boolean) =>
       : 'border-neutral-700 bg-elevated text-neutral-200 hover:border-neutral-500'
   }`
 
+const navItemClass = (active: boolean) =>
+  `w-full rounded-md px-3 py-1.5 text-left text-sm transition-colors ${
+    active
+      ? 'bg-elevated text-foreground'
+      : 'text-text-secondary hover:bg-elevated/60 hover:text-foreground'
+  }`
+
 const nullIfEmpty = (s: string) => (s.trim() === '' ? null : s.trim())
 
 const slugify = (s: string) =>
@@ -160,7 +167,11 @@ export default function ResourcePage() {
   const activeParent = activeCategory
     ? categoryById.get(activeCategory)?.parent_id ?? activeCategory
     : null
-  const subCategories = activeParent ? categories.filter((c) => c.parent_id === activeParent) : []
+
+  const countFor = (categoryId: string) => {
+    const ids = new Set([categoryId, ...categories.filter((c) => c.parent_id === categoryId).map((c) => c.id)])
+    return resources.filter((r) => r.resource_categories.some((rc) => ids.has(rc.category_id))).length
+  }
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim()
@@ -341,332 +352,377 @@ export default function ResourcePage() {
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
 
-      <main className="max-w-5xl mx-auto px-10 py-10">
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold mb-1">Studio Resources</h1>
-            <p className="text-text-secondary text-sm">
-              Tutorials, guides, and references for everything we build, plus the tools we use to build it.
-            </p>
-          </div>
-          {isAdmin && editingId === null && (
-            <button
-              onClick={startNew}
-              className="shrink-0 rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90"
-            >
-              Add Resource
-            </button>
-          )}
-        </div>
-
-        {error && (
-          <div className="mb-6 rounded-md border border-red-800 bg-red-950/40 px-4 py-3 text-sm text-red-300">
-            {error}
-          </div>
-        )}
-
-        {/* Admin editor */}
-        {isAdmin && editingId !== null && (
-          <div className="mb-10 rounded-lg border border-border-default p-6">
-            <h2 className="mb-4 text-lg font-semibold">
-              {editingId === 'new' ? 'New Resource' : 'Edit Resource'}
-            </h2>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <input
-                className={`${inputClass} md:col-span-2`}
-                placeholder="Title"
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-              />
-              <input
-                className={`${inputClass} md:col-span-2`}
-                placeholder="URL"
-                value={form.url}
-                onChange={(e) => setForm({ ...form, url: e.target.value })}
-              />
-              <input
-                className={inputClass}
-                placeholder="Creator"
-                value={form.creator}
-                onChange={(e) => setForm({ ...form, creator: e.target.value })}
-              />
-              <input
-                className={inputClass}
-                placeholder="Tool (Blender, Maya, Substance...)"
-                value={form.tool}
-                onChange={(e) => setForm({ ...form, tool: e.target.value })}
-              />
-              <select
-                className={inputClass}
-                value={form.type}
-                onChange={(e) => setForm({ ...form, type: e.target.value })}
-              >
-                {RESOURCE_TYPES.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-              <select
-                className={inputClass}
-                value={form.skill_level}
-                onChange={(e) => setForm({ ...form, skill_level: e.target.value })}
-              >
-                <option value="">Skill level (optional)</option>
-                {SKILL_LEVELS.map((l) => (
-                  <option key={l} value={l}>{l}</option>
-                ))}
-              </select>
-              <select
-                className={`${inputClass} md:col-span-2`}
-                value={form.engine}
-                onChange={(e) => setForm({ ...form, engine: e.target.value })}
-              >
-                <option value="">Engine (optional)</option>
-                {ENGINES.map((en) => (
-                  <option key={en} value={en}>{en}</option>
-                ))}
-              </select>
-              <textarea
-                className={`${inputClass} md:col-span-2 min-h-28`}
-                placeholder="Notes, takeaways, timestamps"
-                value={form.notes}
-                onChange={(e) => setForm({ ...form, notes: e.target.value })}
-              />
-            </div>
-
-            <div className="mt-5">
-              <p className="mb-2 text-sm uppercase tracking-wide text-text-secondary">Categories</p>
-              <div className="flex flex-wrap gap-2">
-                {categories.length === 0 && (
-                  <p className="text-sm text-text-secondary">No categories yet. Add one below.</p>
-                )}
-                {categories.map((c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => toggleFormCategory(c.id)}
-                    className={chipClass(form.category_ids.includes(c.id))}
-                  >
-                    {c.parent_id ? `${categoryById.get(c.parent_id)?.name} / ${c.name}` : c.name}
-                  </button>
-                ))}
+      <main className="w-full px-8 py-10">
+        <div className="grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1fr)_360px]">
+          {/* LEFT: learning library */}
+          <section className="min-w-0">
+            <div className="mb-8 flex items-end justify-between gap-4">
+              <div>
+                <h1 className="text-2xl font-bold mb-1">Learning Library</h1>
+                <p className="text-text-secondary text-sm">
+                  Tutorials, guides, and references for everything we build.
+                </p>
               </div>
+              {isAdmin && editingId === null && (
+                <button
+                  onClick={startNew}
+                  className="shrink-0 rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90"
+                >
+                  Add Resource
+                </button>
+              )}
             </div>
 
-            <div className="mt-5 flex flex-wrap items-center gap-2">
-              <input
-                className={`${inputClass} max-w-56`}
-                placeholder="New category"
-                value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
-              />
-              <select
-                className={`${inputClass} max-w-56`}
-                value={newCategoryParent}
-                onChange={(e) => setNewCategoryParent(e.target.value)}
-              >
-                <option value="">Top level</option>
-                {topLevel.map((c) => (
-                  <option key={c.id} value={c.id}>Under {c.name}</option>
-                ))}
-              </select>
-              <button
-                type="button"
-                onClick={addCategory}
-                className="rounded-md border border-border-default px-3 py-2 text-sm hover:border-neutral-500"
-              >
-                Add Category
-              </button>
-            </div>
+            {error && (
+              <div className="mb-6 rounded-md border border-red-800 bg-red-950/40 px-4 py-3 text-sm text-red-300">
+                {error}
+              </div>
+            )}
 
-            <div className="mt-6 flex gap-2">
-              <button
-                onClick={saveResource}
-                disabled={saving}
-                className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
-              >
-                {saving ? 'Saving...' : 'Save'}
-              </button>
-              <button
-                onClick={() => {
-                  setEditingId(null)
-                  setForm(emptyForm)
-                }}
-                className="rounded-md border border-border-default px-4 py-2 text-sm hover:border-neutral-500"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-[220px_minmax(0,1fr)]">
+              {/* Category nav */}
+              <nav className="md:sticky md:top-8 self-start">
+                <p className="mb-3 px-3 text-xs uppercase tracking-wide text-text-secondary">Categories</p>
+                <div className="space-y-0.5">
+                  <button onClick={() => setActiveCategory(null)} className={navItemClass(activeCategory === null)}>
+                    <span className="flex justify-between">
+                      <span>All</span>
+                      <span className="text-text-secondary">{resources.length}</span>
+                    </span>
+                  </button>
 
-        {/* Filters */}
-        <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto_auto]">
-          <input
-            className={inputClass}
-            placeholder="Search titles, creators, tools, notes..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <select className={inputClass} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-            <option value="">All types</option>
-            {RESOURCE_TYPES.map((t) => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
-          <select className={inputClass} value={levelFilter} onChange={(e) => setLevelFilter(e.target.value)}>
-            <option value="">All levels</option>
-            {SKILL_LEVELS.map((l) => (
-              <option key={l} value={l}>{l}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="mb-3 flex flex-wrap gap-2">
-          <button onClick={() => setActiveCategory(null)} className={chipClass(activeCategory === null)}>
-            All
-          </button>
-          {topLevel.map((c) => (
-            <button key={c.id} onClick={() => setActiveCategory(c.id)} className={chipClass(activeCategory === c.id)}>
-              {c.name}
-            </button>
-          ))}
-        </div>
-
-        {subCategories.length > 0 && (
-          <div className="mb-6 flex flex-wrap gap-2 pl-4 border-l border-border-default">
-            {subCategories.map((c) => (
-              <button key={c.id} onClick={() => setActiveCategory(c.id)} className={chipClass(activeCategory === c.id)}>
-                {c.name}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Library */}
-        <div className="mb-16 mt-6 space-y-4">
-          {filtered.length === 0 && (
-            <p className="text-sm text-text-secondary">
-              {resources.length === 0 ? 'No resources yet.' : 'Nothing matches those filters.'}
-            </p>
-          )}
-
-          {filtered.map((r) => {
-            const thumb = youtubeThumb(r.url)
-            const done = completed.has(r.id)
-
-            return (
-              <div
-                key={r.id}
-                className={`flex gap-4 rounded-lg border border-border-default p-4 ${done ? 'opacity-60' : ''}`}
-              >
-                {thumb && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={thumb} alt="" className="hidden h-24 w-40 shrink-0 rounded-md object-cover sm:block" />
-                )}
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      {r.url ? (
-                        <a
-                          href={r.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-semibold hover:underline"
-                        >
-                          {r.title}
-                        </a>
-                      ) : (
-                        <p className="font-semibold">{r.title}</p>
-                      )}
-                      {r.creator && <p className="text-sm text-text-secondary">{r.creator}</p>}
-                    </div>
-
-                    <button
-                      onClick={() => toggleComplete(r.id)}
-                      className={`shrink-0 rounded-md border px-3 py-1 text-xs ${
-                        done
-                          ? 'border-green-700 bg-green-950/40 text-green-300'
-                          : 'border-border-default text-text-secondary hover:border-neutral-500'
-                      }`}
-                    >
-                      {done ? 'Completed' : 'Mark complete'}
-                    </button>
-                  </div>
-
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {[r.type, r.skill_level, r.engine, r.tool].filter(Boolean).map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-full border border-neutral-700 bg-elevated px-2 py-0.5 text-xs text-neutral-300"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                    {r.resource_categories.map((rc) => {
-                      const cat = categoryById.get(rc.category_id)
-                      return cat ? (
-                        <span
-                          key={rc.category_id}
-                          className="rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-300"
-                        >
-                          {cat.name}
+                  {topLevel.map((c) => (
+                    <div key={c.id}>
+                      <button onClick={() => setActiveCategory(c.id)} className={navItemClass(activeCategory === c.id)}>
+                        <span className="flex justify-between">
+                          <span>{c.name}</span>
+                          <span className="text-text-secondary">{countFor(c.id)}</span>
                         </span>
-                      ) : null
-                    })}
-                  </div>
-
-                  {r.notes && (
-                    <p className="mt-3 whitespace-pre-wrap text-sm text-text-secondary">{r.notes}</p>
-                  )}
-
-                  {isAdmin && (
-                    <div className="mt-3 flex gap-3 text-xs">
-                      <button onClick={() => startEdit(r)} className="text-text-secondary hover:text-foreground">
-                        Edit
                       </button>
-                      <button onClick={() => deleteResource(r.id)} className="text-red-400 hover:text-red-300">
-                        Delete
-                      </button>
+
+                      {activeParent === c.id && (
+                        <div className="ml-3 mt-0.5 space-y-0.5 border-l border-border-default pl-2">
+                          {categories
+                            .filter((sub) => sub.parent_id === c.id)
+                            .map((sub) => (
+                              <button
+                                key={sub.id}
+                                onClick={() => setActiveCategory(sub.id)}
+                                className={navItemClass(activeCategory === sub.id)}
+                              >
+                                <span className="flex justify-between">
+                                  <span>{sub.name}</span>
+                                  <span className="text-text-secondary">{countFor(sub.id)}</span>
+                                </span>
+                              </button>
+                            ))}
+                        </div>
+                      )}
                     </div>
+                  ))}
+
+                  {categories.length === 0 && (
+                    <p className="px-3 py-1.5 text-sm text-text-secondary">No categories yet.</p>
                   )}
                 </div>
+              </nav>
+
+              {/* Content */}
+              <div className="min-w-0">
+                {/* Admin editor */}
+                {isAdmin && editingId !== null && (
+                  <div className="mb-8 rounded-lg border border-border-default p-6">
+                    <h2 className="mb-4 text-lg font-semibold">
+                      {editingId === 'new' ? 'New Resource' : 'Edit Resource'}
+                    </h2>
+
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <input
+                        className={`${inputClass} md:col-span-2`}
+                        placeholder="Title"
+                        value={form.title}
+                        onChange={(e) => setForm({ ...form, title: e.target.value })}
+                      />
+                      <input
+                        className={`${inputClass} md:col-span-2`}
+                        placeholder="URL"
+                        value={form.url}
+                        onChange={(e) => setForm({ ...form, url: e.target.value })}
+                      />
+                      <input
+                        className={inputClass}
+                        placeholder="Creator"
+                        value={form.creator}
+                        onChange={(e) => setForm({ ...form, creator: e.target.value })}
+                      />
+                      <input
+                        className={inputClass}
+                        placeholder="Tool (Blender, Maya, Substance...)"
+                        value={form.tool}
+                        onChange={(e) => setForm({ ...form, tool: e.target.value })}
+                      />
+                      <select
+                        className={inputClass}
+                        value={form.type}
+                        onChange={(e) => setForm({ ...form, type: e.target.value })}
+                      >
+                        {RESOURCE_TYPES.map((t) => (
+                          <option key={t} value={t}>{t}</option>
+                        ))}
+                      </select>
+                      <select
+                        className={inputClass}
+                        value={form.skill_level}
+                        onChange={(e) => setForm({ ...form, skill_level: e.target.value })}
+                      >
+                        <option value="">Skill level (optional)</option>
+                        {SKILL_LEVELS.map((l) => (
+                          <option key={l} value={l}>{l}</option>
+                        ))}
+                      </select>
+                      <select
+                        className={`${inputClass} md:col-span-2`}
+                        value={form.engine}
+                        onChange={(e) => setForm({ ...form, engine: e.target.value })}
+                      >
+                        <option value="">Engine (optional)</option>
+                        {ENGINES.map((en) => (
+                          <option key={en} value={en}>{en}</option>
+                        ))}
+                      </select>
+                      <textarea
+                        className={`${inputClass} md:col-span-2 min-h-28`}
+                        placeholder="Notes, takeaways, timestamps"
+                        value={form.notes}
+                        onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="mt-5">
+                      <p className="mb-2 text-xs uppercase tracking-wide text-text-secondary">Categories</p>
+                      <div className="flex flex-wrap gap-2">
+                        {categories.length === 0 && (
+                          <p className="text-sm text-text-secondary">No categories yet. Add one below.</p>
+                        )}
+                        {categories.map((c) => (
+                          <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => toggleFormCategory(c.id)}
+                            className={chipClass(form.category_ids.includes(c.id))}
+                          >
+                            {c.parent_id ? `${categoryById.get(c.parent_id)?.name} / ${c.name}` : c.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-5 flex flex-wrap items-center gap-2">
+                      <input
+                        className={`${inputClass} max-w-56`}
+                        placeholder="New category"
+                        value={newCategoryName}
+                        onChange={(e) => setNewCategoryName(e.target.value)}
+                      />
+                      <select
+                        className={`${inputClass} max-w-56`}
+                        value={newCategoryParent}
+                        onChange={(e) => setNewCategoryParent(e.target.value)}
+                      >
+                        <option value="">Top level</option>
+                        {topLevel.map((c) => (
+                          <option key={c.id} value={c.id}>Under {c.name}</option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={addCategory}
+                        className="rounded-md border border-border-default px-3 py-2 text-sm hover:border-neutral-500"
+                      >
+                        Add Category
+                      </button>
+                    </div>
+
+                    <div className="mt-6 flex gap-2">
+                      <button
+                        onClick={saveResource}
+                        disabled={saving}
+                        className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
+                      >
+                        {saving ? 'Saving...' : 'Save'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingId(null)
+                          setForm(emptyForm)
+                        }}
+                        className="rounded-md border border-border-default px-4 py-2 text-sm hover:border-neutral-500"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Filters */}
+                <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto_auto]">
+                  <input
+                    className={inputClass}
+                    placeholder="Search titles, creators, tools, notes..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                  <select className={inputClass} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+                    <option value="">All types</option>
+                    {RESOURCE_TYPES.map((t) => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                  <select className={inputClass} value={levelFilter} onChange={(e) => setLevelFilter(e.target.value)}>
+                    <option value="">All levels</option>
+                    {SKILL_LEVELS.map((l) => (
+                      <option key={l} value={l}>{l}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Resource list */}
+                <div className="space-y-4">
+                  {filtered.length === 0 && (
+                    <p className="text-sm text-text-secondary">
+                      {resources.length === 0 ? 'No resources yet.' : 'Nothing matches those filters.'}
+                    </p>
+                  )}
+
+                  {filtered.map((r) => {
+                    const thumb = youtubeThumb(r.url)
+                    const done = completed.has(r.id)
+
+                    return (
+                      <div
+                        key={r.id}
+                        className={`flex gap-4 rounded-lg border border-border-default p-4 ${done ? 'opacity-60' : ''}`}
+                      >
+                        {thumb && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={thumb}
+                            alt=""
+                            className="hidden h-24 w-40 shrink-0 rounded-md object-cover sm:block"
+                          />
+                        )}
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              {r.url ? (
+                                <a
+                                  href={r.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="font-semibold hover:underline"
+                                >
+                                  {r.title}
+                                </a>
+                              ) : (
+                                <p className="font-semibold">{r.title}</p>
+                              )}
+                              {r.creator && <p className="text-sm text-text-secondary">{r.creator}</p>}
+                            </div>
+
+                            <button
+                              onClick={() => toggleComplete(r.id)}
+                              className={`shrink-0 rounded-md border px-3 py-1 text-xs ${
+                                done
+                                  ? 'border-green-700 bg-green-950/40 text-green-300'
+                                  : 'border-border-default text-text-secondary hover:border-neutral-500'
+                              }`}
+                            >
+                              {done ? 'Completed' : 'Mark complete'}
+                            </button>
+                          </div>
+
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {[r.type, r.skill_level, r.engine, r.tool].filter(Boolean).map((tag) => (
+                              <span
+                                key={tag}
+                                className="rounded-full border border-neutral-700 bg-elevated px-2 py-0.5 text-xs text-neutral-300"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                            {r.resource_categories.map((rc) => {
+                              const cat = categoryById.get(rc.category_id)
+                              return cat ? (
+                                <span
+                                  key={rc.category_id}
+                                  className="rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-300"
+                                >
+                                  {cat.name}
+                                </span>
+                              ) : null
+                            })}
+                          </div>
+
+                          {r.notes && (
+                            <p className="mt-3 whitespace-pre-wrap text-sm text-text-secondary">{r.notes}</p>
+                          )}
+
+                          {isAdmin && (
+                            <div className="mt-3 flex gap-3 text-xs">
+                              <button
+                                onClick={() => startEdit(r)}
+                                className="text-text-secondary hover:text-foreground"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => deleteResource(r.id)}
+                                className="text-red-400 hover:text-red-300"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
-            )
-          })}
-        </div>
+            </div>
+          </section>
 
-        {/* Studio stack */}
-        <div className="border-t border-border-default pt-10">
-          <h2 className="text-lg font-semibold mb-4">Studio Stack</h2>
+          {/* RIGHT: studio stack */}
+          <aside className="self-start rounded-lg border border-border-default p-6 xl:sticky xl:top-8">
+            <h2 className="text-lg font-semibold mb-1">Studio Stack</h2>
+            <p className="mb-5 text-xs text-text-secondary">Tools and software used across the studio.</p>
 
-          <div className="border border-border-default rounded-lg p-6 mb-8">
-            <p className="text-sm text-text-secondary leading-relaxed">
+            <p className="mb-6 text-sm leading-relaxed text-text-secondary">
               The development stack depends on the project. Unity and Unreal are both used, since the choice of engine
               comes down to what each game needs, they&apos;re tools, not a fixed pipeline. Everything else in the
               stack is flexible for future team members to bring their own preferred tools; engine choice per game is
               the one thing that doesn&apos;t flex.
             </p>
-          </div>
 
-          <div className="space-y-8">
-            {Object.entries(devStack).map(([category, tools]) => (
-              <div key={category}>
-                <h3 className="text-sm uppercase tracking-wide text-text-secondary mb-3">{category}</h3>
-                <div className="flex flex-wrap gap-2">
-                  {tools.map((tool) => (
-                    <span
-                      key={tool}
-                      className="rounded-full border border-neutral-700 bg-elevated px-3 py-1 text-sm text-neutral-200"
-                    >
-                      {tool}
-                    </span>
-                  ))}
+            <div className="space-y-6">
+              {Object.entries(devStack).map(([category, tools]) => (
+                <div key={category}>
+                  <h3 className="mb-2 text-xs uppercase tracking-wide text-text-secondary">{category}</h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {tools.map((tool) => (
+                      <span
+                        key={tool}
+                        className="rounded-full border border-neutral-700 bg-elevated px-2.5 py-0.5 text-xs text-neutral-200"
+                      >
+                        {tool}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </aside>
         </div>
       </main>
     </div>
