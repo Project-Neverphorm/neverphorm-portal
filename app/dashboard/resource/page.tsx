@@ -6,8 +6,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
-import type { User } from '@supabase/supabase-js'
 import Footer from '@/components/Footer'
+import type { User } from '@supabase/supabase-js'
 
 /* ---------- static content ---------- */
 
@@ -85,6 +85,8 @@ const panelSticky = 'min-[1800px]:sticky min-[1800px]:top-8 self-start'
 const inputClass =
   'w-full rounded-lg border border-border-default bg-elevated px-3 py-2.5 text-sm text-foreground placeholder:text-neutral-500 focus:outline-none focus:border-neutral-500'
 
+const iconButtonClass = 'rounded-lg p-2 text-text-secondary hover:bg-elevated hover:text-foreground'
+
 const pillClass = (active: boolean) =>
   `rounded-full border px-3 py-1 text-xs font-medium capitalize transition-colors ${
     active
@@ -148,6 +150,18 @@ const ExternalIcon = () => (
   </svg>
 )
 
+const ExpandIcon = () => (
+  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+    <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+  </svg>
+)
+
+const CollapseIcon = () => (
+  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+    <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
+  </svg>
+)
+
 /* ---------- utils ---------- */
 
 const nullIfEmpty = (s: string) => (s.trim() === '' ? null : s.trim())
@@ -163,6 +177,23 @@ function youtubeThumb(url: string | null): string | null {
     if (u.hostname.includes('youtu.be')) id = u.pathname.slice(1)
     else if (u.hostname.includes('youtube.com')) id = u.searchParams.get('v')
     return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : null
+  } catch {
+    return null
+  }
+}
+
+function youtubeEmbed(url: string | null): string | null {
+  if (!url) return null
+  try {
+    const u = new URL(url)
+    const base = 'https://www.youtube-nocookie.com/embed/'
+    if (u.hostname.includes('youtu.be')) return `${base}${u.pathname.slice(1)}?autoplay=1&rel=0`
+    if (!u.hostname.includes('youtube.com')) return null
+    const v = u.searchParams.get('v')
+    const list = u.searchParams.get('list')
+    if (v) return `${base}${v}?autoplay=1&rel=0${list ? `&list=${list}` : ''}`
+    if (list) return `${base}videoseries?list=${list}&autoplay=1&rel=0`
+    return null
   } catch {
     return null
   }
@@ -224,6 +255,9 @@ export default function ResourcePage() {
 
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
+  const [playing, setPlaying] = useState<Resource | null>(null)
+  const [theater, setTheater] = useState(false)
+
   const loadData = useCallback(async () => {
     const [catRes, resRes] = await Promise.all([
       supabase.from('categories').select('*').order('sort_order').order('name'),
@@ -262,6 +296,7 @@ export default function ResourcePage() {
     init()
   }, [router, loadData])
 
+  // Escape closes the editor
   useEffect(() => {
     if (editingId === null) return
     const onKey = (e: KeyboardEvent) => {
@@ -270,6 +305,20 @@ export default function ResourcePage() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [editingId])
+
+  // Escape closes the player, and lock background scroll while it's open
+  useEffect(() => {
+    if (!playing) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closePlayer()
+    }
+    window.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [playing])
 
   /* ---------- derived ---------- */
 
@@ -318,6 +367,7 @@ export default function ResourcePage() {
 
   const activeCategoryName = activeCategory ? categoryById.get(activeCategory)?.name : 'All Resources'
   const hasFilters = !!(activeCategory || search || typeFilter)
+  const playingEmbed = playing ? youtubeEmbed(playing.url) : null
 
   /* ---------- actions ---------- */
 
@@ -342,6 +392,11 @@ export default function ResourcePage() {
   function closeEditor() {
     setEditingId(null)
     setForm(emptyForm)
+  }
+
+  function closePlayer() {
+    setPlaying(null)
+    setTheater(false)
   }
 
   const clearFilters = () => {
@@ -500,6 +555,7 @@ export default function ResourcePage() {
 
   const renderCard = (r: Resource) => {
     const thumb = youtubeThumb(r.url)
+    const embed = youtubeEmbed(r.url)
 
     const media = (
       <div className="relative aspect-video overflow-hidden bg-neutral-900">
@@ -516,6 +572,14 @@ export default function ResourcePage() {
               <PlayIcon />
             </span>
             {r.creator && <span className="text-xs uppercase tracking-widest text-neutral-600">{r.creator}</span>}
+          </div>
+        )}
+
+        {embed && (
+          <div className="absolute inset-0 flex items-center justify-center transition-colors group-hover:bg-black/40">
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-black opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+              <PlayIcon className="ml-1 h-6 w-6" />
+            </span>
           </div>
         )}
 
@@ -543,7 +607,11 @@ export default function ResourcePage() {
         key={r.id}
         className="group flex flex-col overflow-hidden rounded-xl border border-border-default bg-elevated/20 transition-colors hover:border-neutral-600"
       >
-        {r.url ? (
+        {embed ? (
+          <button onClick={() => setPlaying(r)} className="block w-full text-left">
+            {media}
+          </button>
+        ) : r.url ? (
           <a href={r.url} target="_blank" rel="noopener noreferrer">
             {media}
           </a>
@@ -552,7 +620,14 @@ export default function ResourcePage() {
         )}
 
         <div className="flex flex-1 flex-col p-4">
-          {r.url ? (
+          {embed ? (
+            <button
+              onClick={() => setPlaying(r)}
+              className="line-clamp-2 text-left font-semibold leading-snug hover:underline"
+            >
+              {r.title}
+            </button>
+          ) : r.url ? (
             <a
               href={r.url}
               target="_blank"
@@ -650,6 +725,14 @@ export default function ResourcePage() {
     )
 
     const cls = 'group/mini flex items-center gap-3 rounded-lg p-1.5 transition-colors hover:bg-elevated/50'
+
+    if (youtubeEmbed(r.url)) {
+      return (
+        <button key={r.id} onClick={() => setPlaying(r)} className={`${cls} w-full text-left`}>
+          {inner}
+        </button>
+      )
+    }
 
     return r.url ? (
       <a key={r.id} href={r.url} target="_blank" rel="noopener noreferrer" className={cls}>
@@ -907,14 +990,15 @@ export default function ResourcePage() {
                   const cat = findCategoryByName(stage.name)
                   const count = cat ? countFor(cat.id) : 0
                   const active = !!cat && activeCategory === cat.id
+                  const select = () => (cat ? setActiveCategory(cat.id) : setSearch(stage.name))
 
                   return (
                     <li key={stage.name}>
                       <div
                         role="button"
                         tabIndex={0}
-                        onClick={() => (cat ? setActiveCategory(cat.id) : setSearch(stage.name))}
-                        onKeyDown={(e) => e.key === 'Enter' && (cat ? setActiveCategory(cat.id) : setSearch(stage.name))}
+                        onClick={select}
+                        onKeyDown={(e) => e.key === 'Enter' && select()}
                         className={`flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2 transition-colors ${
                           active ? 'bg-elevated' : 'hover:bg-elevated/50'
                         }`}
@@ -1136,7 +1220,120 @@ export default function ResourcePage() {
         </div>
       )}
 
-      
+      {/* Video player modal */}
+      {playing && playingEmbed && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
+          onMouseDown={(e) => e.target === e.currentTarget && closePlayer()}
+        >
+          <div
+            className={`flex max-h-full w-full flex-col overflow-hidden rounded-xl border border-border-default bg-background shadow-2xl ${
+              theater ? 'max-w-[96vw]' : 'max-w-7xl'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-4 border-b border-border-default px-5 py-3">
+              <div className="min-w-0">
+                <h2 className="truncate font-semibold">{playing.title}</h2>
+                {playing.creator && <p className="text-xs text-text-secondary">{playing.creator}</p>}
+              </div>
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  onClick={() => setTheater((t) => !t)}
+                  title={theater ? 'Exit theater mode' : 'Theater mode'}
+                  className={iconButtonClass}
+                >
+                  {theater ? <CollapseIcon /> : <ExpandIcon />}
+                </button>
+                <a
+                  href={playing.url ?? '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Open on YouTube"
+                  className={iconButtonClass}
+                >
+                  <ExternalIcon />
+                </a>
+                <button onClick={closePlayer} title="Close" className={iconButtonClass}>
+                  <CloseIcon />
+                </button>
+              </div>
+            </div>
+
+            <div className={`flex min-h-0 flex-col ${theater ? '' : 'lg:flex-row'}`}>
+              <div className={`w-full bg-black ${theater ? 'mx-auto max-w-[calc(82vh*16/9)]' : 'lg:flex-1'}`}>
+                <div className="aspect-video w-full">
+                  <iframe
+                    key={playing.id}
+                    src={playingEmbed}
+                    title={playing.title}
+                    className="h-full w-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                </div>
+              </div>
+
+              {!theater && (
+                <aside className="w-full shrink-0 space-y-5 overflow-y-auto border-t border-border-default p-5 lg:w-80 lg:border-l lg:border-t-0">
+                  <div>
+                    <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-neutral-500">Notes</p>
+                    <p className="whitespace-pre-wrap text-sm text-text-secondary">
+                      {playing.notes || 'No notes yet.'}
+                    </p>
+                  </div>
+
+                  {playing.resource_categories.length > 0 && (
+                    <div>
+                      <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+                        Categories
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {playing.resource_categories.map((rc) => {
+                          const cat = categoryById.get(rc.category_id)
+                          return cat ? (
+                            <button
+                              key={rc.category_id}
+                              onClick={() => {
+                                setActiveCategory(cat.id)
+                                closePlayer()
+                              }}
+                              className="rounded-md bg-neutral-800/80 px-2 py-0.5 text-[11px] text-neutral-300 hover:bg-neutral-700"
+                            >
+                              {cat.name}
+                            </button>
+                          ) : null
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-2 border-t border-neutral-800 pt-4">
+                    <button
+                      onClick={() => copyLink(playing)}
+                      className="flex items-center gap-1.5 rounded-lg border border-neutral-800 px-3 py-1.5 text-xs text-text-secondary hover:border-neutral-600 hover:text-foreground"
+                    >
+                      <LinkIcon />
+                      {copiedId === playing.id ? 'Copied!' : 'Copy link'}
+                    </button>
+                    {isAdmin && (
+                      <button
+                        onClick={() => {
+                          const r = playing
+                          closePlayer()
+                          startEdit(r)
+                        }}
+                        className="rounded-lg border border-neutral-800 px-3 py-1.5 text-xs text-text-secondary hover:border-neutral-600 hover:text-foreground"
+                      >
+                        Edit
+                      </button>
+                    )}
+                  </div>
+                </aside>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
