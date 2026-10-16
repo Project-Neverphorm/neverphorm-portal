@@ -154,7 +154,6 @@ export default function MyProfile() {
 
           <div className="space-y-3">
             <div>
-              <p className="mb-1 text-xs text-text-secondary">Name and role (ask Cody to change these)</p>
               <p className="text-sm">
                 {member.name}
                 {member.role && <span className="text-text-secondary"> · {member.role}</span>}
