@@ -8,6 +8,17 @@ import { supabase } from '@/lib/supabase'
 import Navbar from '@/components/Navbar'
 import type { User } from '@supabase/supabase-js'
 import Footer from '@/components/Footer'
+import TeamManager from '@/components/cms/TeamManager'
+import JobsManager from '@/components/cms/JobsManager'
+
+type Tab = 'games' | 'updates' | 'team' | 'jobs'
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'games', label: 'Games' },
+  { id: 'updates', label: 'Updates' },
+  { id: 'team', label: 'Team' },
+  { id: 'jobs', label: 'Jobs' },
+]
 
 type Game = {
   id: string
@@ -46,7 +57,7 @@ export default function CMSPage() {
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  const [tab, setTab] = useState<'games' | 'updates'>('games')
+  const [tab, setTab] = useState<Tab>('games')
 
   const [games, setGames] = useState<Game[]>([])
   const [updates, setUpdates] = useState<Update[]>([])
@@ -193,25 +204,27 @@ export default function CMSPage() {
       <Navbar />
 
       <div className="flex gap-2 px-10 pt-8">
-        {(['games', 'updates'] as const).map((t) => (
+        {TABS.map((t) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={t.id}
+            onClick={() => setTab(t.id)}
             className={`text-sm px-4 py-2 rounded border transition-colors ${
-              tab === t ? 'bg-brand text-black border-brand font-semibold' : 'border-neutral-700 text-text-secondary hover:text-foreground'
+              tab === t.id ? 'bg-brand text-black border-brand font-semibold' : 'border-neutral-700 text-text-secondary hover:text-foreground'
             }`}
           >
-            {t === 'games' ? 'Games' : 'Updates'}
+            {t.label}
           </button>
         ))}
       </div>
 
       <div className="px-10 py-8 flex-1">
+        {tab === 'team' && <TeamManager />}
+        {tab === 'jobs' && <JobsManager />}
 
         {tab === 'games' && (
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h1 className="text-xl font-bold">Games — projectneverphorm.com/games</h1>
+              <h1 className="text-xl font-bold">Games · projectneverphorm.com/games</h1>
               <button onClick={openNewGame} className="bg-brand text-black text-sm font-semibold rounded px-4 py-2">
                 + Add game
               </button>
@@ -240,7 +253,7 @@ export default function CMSPage() {
         {tab === 'updates' && (
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h1 className="text-xl font-bold">Updates — projectneverphorm.com/updates</h1>
+              <h1 className="text-xl font-bold">Updates · projectneverphorm.com/updates</h1>
               <button onClick={openNewUpdate} className="bg-brand text-black text-sm font-semibold rounded px-4 py-2">
                 + Add update
               </button>
