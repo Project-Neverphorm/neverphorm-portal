@@ -7,6 +7,14 @@ export type UpdateEntry = {
   // Newest at the top
   export const UPDATES: UpdateEntry[] = [
     {
+      date: '2026-10-15',
+      title: 'Resources Page',
+      changes: [
+        'Major update to the resources page',
+        'Added in what would be more useful and helpful forms of information',
+      ],
+    },
+    {
         date: '2026-10-12',
         title: 'Training Page',
         changes: [
