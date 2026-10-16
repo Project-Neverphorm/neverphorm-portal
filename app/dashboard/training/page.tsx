@@ -264,11 +264,11 @@ export default function TrainingPage() {
   const openCompletion = openModule ? moduleCompletion(user?.id ?? '', openModule.id) : undefined
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-clip">
       <Navbar />
 
-      <div className="flex-1 flex">
-        <main className="flex-1 px-10 py-10">
+      <div className="flex-1 flex flex-col lg:flex-row min-w-0">
+        <main className="flex-1 min-w-0 px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
           <div className="mb-10">
             <h1 className="text-2xl font-bold">Training</h1>
             <p className="text-text-secondary text-sm mt-1">
@@ -294,7 +294,7 @@ export default function TrainingPage() {
           </div>
 
           <section id="pathways" className="mb-14">
-            <div className="flex items-center justify-between mb-1">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
               <h2 className="text-sm uppercase tracking-wide text-text-secondary">Pathways</h2>
               <span className="text-xs text-text-secondary">
                 {myCompletedCount} / {PATHWAYS.length} complete
@@ -302,7 +302,7 @@ export default function TrainingPage() {
             </div>
             <p className="text-2xl font-bold mb-6">Required Learning Pathways</p>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {PATHWAYS.map((pathway) => {
                 const complete = isComplete(user?.id ?? '', pathway.key)
                 const saving = savingKey === pathway.key
@@ -371,7 +371,7 @@ export default function TrainingPage() {
             {modules.length === 0 ? (
               <p className="text-sm text-text-secondary">No quick learns yet. Check back soon.</p>
             ) : (
-              <div className="grid grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                 {modules.map((mod) => {
                   const done = !!moduleCompletion(user?.id ?? '', mod.id)
 
@@ -416,7 +416,7 @@ export default function TrainingPage() {
               Not required, but useful for going deeper in a specific area.
             </p>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {CERT_LINKS.map((cert) => (
                 <div key={cert.key} className="border border-border-default rounded-lg p-6">
                   <p className="text-xs text-text-secondary uppercase tracking-wide mb-1">
@@ -438,7 +438,7 @@ export default function TrainingPage() {
           </section>
         </main>
 
-        <aside className="w-80 shrink-0 border-l border-border-default px-6 py-10 min-h-screen">
+        <aside className="w-full lg:w-80 lg:shrink-0 border-t lg:border-t-0 lg:border-l border-border-default px-4 sm:px-6 py-8 lg:py-10 lg:min-h-screen">
           <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-4">
             Team Progress
           </h2>
@@ -518,7 +518,7 @@ export default function TrainingPage() {
           onClick={() => setOpenModule(null)}
         >
           <div
-            className="w-full max-w-2xl bg-elevated border border-border-default rounded-lg p-8 max-h-[85vh] overflow-y-auto"
+            className="w-full max-w-2xl bg-elevated border border-border-default rounded-lg p-5 sm:p-8 max-h-[85vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-4 mb-6">
