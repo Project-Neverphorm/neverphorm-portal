@@ -10,14 +10,16 @@ import type { User } from '@supabase/supabase-js'
 import Footer from '@/components/Footer'
 import TeamManager from '@/components/cms/TeamManager'
 import JobsManager from '@/components/cms/JobsManager'
+import MyProfile from '@/components/cms/MyProfile'
 
-type Tab = 'games' | 'updates' | 'team' | 'jobs'
+type Tab = 'games' | 'updates' | 'team' | 'jobs' | 'profile'
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'games', label: 'Games' },
-  { id: 'updates', label: 'Updates' },
-  { id: 'team', label: 'Team' },
-  { id: 'jobs', label: 'Jobs' },
+const TABS: { id: Tab; label: string; adminOnly: boolean }[] = [
+  { id: 'games', label: 'Games', adminOnly: true },
+  { id: 'updates', label: 'Updates', adminOnly: true },
+  { id: 'team', label: 'Team', adminOnly: true },
+  { id: 'jobs', label: 'Jobs', adminOnly: true },
+  { id: 'profile', label: 'My Profile', adminOnly: false },
 ]
 
 type Game = {
@@ -54,10 +56,11 @@ const emptyUpdate = {
 
 export default function CMSPage() {
   const [user, setUser] = useState<User | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  const [tab, setTab] = useState<Tab>('games')
+  const [tab, setTab] = useState<Tab>('profile')
 
   const [games, setGames] = useState<Game[]>([])
   const [updates, setUpdates] = useState<Update[]>([])
@@ -81,22 +84,29 @@ export default function CMSPage() {
   }
 
   useEffect(() => {
-    loadGames()
-    loadUpdates()
-  }, [])
-
-  useEffect(() => {
-    const checkUser = async () => {
+    const init = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         router.push('/login')
         return
       }
       setUser(user)
+
+      const { data: admin } = await supabase.rpc('is_studio_admin')
+      const adminFlag = admin === true
+      setIsAdmin(adminFlag)
+      setTab(adminFlag ? 'games' : 'profile')
+
+      if (adminFlag) {
+        loadGames()
+        loadUpdates()
+      }
       setLoading(false)
     }
-    checkUser()
+    init()
   }, [router])
+
+  const visibleTabs = TABS.filter((t) => isAdmin || !t.adminOnly)
 
   const openNewGame = () => {
     setGameForm(emptyGame)
@@ -203,25 +213,29 @@ export default function CMSPage() {
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Navbar />
 
-      <div className="flex gap-2 px-10 pt-8">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`text-sm px-4 py-2 rounded border transition-colors ${
-              tab === t.id ? 'bg-brand text-black border-brand font-semibold' : 'border-neutral-700 text-text-secondary hover:text-foreground'
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      {visibleTabs.length > 1 && (
+        <div className="flex gap-2 px-10 pt-8">
+          {visibleTabs.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`text-sm px-4 py-2 rounded border transition-colors ${
+                tab === t.id ? 'bg-brand text-black border-brand font-semibold' : 'border-neutral-700 text-text-secondary hover:text-foreground'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="px-10 py-8 flex-1">
-        {tab === 'team' && <TeamManager />}
-        {tab === 'jobs' && <JobsManager />}
+        {tab === 'profile' && <MyProfile />}
 
-        {tab === 'games' && (
+        {isAdmin && tab === 'team' && <TeamManager />}
+        {isAdmin && tab === 'jobs' && <JobsManager />}
+
+        {isAdmin && tab === 'games' && (
           <div>
             <div className="flex items-center justify-between mb-6">
               <h1 className="text-xl font-bold">Games · projectneverphorm.com/games</h1>
@@ -250,7 +264,7 @@ export default function CMSPage() {
           </div>
         )}
 
-        {tab === 'updates' && (
+        {isAdmin && tab === 'updates' && (
           <div>
             <div className="flex items-center justify-between mb-6">
               <h1 className="text-xl font-bold">Updates · projectneverphorm.com/updates</h1>
@@ -280,7 +294,7 @@ export default function CMSPage() {
         )}
       </div>
 
-      {showGameForm && (
+      {isAdmin && showGameForm && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4 py-8 overflow-y-auto">
           <div className="w-full max-w-lg bg-elevated border border-border-default rounded-lg p-6">
             <div className="flex items-center justify-between mb-5">
@@ -331,7 +345,7 @@ export default function CMSPage() {
         </div>
       )}
 
-      {showUpdateForm && (
+      {isAdmin && showUpdateForm && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4 py-8 overflow-y-auto">
           <div className="w-full max-w-lg bg-elevated border border-border-default rounded-lg p-6">
             <div className="flex items-center justify-between mb-5">
