@@ -30,6 +30,15 @@ const STAGES: Stage[] = [
       { title: "Rage Room Sim DLC packs", net: 1500 },
     ],
   },
+  {
+    label: "Big month",
+    blurb: "What a breakout month could look like if all three titles sell well at once.",
+    lines: [
+      { title: "Duskline", net: 48000 },
+      { title: "Gate Coverage Sim", net: 27488 },
+      { title: "Rage Room Sim", net: 56370 },
+    ],
+  },
 ];
 
 const STUDIO_RATE = 0.3;
