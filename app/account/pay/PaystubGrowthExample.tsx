@@ -177,3 +177,10 @@ function Stat({
     </div>
   );
 }
+
+    <p className="mt-4 text-xs text-zinc-400">
+        These are made-up examples to show how payouts work as the studio
+        releases more titles. They are not projections or promises. Real
+        payouts depend entirely on actual sales and will vary a lot from
+        month to month.
+      </p>
