@@ -1,5 +1,6 @@
 import { Badge, Card, ExampleTag, InfoRow, ProgressBar, StatTile, Table, TabHeader } from '@/components/account/AccountUI'
 import { ClockIcon, DownloadIcon, FileIcon, TrendingIcon, WalletIcon } from '@/components/account/icons'
+import TaxNotice from "./TaxNotice";
 
 // Placeholder numbers (all net). Replace with Supabase data later.
 const monthly = [
@@ -14,6 +15,8 @@ const statements = [
   ['Nov 2026', 'Duskline', '$19,250', '20%', '$3,850.00', 'Example'],
   ['Oct 2026', 'Duskline', '$16,500', '20%', '$3,300.00', 'Example'],
 ]
+// TODO: replace with this user's real payout from Supabase
+const currentMonthPayout = 0;
 
 const usd = (n: number) => `$${n.toLocaleString()}`
 
@@ -25,6 +28,8 @@ export default function PayPage() {
         description="How you're paid, when payouts happen, and your statement history. All figures are net."
         action={<ExampleTag />}
       />
+
+      <TaxNotice payoutAmount={currentMonthPayout} />
 
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <StatTile label="Pay type" value="Rev share" hint="Switches to salary at milestone" icon={<WalletIcon />} />
