@@ -112,10 +112,10 @@ export default function PayPage() {
               ))}
             </ul>
           </Card>
-
-          <PaystubGrowthExample poolMembers={4} />
         </div>
       </div>
+
+      <PaystubGrowthExample poolMembers={4} />
 
       <Card title="Road to salary" action={<ExampleTag />}>
         <div className="grid gap-6 md:grid-cols-3">
