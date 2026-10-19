@@ -76,7 +76,7 @@ type TaxNoticeProps = {
             )}
   
             <p className="text-xs text-zinc-400">
-              This is a rule of thumb, not tax advice. Check with a tax
+              This is a rule of thumb based on research, not tax advice. Check with a tax
               professional about your situation and whether you need to make
               quarterly estimated payments. This is an example of what we all will need to do.
               Realistically, we plan on looking into CPAs (Certified Professional Account) when the time comes.
