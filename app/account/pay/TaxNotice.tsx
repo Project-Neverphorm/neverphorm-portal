@@ -79,7 +79,7 @@ type TaxNoticeProps = {
               This is a rule of thumb based on research, not tax advice. Check with a tax
               professional about your situation and whether you need to make
               quarterly estimated payments. This is an example of what we all will need to do.
-              Realistically, we plan on looking into CPAs (Certified Professional Account) when the time comes.
+              Realistically, we plan on looking into CPAs (Certified Professional Accountant) when the time comes.
             </p>
           </div>
         </div>
