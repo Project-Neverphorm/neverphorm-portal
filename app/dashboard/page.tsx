@@ -74,7 +74,7 @@ export default function DashboardPage() {
   const [newTaskXP, setNewTaskXP] = useState(XP_TIERS[0].value)
 
   const RESPONSIBILITIES: Record<string, string[]> = {
-    'Studio Head & Creative Director': [
+    'Creative Lead & Programmer': [
       'Creative direction across all titles',
       'Gameplay programming & technical architecture',
       'Business development & legal (DUNS, developer accounts, LLC)',
@@ -86,24 +86,25 @@ export default function DashboardPage() {
       'Voice acting & audio direction',
       'Website & internal tools development',
     ],
-    'Business Operations': [
+    'Business Operations Lead': [
       'HR — onboarding, contracts, and team admin',
       'Publisher relations & outreach',
       'Marketing & launch coordination (release timing, store pages, PR pushes)',
       'Accounting & bookkeeping',
       'Legal & business affairs support',
     ],
-    'Marketing & Community': [
+    'Marketing & Community Lead': [
       'Social media & community strategy',
       'Marketing & launch coordination (release timing, store pages, PR pushes)',
       'Content calendar & promotional campaigns',
       'Press outreach & partnerships',
     ],
-    'Graphic Designer': [
-      'Achievement/trophy design & implementation',
-      'QA testing & bug reporting',
-      'Marketing assets (social graphics, store page art)',
-      'Branding & visual identity support',
+    'Level Designer': [
+      'Level layout & greyboxing in the game engine',
+      'Platform, hazard & trap placement',
+      'Difficulty pacing & progression across levels',
+      'Set dressing levels with environment assets',
+      'Playtesting & iterating on level flow',
     ],
     'UI/UX Designer': [
       '2D UI/UX design across all titles',
