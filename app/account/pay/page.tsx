@@ -1,6 +1,7 @@
 import { Badge, Card, ExampleTag, InfoRow, ProgressBar, StatTile, Table, TabHeader } from '@/components/account/AccountUI'
 import { ClockIcon, DownloadIcon, FileIcon, TrendingIcon, WalletIcon } from '@/components/account/icons'
 import TaxNotice from "./TaxNotice";
+import PaystubGrowthExample from "./PaystubGrowthExample";
 
 // Placeholder numbers (all net). Replace with Supabase data later.
 const monthly = [
@@ -93,6 +94,8 @@ export default function PayPage() {
             ])}
           />
         </Card>
+
+        <PaystubGrowthExample poolMembers={4} />
 
         <div className="space-y-4">
           <Card title="Payout method">
