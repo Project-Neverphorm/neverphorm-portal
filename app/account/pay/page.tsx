@@ -95,8 +95,6 @@ export default function PayPage() {
           />
         </Card>
 
-        <PaystubGrowthExample poolMembers={4} />
-
         <div className="space-y-4">
           <Card title="Payout method">
             <InfoRow label="Method" value="Direct deposit" />
@@ -114,6 +112,8 @@ export default function PayPage() {
               ))}
             </ul>
           </Card>
+
+          <PaystubGrowthExample poolMembers={4} />
         </div>
       </div>
 
