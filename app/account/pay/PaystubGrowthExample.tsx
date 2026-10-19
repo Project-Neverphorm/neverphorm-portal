@@ -39,6 +39,17 @@ const STAGES: Stage[] = [
       { title: "Rage Room Sim", net: 56370 },
     ],
   },
+  {
+    label: "Verdantium launch",
+    blurb: "The whole catalog plus a flagship launch in the same month.",
+    lines: [
+      { title: "Duskline", net: 47390 },
+      { title: "Gate Coverage Sim", net: 17400 },
+      { title: "Rage Room Sim", net: 39304 },
+      { title: "Rage Room Sim DLC (6 packs)", net: 8480 },
+      { title: "Verdantium", net: 186304 },
+    ],
+  },
 ];
 
 const STUDIO_RATE = 0.3;
