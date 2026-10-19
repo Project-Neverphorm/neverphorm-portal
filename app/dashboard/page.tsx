@@ -360,65 +360,76 @@ export default function DashboardPage() {
   const studioXP = xpLog.reduce((sum, entry) => sum + entry.xp, 0)
   const studioLevel = getStudioLevelInfo(studioXP)
 
+  const renderTeamList = () => (
+    <div className="space-y-6">
+      {teamMembers.map((member) => {
+        const memberXP = xpForMember(member.id)
+        const memberLevel = getLevelInfo(memberXP)
+        const initials = member.full_name
+          .split(' ')
+          .map((n) => n[0])
+          .join('')
+          .toUpperCase()
+          .slice(0, 2)
+
+        return (
+          <div key={member.id}>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-full bg-brand text-black font-bold flex items-center justify-center shrink-0">
+                {initials}
+              </div>
+              <div className="min-w-0">
+                <p className="font-semibold text-sm truncate">{member.full_name}</p>
+                <p className="text-xs text-text-secondary truncate">{member.title}</p>
+              </div>
+            </div>
+            <p className="text-xs text-text-secondary mb-1">Lvl {memberLevel.level} · {memberLevel.progress} / {memberLevel.needed} XP</p>
+            <div className="w-full h-1.5 bg-elevated rounded-full overflow-hidden">
+              <div className="h-full bg-brand" style={{ width: `${Math.min(memberLevel.percent, 100)}%` }} />
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-clip">
       <Navbar />
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 min-w-0">
 
-        <aside className="w-72 shrink-0 border-r border-border-default px-6 py-10">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-sm uppercase tracking-wide text-text-secondary">Team</h2>
-          </div>
-
-          <div className="space-y-6">
-            {teamMembers.map((member) => {
-              const memberXP = xpForMember(member.id)
-              const memberLevel = getLevelInfo(memberXP)
-              const initials = member.full_name
-                .split(' ')
-                .map((n) => n[0])
-                .join('')
-                .toUpperCase()
-                .slice(0, 2)
-
-              return (
-                <div key={member.id}>
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-full bg-brand text-black font-bold flex items-center justify-center shrink-0">
-                      {initials}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm">{member.full_name}</p>
-                      <p className="text-xs text-text-secondary">{member.title}</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-text-secondary mb-1">Lvl {memberLevel.level} · {memberLevel.progress} / {memberLevel.needed} XP</p>
-                  <div className="w-full h-1.5 bg-elevated rounded-full overflow-hidden">
-                    <div className="h-full bg-brand" style={{ width: `${Math.min(memberLevel.percent, 100)}%` }} />
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+        {/* Desktop sidebar */}
+        <aside className="hidden lg:block w-72 shrink-0 border-r border-border-default px-6 py-10">
+          <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-6">Team</h2>
+          {renderTeamList()}
         </aside>
 
-        <main className="flex-1 px-10 py-10">
+        <main className="flex-1 min-w-0 px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
 
-          <div className="mb-10">
-            <h1 className="text-2xl font-bold">Welcome back, {myProfile?.full_name ?? 'there'}</h1>
+          <div className="mb-8 lg:mb-10">
+            <h1 className="text-2xl font-bold break-words">Welcome back, {myProfile?.full_name ?? 'there'}</h1>
             <p className="text-text-secondary text-sm mt-1">Here&apos;s where things stand.</p>
           </div>
 
-          <div className="border-b border-border-default pb-10 mb-10">
-            <div className="flex items-center justify-between mb-3">
+          {/* Mobile team section */}
+          <details className="lg:hidden mb-8 border border-border-default rounded-lg group/team">
+            <summary className="flex items-center justify-between px-4 py-3 cursor-pointer list-none text-sm uppercase tracking-wide text-text-secondary [&::-webkit-details-marker]:hidden">
+              <span>Team ({teamMembers.length})</span>
+              <span className="inline-block transition-transform group-open/team:rotate-180">▾</span>
+            </summary>
+            <div className="px-4 pb-4 pt-1">{renderTeamList()}</div>
+          </details>
+
+          <div className="border-b border-border-default pb-8 mb-8 lg:pb-10 lg:mb-10">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
               <h2 className="text-sm uppercase tracking-wide text-text-secondary">Studio Progress</h2>
               <button
                 onClick={() => setShowStudioLevels(true)}
                 className="text-xs text-brand hover:underline">About Studio Levels</button>
             </div>
-            <div className="flex items-end gap-4 mb-4">
-              <span className="text-6xl font-bold text-brand">Lvl {studioLevel.level}</span>
+            <div className="flex flex-wrap items-end gap-x-4 gap-y-1 mb-4">
+              <span className="text-5xl sm:text-6xl font-bold text-brand">Lvl {studioLevel.level}</span>
               <span className="text-green-300 text-sm pb-2">Starting Fresh!</span>
             </div>
             <div className="w-full h-2 bg-elevated rounded-full overflow-hidden">
@@ -427,7 +438,7 @@ export default function DashboardPage() {
             <p className="text-sm text-text-secondary mt-2">{studioLevel.progress} / {studioLevel.needed} XP</p>
           </div>
 
-          <div className="grid grid-cols-3 gap-10 border-b border-border-default pb-10 mb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-10 border-b border-border-default pb-8 mb-8 lg:pb-10 lg:mb-10">
             <div>
               <p className="text-xs uppercase tracking-wide text-text-secondary mb-2">Next Goal</p>
               <p className="font-semibold">Complete Current Task Boxes</p>
@@ -445,40 +456,40 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-10 xl:gap-12">
 
-            <div className="col-span-2">
-              <div className="flex items-center justify-between mb-1">
+            <div className="lg:col-span-2 min-w-0">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                 <h2 className="text-sm uppercase tracking-wide text-text-secondary">My Current Tasks</h2>
                 <span className="text-xs text-text-secondary">🎯 Target: Ongoing</span>
               </div>
               <p className="text-2xl font-bold mb-1">Current Tasks</p>
-              <p className="text-brand text-sm mb-3">Assigned to {myProfile?.full_name}</p>
+              <p className="text-brand text-sm mb-3 break-words">Assigned to {myProfile?.full_name}</p>
 
               <div className="w-full h-2 bg-elevated rounded-full overflow-hidden mb-2">
                 <div className="h-full bg-brand" style={{ width: `${Math.min(myLevel.percent, 100)}%` }} />
               </div>
               <p className="text-sm text-text-secondary mb-6">Lvl {myLevel.level} · {myLevel.progress} / {myLevel.needed} XP · {myCompletedCount} tasks completed</p>
 
-              <div className="divide-y divide-neutral-800 max-h-80 overflow-y-auto pr-2">
+              <div className="divide-y divide-neutral-800 lg:max-h-80 lg:overflow-y-auto lg:pr-2">
                 {myTasks.length === 0 && (
                   <p className="text-sm text-text-secondary py-4">No active tasks. Log one from the admin panel.</p>
                 )}
                 {myTasks.map((task) => (
                   <div key={task.id} className="py-3 group">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 min-w-0">
                         <button
                           onClick={() => completeTask(task.id)}
                           aria-label={`Mark "${task.name}" complete`}
-                          className="w-5 h-5 rounded border border-neutral-600 hover:border-brand flex items-center justify-center shrink-0 transition-colors"
+                          className="mt-0.5 w-6 h-6 lg:w-5 lg:h-5 rounded border border-neutral-600 hover:border-brand flex items-center justify-center shrink-0 transition-colors"
                         />
                         <button
                           type="button"
                           onClick={() =>
                             setExpandedTaskId(expandedTaskId === task.id ? null : task.id)
                           }
-                          className="text-sm text-left hover:text-brand transition-colors"
+                          className="text-sm text-left break-words min-w-0 hover:text-brand transition-colors"
                         >
                           {task.name}
                           {task.description && (
@@ -488,12 +499,12 @@ export default function DashboardPage() {
                           )}
                         </button>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <span className="text-sm font-semibold text-brand">+{task.xp} XP</span>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="text-sm font-semibold text-brand whitespace-nowrap">+{task.xp} XP</span>
                         <button
                           onClick={() => deleteTask(task.id)}
                           aria-label={`Delete "${task.name}"`}
-                          className="text-neutral-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="p-1 text-neutral-600 hover:text-red-500 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
                         >
                           ✕
                         </button>
@@ -501,7 +512,7 @@ export default function DashboardPage() {
                     </div>
 
                     {expandedTaskId === task.id && task.description && (
-                      <p className="text-sm text-text-secondary mt-2 pl-8 whitespace-pre-wrap">
+                      <p className="text-sm text-text-secondary mt-2 pl-9 lg:pl-8 whitespace-pre-wrap break-words">
                         {task.description}
                       </p>
                     )}
@@ -510,14 +521,14 @@ export default function DashboardPage() {
               </div>
 
               <div className="mt-6 border-l-2 border-brand bg-elevated/40 rounded-r px-4 py-3">
-                  <p className="text-xs uppercase tracking-wide text-brand mb-1">Before you check it off</p>
-                  <p className="text-sm text-neutral-300">
-                    Only check off a task once it&apos;s actually done. Checking tasks off is how everyone stays up to date visually with where the studio is at, so please keep it accurate. Thank you and good day!
-                  </p>
+                <p className="text-xs uppercase tracking-wide text-brand mb-1">Before you check it off</p>
+                <p className="text-sm text-neutral-300">
+                  Only check off a task once it&apos;s actually done. Checking tasks off is how everyone stays up to date visually with where the studio is at, so please keep it accurate. Thank you and good day!
+                </p>
               </div>
             </div>
 
-                        <div>
+            <div className="min-w-0">
               <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">Responsibilities</h2>
               <div className="space-y-2">
                 {(RESPONSIBILITIES[myProfile?.title ?? ''] ?? []).map((item) => (
@@ -565,18 +576,18 @@ export default function DashboardPage() {
             </div>
 
             {isManager && (
-              <div>
+              <div className="min-w-0">
                 <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">Admin</h2>
                 <div className="flex flex-col gap-2 mb-8">
                   <button
                     onClick={() => setShowLogTask(true)}
-                    className="text-sm text-left border border-neutral-700 hover:border-brand rounded px-4 py-2 transition-colors"
+                    className="text-sm text-left border border-neutral-700 hover:border-brand rounded px-4 py-3 lg:py-2 transition-colors"
                   >
                     + Log Task
                   </button>
                   <button
                     onClick={() => setShowArchive(true)}
-                    className="text-sm text-left border border-neutral-700 hover:border-brand rounded px-4 py-2 transition-colors flex items-center justify-between"
+                    className="text-sm text-left border border-neutral-700 hover:border-brand rounded px-4 py-3 lg:py-2 transition-colors flex items-center justify-between"
                   >
                     <span>Archived Tasks</span>
                     <span className="text-text-secondary">{archivedTasks.length}</span>
@@ -597,9 +608,9 @@ export default function DashboardPage() {
                         onClick={() => setViewingMember(member)}
                         className="w-full text-left border-l-2 border-brand pl-4 mb-6 py-1 rounded-r hover:bg-elevated/40 transition-colors"
                       >
-                        <div className="flex items-center justify-between">
-                          <p className="font-semibold">{member.full_name}</p>
-                          <span className="text-sm text-text-secondary">{memberLevel.progress}/{memberLevel.needed}</span>
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="font-semibold truncate">{member.full_name}</p>
+                          <span className="text-sm text-text-secondary shrink-0">{memberLevel.progress}/{memberLevel.needed}</span>
                         </div>
                         <p className="text-brand text-sm">Current Tasks</p>
                         <p className="text-xs text-text-secondary mb-2">🎯 Target: Ongoing</p>
@@ -625,7 +636,7 @@ export default function DashboardPage() {
 
       {showLogTask && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
-          <div className="w-full max-w-sm bg-elevated border border-border-default rounded-lg p-6">
+          <div className="w-full max-w-sm bg-elevated border border-border-default rounded-lg p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-semibold">Log a new task</h3>
               <button onClick={() => setShowLogTask(false)} aria-label="Close" className="text-text-secondary hover:text-foreground">✕</button>
@@ -693,7 +704,7 @@ export default function DashboardPage() {
 
       {showArchive && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
-          <div className="w-full max-w-md bg-elevated border border-border-default rounded-lg p-6">
+          <div className="w-full max-w-md bg-elevated border border-border-default rounded-lg p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-semibold">Archived tasks</h3>
               <button onClick={() => setShowArchive(false)} aria-label="Close" className="text-text-secondary hover:text-foreground">

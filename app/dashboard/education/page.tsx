@@ -507,11 +507,35 @@ export default function EducationPage() {
     )
   }
 
+    // Phones show one level at a time; large screens show all three columns
+  const mobileLevel: 'categories' | 'items' | 'detail' = item
+    ? 'detail'
+    : category
+    ? 'items'
+    : 'categories'
+
+  const scrollTopOnMobile = () => {
+    if (window.innerWidth < 1024) window.scrollTo({ top: 0 })
+  }
+
+  const selectCategory = (id: string) => {
+    setCategoryId(id)
+    setItemId(null)
+    scrollTopOnMobile()
+  }
+
+  const selectItem = (id: string) => {
+    setItemId(id)
+    scrollTopOnMobile()
+  }
+
+  const sectionLabel = section === 'departments' ? 'Departments' : 'Vendors & Engines'
+
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-clip">
       <Navbar />
 
-      <div className="flex gap-2 px-10 pt-8">
+      <div className="flex gap-2 px-4 sm:px-6 lg:px-10 pt-6 lg:pt-8">
         {(['departments', 'tools'] as const).map((s) => (
           <button
             key={s}
@@ -527,88 +551,103 @@ export default function EducationPage() {
         ))}
       </div>
 
-      <div className="flex flex-1 px-10 py-8 gap-0">
+      <div className="flex flex-1 min-w-0 px-4 sm:px-6 lg:px-10 py-6 lg:py-8">
         {/* Category column (Departments / Vendors & Engines) */}
         <div
-          className={`shrink-0 border-r border-border-default transition-all ${
-            vendorsCollapsed ? 'w-10 pr-2' : 'w-56 pr-6'
+          className={`${mobileLevel === 'categories' ? 'block' : 'hidden'} lg:block w-full lg:shrink-0 lg:border-r border-border-default transition-all ${
+            vendorsCollapsed ? 'lg:w-10 lg:pr-2' : 'lg:w-56 lg:pr-6'
           }`}
         >
           <button
             onClick={() => setVendorsCollapsed(!vendorsCollapsed)}
-            className="mb-3 text-xs text-text-secondary hover:text-foreground"
+            className="hidden lg:block mb-3 text-xs text-text-secondary hover:text-foreground"
           >
             {vendorsCollapsed ? '»' : '« Collapse'}
           </button>
-          {!vendorsCollapsed && (
-            <>
-              <h2 className="text-xs uppercase tracking-wide text-text-secondary mb-3">
-                {section === 'departments' ? 'Departments' : 'Vendors & Engines'}
-              </h2>
-              <div className="flex flex-col gap-1">
-                {tree.map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => {
-                      setCategoryId(c.id)
-                      setItemId(null)
-                    }}
-                    className={`text-left text-sm px-3 py-2 rounded transition-colors ${
-                      categoryId === c.id
-                        ? 'bg-elevated text-brand font-semibold'
-                        : 'text-neutral-300 hover:bg-elevated'
-                    }`}
-                  >
-                    {c.name}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
+          <div className={vendorsCollapsed ? 'lg:hidden' : ''}>
+            <h2 className="text-xs uppercase tracking-wide text-text-secondary mb-3">{sectionLabel}</h2>
+            <div className="flex flex-col gap-1">
+              {tree.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => selectCategory(c.id)}
+                  className={`flex items-center justify-between text-left text-sm px-3 py-3 lg:py-2 rounded transition-colors ${
+                    categoryId === c.id
+                      ? 'bg-elevated text-brand font-semibold'
+                      : 'text-neutral-300 hover:bg-elevated'
+                  }`}
+                >
+                  <span>{c.name}</span>
+                  <span className="lg:hidden text-text-muted">›</span>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Items column */}
         <div
-          className={`shrink-0 border-r border-border-default transition-all ${
-            itemsCollapsed ? 'w-10 px-2' : 'w-64 px-6'
+          className={`${mobileLevel === 'items' ? 'block' : 'hidden'} lg:block w-full lg:shrink-0 lg:border-r border-border-default transition-all ${
+            itemsCollapsed ? 'lg:w-10 lg:px-2' : 'lg:w-64 lg:px-6'
           }`}
         >
           <button
+            onClick={() => {
+              setCategoryId(null)
+              setItemId(null)
+            }}
+            className="lg:hidden mb-4 text-sm text-brand"
+          >
+            ← {sectionLabel}
+          </button>
+          <button
             onClick={() => setItemsCollapsed(!itemsCollapsed)}
-            className="mb-3 text-xs text-text-secondary hover:text-foreground"
+            className="hidden lg:block mb-3 text-xs text-text-secondary hover:text-foreground"
           >
             {itemsCollapsed ? '»' : '« Collapse'}
           </button>
-          {!itemsCollapsed && !category && (
-            <p className="text-sm text-text-secondary">
-              Select a {section === 'departments' ? 'department ' : 'vendor '} to see what&apos;s inside.
-            </p>
-          )}
-          {!itemsCollapsed && category && (
-            <>
-              <h2 className="text-xs uppercase tracking-wide text-text-secondary mb-3">{category.name}</h2>
-              <div className="flex flex-col gap-1">
-                {category.items.map((i) => (
-                  <button
-                    key={i.id}
-                    onClick={() => setItemId(i.id)}
-                    className={`text-left text-sm px-3 py-2 rounded transition-colors ${
-                      itemId === i.id
-                        ? 'bg-elevated text-brand font-semibold'
-                        : 'text-neutral-300 hover:bg-elevated'
-                    }`}
-                  >
-                    {i.name}
-                    {!i.detail && <span className="text-text-muted text-xs ml-2">·</span>}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
+          <div className={itemsCollapsed ? 'lg:hidden' : ''}>
+            {!category && (
+              <p className="text-sm text-text-secondary">
+                Select a {section === 'departments' ? 'department' : 'vendor'} to see what&apos;s inside.
+              </p>
+            )}
+            {category && (
+              <>
+                <h2 className="text-xs uppercase tracking-wide text-text-secondary mb-3">{category.name}</h2>
+                <div className="flex flex-col gap-1">
+                  {category.items.map((i) => (
+                    <button
+                      key={i.id}
+                      onClick={() => selectItem(i.id)}
+                      className={`flex items-center justify-between text-left text-sm px-3 py-3 lg:py-2 rounded transition-colors ${
+                        itemId === i.id
+                          ? 'bg-elevated text-brand font-semibold'
+                          : 'text-neutral-300 hover:bg-elevated'
+                      }`}
+                    >
+                      <span>
+                        {i.name}
+                        {!i.detail && <span className="text-text-muted text-xs ml-2">·</span>}
+                      </span>
+                      <span className="lg:hidden text-text-muted">›</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Detail panel */}
-        <div className="flex-1 pl-8 overflow-y-auto">
+        <div
+          className={`${mobileLevel === 'detail' ? 'block' : 'hidden'} lg:block flex-1 min-w-0 lg:pl-8 lg:overflow-y-auto`}
+        >
+          {category && (
+            <button onClick={() => setItemId(null)} className="lg:hidden mb-4 text-sm text-brand">
+              ← {category.name}
+            </button>
+          )}
           {contentLoading && item === null && category && (
             <p className="text-sm text-text-secondary">Loading content…</p>
           )}
@@ -619,7 +658,7 @@ export default function EducationPage() {
           )}
           {item && !item.detail && (
             <div>
-              <h1 className="text-2xl font-bold mb-2">{item.name}</h1>
+              <h1 className="text-2xl font-bold mb-2 break-words">{item.name}</h1>
               <p className="text-sm text-text-secondary">Content coming soon.</p>
             </div>
           )}
