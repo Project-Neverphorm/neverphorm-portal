@@ -74,7 +74,7 @@ export default function DashboardPage() {
   const [newTaskXP, setNewTaskXP] = useState(XP_TIERS[0].value)
 
   const RESPONSIBILITIES: Record<string, string[]> = {
-    'Studio Head & Creative Lead': [
+    'Studio Head & Creative Director': [
       'Creative direction across all titles',
       'Gameplay programming & technical architecture',
       'Business development & legal (DUNS, developer accounts, LLC)',
