@@ -114,10 +114,20 @@ export default function DashboardPage() {
     ],
   }
 
-  const loadTeam = async () => {
+    const loadTeam = async () => {
     const { data } = await supabase.from('profiles').select('id, full_name, title')
-    setTeamMembers(data ?? [])
-    if (data && data.length > 0) setNewTaskMemberId((prev) => prev || data[0].id)
+    const ORDER = [
+      'Studio Head & Creative Director',
+      'Business Operations Lead',
+      'Marketing & Community Lead',
+      'Level Designer',
+      'UI/UX Designer',
+    ]
+    const sorted = (data ?? []).sort(
+      (a, b) => ORDER.indexOf(a.title) - ORDER.indexOf(b.title)
+    )
+    setTeamMembers(sorted)
+    if (sorted.length > 0) setNewTaskMemberId((prev) => prev || sorted[0].id)
   }
 
   const loadTasks = async () => {
