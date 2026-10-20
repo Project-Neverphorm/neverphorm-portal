@@ -100,10 +100,11 @@ export default function DashboardPage() {
       'Press outreach & partnerships',
     ],
     'Level Designer': [
-      'Achievement/trophy design & implementation',
-      'QA testing & bug reporting',
-      'Marketing assets (social graphics, store page art)',
-      'Branding & visual identity support',
+      'Level layout & greyboxing in the game engine',
+      'Platform, hazard & trap placement',
+      'Difficulty pacing & progression across levels',
+      'Set dressing levels with environment assets',
+      'Playtesting & iterating on level flow',
     ],
     'UI/UX Designer': [
       '2D UI/UX design across all titles',
