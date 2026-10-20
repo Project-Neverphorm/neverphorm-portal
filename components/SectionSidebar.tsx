@@ -67,7 +67,7 @@ export default function SectionSidebar({
                 isCollapsed ? '' : 'md:justify-start'
               } ${
                 active
-                  ? 'bg-brand text-black font-semibold'
+                  ? 'bg-brand text-background font-semibold'
                   : 'text-text-secondary hover:text-foreground hover:bg-background'
               }`}
             >

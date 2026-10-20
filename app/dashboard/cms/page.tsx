@@ -220,7 +220,7 @@ export default function CMSPage() {
               key={t.id}
               onClick={() => setTab(t.id)}
               className={`text-sm px-4 py-2 rounded border transition-colors ${
-                tab === t.id ? 'bg-brand text-black border-brand font-semibold' : 'border-neutral-700 text-text-secondary hover:text-foreground'
+                tab === t.id ? 'bg-brand text-background border-brand font-semibold' : 'border-border-default text-text-secondary hover:text-foreground'
               }`}
             >
               {t.label}
@@ -239,12 +239,12 @@ export default function CMSPage() {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h1 className="text-xl font-bold">Games · projectneverphorm.com/games</h1>
-              <button onClick={openNewGame} className="bg-brand text-black text-sm font-semibold rounded px-4 py-2">
+              <button onClick={openNewGame} className="bg-brand text-background text-sm font-semibold rounded px-4 py-2">
                 + Add game
               </button>
             </div>
 
-            <div className="divide-y divide-neutral-800 border border-border-default rounded-lg">
+            <div className="divide-y divide-border-default border border-border-default rounded-lg">
               {games.length === 0 && <p className="text-sm text-text-secondary p-4">No games yet.</p>}
               {games.map((g) => (
                 <div key={g.id} className="flex items-center justify-between p-4">
@@ -268,12 +268,12 @@ export default function CMSPage() {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h1 className="text-xl font-bold">Updates · projectneverphorm.com/updates</h1>
-              <button onClick={openNewUpdate} className="bg-brand text-black text-sm font-semibold rounded px-4 py-2">
+              <button onClick={openNewUpdate} className="bg-brand text-background text-sm font-semibold rounded px-4 py-2">
                 + Add update
               </button>
             </div>
 
-            <div className="divide-y divide-neutral-800 border border-border-default rounded-lg">
+            <div className="divide-y divide-border-default border border-border-default rounded-lg">
               {updates.length === 0 && <p className="text-sm text-text-secondary p-4">No updates yet.</p>}
               {updates.map((u) => (
                 <div key={u.id} className="flex items-center justify-between p-4">
@@ -295,7 +295,7 @@ export default function CMSPage() {
       </div>
 
       {isAdmin && showGameForm && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4 py-8 overflow-y-auto">
+        <div className="fixed inset-0 bg-foreground/60 flex items-center justify-center z-50 px-4 py-8 overflow-y-auto">
           <div className="w-full max-w-lg bg-elevated border border-border-default rounded-lg p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-semibold">{editingGameId ? 'Edit game' : 'Add game'}</h3>
@@ -337,7 +337,7 @@ export default function CMSPage() {
               <input type="number" placeholder="Sort order (lower = first)" value={gameForm.sort_order}
                 onChange={(e) => setGameForm({ ...gameForm, sort_order: Number(e.target.value) })}
                 className="w-full bg-background border border-border-default rounded px-3 py-2 text-sm" />
-              <button type="submit" className="w-full bg-brand text-black font-semibold rounded py-2 text-sm mt-2">
+              <button type="submit" className="w-full bg-brand text-background font-semibold rounded py-2 text-sm mt-2">
                 {editingGameId ? 'Save changes' : 'Add game'}
               </button>
             </form>
@@ -346,7 +346,7 @@ export default function CMSPage() {
       )}
 
       {isAdmin && showUpdateForm && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4 py-8 overflow-y-auto">
+        <div className="fixed inset-0 bg-foreground/60 flex items-center justify-center z-50 px-4 py-8 overflow-y-auto">
           <div className="w-full max-w-lg bg-elevated border border-border-default rounded-lg p-6">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-semibold">{editingUpdateId ? 'Edit update' : 'Add update'}</h3>
@@ -378,7 +378,7 @@ export default function CMSPage() {
               <input placeholder="Cover image URL" value={updateForm.cover_image_url}
                 onChange={(e) => setUpdateForm({ ...updateForm, cover_image_url: e.target.value })}
                 className="w-full bg-background border border-border-default rounded px-3 py-2 text-sm" />
-              <button type="submit" className="w-full bg-brand text-black font-semibold rounded py-2 text-sm mt-2">
+              <button type="submit" className="w-full bg-brand text-background font-semibold rounded py-2 text-sm mt-2">
                 {editingUpdateId ? 'Save changes' : 'Post update'}
               </button>
             </form>

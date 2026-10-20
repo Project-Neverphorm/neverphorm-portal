@@ -155,7 +155,7 @@ export default function RolePage() {
               />
             </div>
           </div>
-          <button disabled className="mt-4 bg-brand text-black font-semibold rounded px-4 py-2 text-sm disabled:opacity-50">
+          <button disabled className="mt-4 bg-brand text-background font-semibold rounded px-4 py-2 text-sm disabled:opacity-50">
             Send request (coming soon)
           </button>
         </Card>

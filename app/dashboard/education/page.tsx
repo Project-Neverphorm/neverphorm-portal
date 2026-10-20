@@ -323,13 +323,13 @@ function DetailPanel({ item }: { item: Item }) {
     <div className="max-w-2xl ">
       <h1 className="text-2xl font-bold mb-4">{item.name}</h1>
       {item.detail?.overview && (
-        <p className="text-sm text-neutral-300 leading-relaxed mb-6">{item.detail.overview}</p>
+        <p className="text-sm text-text-secondary leading-relaxed mb-6">{item.detail.overview}</p>
       )}
 
       {item.detail?.whyChosen && (
         <div className="mb-6">
           <h3 className="text-xs uppercase tracking-wide text-text-secondary mb-2">Why we chose it</h3>
-          <p className="text-sm text-neutral-300 leading-relaxed">{item.detail.whyChosen}</p>
+          <p className="text-sm text-text-secondary leading-relaxed">{item.detail.whyChosen}</p>
         </div>
       )}
 
@@ -338,7 +338,7 @@ function DetailPanel({ item }: { item: Item }) {
           <h3 className="text-xs uppercase tracking-wide text-text-secondary mb-2">Responsibilities</h3>
           <ul className="space-y-1">
             {item.detail.responsibilities.map((r) => (
-              <li key={r} className="text-sm text-neutral-300 flex items-start gap-2">
+              <li key={r} className="text-sm text-text-secondary flex items-start gap-2">
                 <span className="text-brand mt-1">•</span>
                 {r}
               </li>
@@ -356,8 +356,8 @@ function DetailPanel({ item }: { item: Item }) {
                 onClick={() => scrollTo(s.id)}
                 className={`text-sm px-3 py-1 rounded-full transition-colors ${
                   activeSection === s.id
-                    ? 'bg-brand text-black font-medium'
-                    : 'bg-elevated text-neutral-300 hover:text-foreground'
+                    ? 'bg-brand text-background font-medium'
+                    : 'bg-elevated text-text-secondary hover:text-foreground'
                 }`}
               >
                 {s.label}
@@ -370,7 +370,7 @@ function DetailPanel({ item }: { item: Item }) {
               <section key={s.id} id={s.id} className="scroll-mt-20">
                 <h3 className="text-lg font-semibold mb-3">{s.label}</h3>
                 {s.content.map((line, i) => (
-                  <p key={i} className="text-sm text-neutral-300 mb-2 leading-relaxed">
+                  <p key={i} className="text-sm text-text-secondary mb-2 leading-relaxed">
                     {line}
                   </p>
                 ))}
@@ -404,7 +404,7 @@ function DetailPanel({ item }: { item: Item }) {
           <h3 className="text-xs uppercase tracking-wide text-text-secondary mb-2">Tips & shortcuts</h3>
           <ul className="space-y-1">
             {item.detail.tips.map((t) => (
-              <li key={t} className="text-sm text-neutral-300 flex items-start gap-2">
+              <li key={t} className="text-sm text-text-secondary flex items-start gap-2">
                 <span className="text-brand mt-1">•</span>
                 {t}
               </li>
@@ -542,8 +542,8 @@ export default function EducationPage() {
             onClick={() => switchSection(s)}
             className={`text-sm px-4 py-2 rounded border transition-colors ${
               section === s
-                ? 'bg-brand text-black border-brand font-semibold'
-                : 'border-neutral-700 text-text-secondary hover:text-foreground'
+                ? 'bg-brand text-background border-brand font-semibold'
+                : 'border-border-default text-text-secondary hover:text-foreground'
             }`}
           >
             {s === 'departments' ? 'Departments' : 'Tools'}
@@ -574,7 +574,7 @@ export default function EducationPage() {
                   className={`flex items-center justify-between text-left text-sm px-3 py-3 lg:py-2 rounded transition-colors ${
                     categoryId === c.id
                       ? 'bg-elevated text-brand font-semibold'
-                      : 'text-neutral-300 hover:bg-elevated'
+                      : 'text-text-secondary hover:bg-elevated'
                   }`}
                 >
                   <span>{c.name}</span>
@@ -623,7 +623,7 @@ export default function EducationPage() {
                       className={`flex items-center justify-between text-left text-sm px-3 py-3 lg:py-2 rounded transition-colors ${
                         itemId === i.id
                           ? 'bg-elevated text-brand font-semibold'
-                          : 'text-neutral-300 hover:bg-elevated'
+                          : 'text-text-secondary hover:bg-elevated'
                       }`}
                     >
                       <span>

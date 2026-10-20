@@ -92,37 +92,37 @@ export default function Navbar() {
             onMouseEnter={() => setOpenDropdown('studio')}
             onMouseLeave={() => setOpenDropdown(null)}
           >
-            <button className="hover:text-neutral-300">Studio Center</button>
+            <button className="hover:text-brand-hover">Studio Center</button>
             {openDropdown === 'studio' && (
               <div className="absolute top-full left-0 bg-elevated rounded shadow-lg py-2 w-40 z-50">
-                <Link href="/dashboard/education" className="block px-4 py-2 hover:bg-neutral-700">
+                <Link href="/dashboard/education" className="block px-4 py-2 hover:bg-surface">
                   Education
                 </Link>
-                <Link href="/dashboard/resource" className="block px-4 py-2 hover:bg-neutral-700">
+                <Link href="/dashboard/resource" className="block px-4 py-2 hover:bg-surface">
                   Resource
                 </Link>
-                <Link href="/dashboard/training" className="block px-4 py-2 hover:bg-neutral-700">
+                <Link href="/dashboard/training" className="block px-4 py-2 hover:bg-surface">
                   Training
                 </Link>
-                <Link href="/dashboard/pipeline" className="block px-4 py-2 hover:bg-neutral-700">
+                <Link href="/dashboard/pipeline" className="block px-4 py-2 hover:bg-surface">
                   Pipeline
                 </Link>
               </div>
             )}
           </div>
 
-          <button onClick={() => setOpenModal('purpose')} className="hover:text-neutral-300">
+          <button onClick={() => setOpenModal('purpose')} className="hover:text-brand-hover">
             Purpose
           </button>
 
-          <button onClick={() => setOpenModal('calendar')} className="hover:text-neutral-300">
+          <button onClick={() => setOpenModal('calendar')} className="hover:text-brand-hover">
             Calendar
           </button>
 
-          <Link href="/dashboard/cms" className="hover:text-neutral-300">
+          <Link href="/dashboard/cms" className="hover:text-brand-hover">
             CMS
           </Link>
-          <Link href="/dashboard/updates" className="hover:text-neutral-300">
+          <Link href="/dashboard/updates" className="hover:text-brand-hover">
             Updates
           </Link>
 
@@ -131,19 +131,19 @@ export default function Navbar() {
             onMouseEnter={() => setOpenDropdown('links')}
             onMouseLeave={() => setOpenDropdown(null)}
           >
-            <button className="hover:text-neutral-300">Links</button>
+            <button className="hover:text-brand-hover">Links</button>
             {openDropdown === 'links' && (
               <div className="absolute top-full left-0 bg-elevated rounded shadow-lg py-2 w-48 z-50">
-                <a href="https://projectneverphorm.com" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-neutral-700">
+                <a href="https://projectneverphorm.com" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-surface">
                   Studio Website
                 </a>
-                <a href="https://app.notion.com/p/Studio-Hub-3928c49cb9f880468c1ff6d340dcf9e3" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-neutral-700">
+                <a href="https://app.notion.com/p/Studio-Hub-3928c49cb9f880468c1ff6d340dcf9e3" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-surface">
                   Notion Workspace
                 </a>
-                <a href="https://drive.google.com" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-neutral-700">
+                <a href="https://drive.google.com" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-surface">
                   Google Drive
                 </a>
-                <a href="https://discord.gg/s7cKSNTzEh" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-neutral-700">
+                <a href="https://discord.gg/s7cKSNTzEh" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-surface">
                   Discord
                 </a>
                 <a href="https://www.figma.com/files/team/1684411640265098802/folder/659134963?fuid=1684411638716782212" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 hover:bg-ne...">
@@ -158,10 +158,10 @@ export default function Navbar() {
             onMouseEnter={() => setOpenDropdown('account')}
             onMouseLeave={() => setOpenDropdown(null)}
           >
-            <button className="hover:text-neutral-300">Account</button>
+            <button className="hover:text-brand-hover">Account</button>
             {openDropdown === 'account' && (
               <div className="absolute top-full right-0 bg-elevated rounded shadow-lg py-2 w-40 z-50">
-                <Link href="/account" className="block px-4 py-2 hover:bg-neutral-700">
+                <Link href="/account" className="block px-4 py-2 hover:bg-surface">
                   Account
                 </Link>
               </div>
@@ -218,7 +218,7 @@ export default function Navbar() {
             <p className="text-text-secondary text-xs uppercase pt-2">Account</p>
             <Link href="/account" className="pl-2">Account</Link>
 
-            <p className="text-sm font-semibold pt-2 border-t border-neutral-700">
+            <p className="text-sm font-semibold pt-2 border-t border-border-default">
               {profile?.full_name}
             </p>
             <p className="text-xs text-text-secondary">{profile?.title}</p>
@@ -239,7 +239,7 @@ export default function Navbar() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold mb-4">Dashboard Purpose</h2>
-            <div className="text-neutral-300 text-sm leading-relaxed space-y-5">
+            <div className="text-text-secondary text-sm leading-relaxed space-y-5">
               <p>This dashboard exists to bring clarity, not pressure.</p>
               <p>It helps everyone understand:</p>
               <ul className="list-disc pl-5 space-y-1">
@@ -317,7 +317,7 @@ export default function Navbar() {
                 key={dateStr}
                 onClick={() => setSelectedDates(dateStr)}
                 className={`aspect-square rounded text-sm p-1 flex flex-col items-center justify-start hover:bg-elevated transition-colors ${
-                  selectedDates === dateStr ? 'bg-elevated ring-1 ring-cyan-400' : ''
+                  selectedDates === dateStr ? 'bg-elevated ring-1 ring-brand' : ''
                 }`}
               >
                 <span>{day}</span>

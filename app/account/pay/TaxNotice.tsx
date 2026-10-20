@@ -29,7 +29,7 @@ type TaxNoticeProps = {
         <div className="flex items-start gap-3">
           <span
             aria-hidden="true"
-            className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-500 font-bold text-black"
+            className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-500 font-bold text-foreground"
           >
             !
           </span>
@@ -39,22 +39,22 @@ type TaxNoticeProps = {
               Set money aside for taxes
             </h3>
   
-            <p className="text-sm leading-relaxed text-zinc-200">
+            <p className="text-sm leading-relaxed text-foreground">
               Your payouts are 1099 contractor income, so{" "}
-              <span className="font-semibold text-white">
+              <span className="font-semibold text-foreground">
                 no taxes are taken out
               </span>
               . You owe self-employment tax plus income tax on everything you
               earn from the studio. Set aside about{" "}
-              <span className="font-semibold text-white">{percent}%</span> of
+              <span className="font-semibold text-foreground">{percent}%</span> of
               every payout.
             </p>
   
             {hasPayout ? (
-              <div className="rounded-xl bg-black/40 p-4">
-                <p className="text-sm text-zinc-300">
+              <div className="rounded-xl bg-elevated p-4">
+                <p className="text-sm text-text-secondary">
                   This month you earned{" "}
-                  <span className="font-semibold text-white">
+                  <span className="font-semibold text-foreground">
                     {formatUSD(payoutAmount)}
                   </span>
                   .
@@ -64,8 +64,8 @@ type TaxNoticeProps = {
                 </p>
               </div>
             ) : (
-              <div className="rounded-xl bg-black/40 p-4">
-                <p className="text-sm text-zinc-300">
+              <div className="rounded-xl bg-elevated p-4">
+                <p className="text-sm text-text-secondary">
                   Example: a {formatUSD(10360)} payout means setting aside{" "}
                   <span className="font-semibold text-orange-300">
                     {formatUSD(Math.round(10360 * setAsideRate))}
@@ -75,7 +75,7 @@ type TaxNoticeProps = {
               </div>
             )}
   
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-text-muted">
               This is a rule of thumb based on research, not tax advice. Check with a tax
               professional about your situation and whether you need to make
               quarterly estimated payments. This is an example of what we all will need to do.

@@ -59,9 +59,9 @@ type Section = 'lineup' | 'catalog'
 const STATUS_STYLES: Record<Game['status'], string> = {
   'Released': 'bg-green-500/15 text-green-400',
   'In Development': 'bg-brand/15 text-brand',
-  'Planned': 'bg-neutral-500/15 text-neutral-300',
-  'Concept': 'bg-neutral-700/40 text-neutral-500',
-  'Paused': 'bg-purple-500/15 text-purple-400',
+  'Planned': 'bg-elevated text-text-secondary',
+  'Concept': 'bg-elevated/40 text-text-muted',
+  'Paused': 'bg-brand/15 text-brand',
 }
 
 const STATUSES: Game['status'][] = ['Concept', 'Planned', 'In Development', 'Released', 'Paused']
@@ -69,7 +69,7 @@ const STATUSES: Game['status'][] = ['Concept', 'Planned', 'In Development', 'Rel
 const SCOPES: Scope[] = ['Tiny', 'Small', 'Medium', 'Big', 'Massive']
 
 const SCOPE_STYLES: Record<Scope, string> = {
-  'Tiny': 'border-neutral-600 text-neutral-400',
+  'Tiny': 'border-border-default text-text-muted',
   'Small': 'border-sky-500/50 text-sky-300',
   'Medium': 'border-amber-500/50 text-amber-300',
   'Big': 'border-orange-500/50 text-orange-300',
@@ -173,10 +173,10 @@ function GameForm({
         />
       </div>
       <div className="flex gap-2 pt-1">
-        <button onClick={onSave} className="flex-1 bg-brand text-black font-semibold rounded py-2 text-sm">
+        <button onClick={onSave} className="flex-1 bg-brand text-background font-semibold rounded py-2 text-sm">
           {saveLabel}
         </button>
-        <button onClick={onCancel} className="flex-1 border border-neutral-700 rounded py-2 text-sm hover:border-neutral-500">
+        <button onClick={onCancel} className="flex-1 border border-border-default rounded py-2 text-sm hover:border-brand-hover">
           Cancel
         </button>
       </div>
@@ -225,7 +225,7 @@ function GameView({
         </div>
       </div>
       {game.blurb && <p className="text-brand text-sm mb-2">{game.blurb}</p>}
-      {game.description && <p className="text-sm text-neutral-300 mb-3">{game.description}</p>}
+      {game.description && <p className="text-sm text-text-secondary mb-3">{game.description}</p>}
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-secondary">
         {game.engine && <span>{game.engine}</span>}
         {game.price && <span>{game.price}</span>}
@@ -280,7 +280,7 @@ function SortableGameCard({ position, ...props }: CardProps & { position: number
       {...attributes}
       {...listeners}
       aria-label={`Drag to reorder ${props.game.title}`}
-      className="cursor-grab active:cursor-grabbing touch-none rounded px-1 text-lg leading-none text-text-secondary hover:text-foreground hover:bg-neutral-800"
+      className="cursor-grab active:cursor-grabbing touch-none rounded px-1 text-lg leading-none text-text-secondary hover:text-foreground hover:bg-elevated"
     >
       ⠿
     </button>
@@ -617,7 +617,7 @@ export default function PipelinePage() {
       ) : (
         <button
           onClick={() => startAdd(section)}
-          className="border border-dashed border-neutral-700 hover:border-brand rounded-lg p-5 flex items-center justify-center text-text-secondary hover:text-brand transition-colors min-h-[140px]"
+          className="border border-dashed border-border-default hover:border-brand rounded-lg p-5 flex items-center justify-center text-text-secondary hover:text-brand transition-colors min-h-[140px]"
         >
           {section === 'lineup' ? '+ Add to production order' : '+ Add to catalog'}
         </button>
@@ -642,7 +642,7 @@ export default function PipelinePage() {
         <Navbar />
         <main className="flex-1 w-full max-w-2xl mx-auto px-6 py-16">
           <h1 className="text-2xl font-bold mb-4">Confidentiality Agreement</h1>
-          <div className="border border-border-default rounded-lg p-6 mb-6 text-sm text-neutral-300 space-y-3 bg-elevated/40">
+          <div className="border border-border-default rounded-lg p-6 mb-6 text-sm text-text-secondary space-y-3 bg-elevated/40">
             <p>
               The Pipeline section contains unreleased game concepts, titles, pricing,
               platform plans, and production timelines internal to Project Neverphorm.
@@ -679,7 +679,7 @@ export default function PipelinePage() {
           <button
             onClick={handleSign}
             disabled={!agreed || fullName.trim().length < 2 || submitting}
-            className="bg-brand text-black rounded px-4 py-2 text-sm font-semibold disabled:opacity-50"
+            className="bg-brand text-background rounded px-4 py-2 text-sm font-semibold disabled:opacity-50"
           >
             {submitting ? 'Signing...' : 'Sign and Continue'}
           </button>
@@ -709,7 +709,7 @@ export default function PipelinePage() {
             <h2 className="text-xs uppercase tracking-wide text-brand mb-2">Announcements</h2>
             <div className="flex items-start gap-3">
               <span className="text-lg leading-none" aria-hidden="true">🔒</span>
-              <p className="text-sm text-neutral-300">Will not reveal until after our 3rd game.</p>
+              <p className="text-sm text-text-secondary">Will not reveal until after our 3rd game.</p>
             </div>
           </aside>
           
@@ -718,8 +718,8 @@ export default function PipelinePage() {
               onClick={() => { setEditMode(!editMode); cancelEdit() }}
               className={`text-sm rounded px-4 py-2 border transition-colors shrink-0 ${
                 editMode
-                  ? 'bg-brand text-black border-brand font-semibold'
-                  : 'border-neutral-700 hover:border-brand'
+                  ? 'bg-brand text-background border-brand font-semibold'
+                  : 'border-border-default hover:border-brand'
               }`}
             >
               {editMode ? 'Done editing' : 'Edit pipeline'}
@@ -732,7 +732,7 @@ export default function PipelinePage() {
           <h2 className="text-xs uppercase tracking-wide text-brand mb-2">Announcements</h2>
           <div className="flex items-start gap-3">
             <span className="text-lg leading-none" aria-hidden="true">🔒</span>
-            <p className="text-sm text-neutral-300">Will not reveal until after our 3rd game.</p>
+            <p className="text-sm text-text-secondary">Will not reveal until after our 3rd game.</p>
           </div>
         </aside>
 

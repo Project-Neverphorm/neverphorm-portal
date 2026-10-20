@@ -24,7 +24,7 @@ type Form = {
 const emptyForm: Form = { title: '', commitment: '', description: '', published: true }
 
 const inputClass =
-  'w-full rounded-lg border border-border-default bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-neutral-500 focus:outline-none focus:border-neutral-500'
+  'w-full rounded-lg border border-border-default bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-text-muted focus:outline-none focus:border-brand'
 
 const nullIfEmpty = (s: string) => (s.trim() === '' ? null : s.trim())
 
@@ -131,7 +131,7 @@ export default function JobsManager() {
   }
 
   const editor = (
-    <div className="rounded-lg border border-neutral-600 bg-elevated p-5">
+    <div className="rounded-lg border border-border-default bg-elevated p-5">
       <div className="space-y-3">
         <div className="flex flex-col gap-3 sm:flex-row">
           <input
@@ -167,7 +167,7 @@ export default function JobsManager() {
       {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
 
       <div className="mt-4 flex justify-end gap-2">
-        <button onClick={cancel} className="rounded-lg border border-border-default px-4 py-2 text-sm hover:border-neutral-500">
+        <button onClick={cancel} className="rounded-lg border border-border-default px-4 py-2 text-sm hover:border-brand-hover">
           Cancel
         </button>
         <button
@@ -214,7 +214,7 @@ export default function JobsManager() {
                   {j.title}
                   <span
                     className={`ml-2 rounded px-1.5 py-0.5 text-[11px] ${
-                      j.published ? 'bg-green-950 text-green-400' : 'bg-neutral-800 text-neutral-400'
+                      j.published ? 'bg-green-950 text-green-400' : 'bg-elevated text-text-muted'
                     }`}
                   >
                     {j.published ? 'Open' : 'Closed'}

@@ -60,7 +60,7 @@ export default function BonusesPage() {
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {steps.map(([t, d], i) => (
               <div key={t} className="rounded-lg bg-background border border-border-default p-4">
-                <span className="w-6 h-6 rounded-full bg-brand text-black text-xs font-bold flex items-center justify-center mb-3">
+                <span className="w-6 h-6 rounded-full bg-brand text-background text-xs font-bold flex items-center justify-center mb-3">
                   {i + 1}
                 </span>
                 <p className="font-semibold mb-1">{t}</p>

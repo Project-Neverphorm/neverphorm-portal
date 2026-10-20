@@ -80,9 +80,9 @@ export default function PaystubGrowthExample({
   const pct = (yourRate * 100).toFixed(yourRate * 100 % 1 === 0 ? 0 : 1);
 
   return (
-    <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-5 sm:p-6">
+    <div className="rounded-2xl border border-border-default bg-surface p-5 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h3 className="text-sm font-medium uppercase tracking-wide text-zinc-400">
+        <h3 className="text-sm font-medium uppercase tracking-wide text-text-muted">
           How your paystub grows
         </h3>
         <span className="rounded-full border border-yellow-500/60 px-3 py-0.5 text-xs text-yellow-400">
@@ -90,7 +90,7 @@ export default function PaystubGrowthExample({
         </span>
       </div>
 
-      <p className="mt-3 text-sm leading-relaxed text-zinc-300">
+      <p className="mt-3 text-sm leading-relaxed text-text-secondary">
         Every title the studio releases adds to the same monthly pool, and
         everyone on the team earns from all of them. Here&apos;s a sample
         month at each stage, with {poolMembers} people in the Team Pool (
@@ -104,8 +104,8 @@ export default function PaystubGrowthExample({
             onClick={() => setActive(i)}
             className={`rounded-full px-4 py-1.5 text-sm transition ${
               i === active
-                ? "bg-cyan-400 font-semibold text-black"
-                : "bg-white/5 text-zinc-300 hover:bg-white/10"
+                ? "bg-brand font-semibold text-background"
+                : "bg-elevated text-text-secondary hover:bg-surface"
             }`}
           >
             {s.label}
@@ -113,12 +113,12 @@ export default function PaystubGrowthExample({
         ))}
       </div>
 
-      <p className="mt-4 text-sm text-zinc-400">{stage.blurb}</p>
+      <p className="mt-4 text-sm text-text-muted">{stage.blurb}</p>
 
       <div className="mt-3 overflow-x-auto">
         <table className="w-full min-w-[420px] text-sm">
           <thead>
-            <tr className="text-left text-zinc-400">
+            <tr className="text-left text-text-muted">
               <th className="py-2 font-normal">Title</th>
               <th className="py-2 text-right font-normal">Net revenue</th>
               <th className="py-2 text-right font-normal">Your share ({pct}%)</th>
@@ -126,15 +126,15 @@ export default function PaystubGrowthExample({
           </thead>
           <tbody>
             {stage.lines.map((l) => (
-              <tr key={l.title} className="border-t border-white/5">
-                <td className="py-2 text-zinc-200">{l.title}</td>
-                <td className="py-2 text-right text-zinc-200">{usd(l.net)}</td>
-                <td className="py-2 text-right text-zinc-200">
+              <tr key={l.title} className="border-t border-border-default">
+                <td className="py-2 text-foreground">{l.title}</td>
+                <td className="py-2 text-right text-foreground">{usd(l.net)}</td>
+                <td className="py-2 text-right text-foreground">
                   {usd(l.net * yourRate)}
                 </td>
               </tr>
             ))}
-            <tr className="border-t border-white/10 font-semibold text-white">
+            <tr className="border-t border-border-default font-semibold text-foreground">
               <td className="py-2">Total</td>
               <td className="py-2 text-right">{usd(total)}</td>
               <td className="py-2 text-right">{usd(yourShare)}</td>
@@ -165,11 +165,11 @@ function Stat({
   warn?: boolean;
 }) {
   return (
-    <div className="rounded-xl bg-black/30 p-3">
-      <p className="text-xs text-zinc-400">{label}</p>
+    <div className="rounded-xl bg-elevated p-3">
+      <p className="text-xs text-text-muted">{label}</p>
       <p
         className={`mt-1 text-base font-semibold ${
-          warn ? "text-orange-300" : highlight ? "text-cyan-300" : "text-white"
+          warn ? "text-orange-300" : highlight ? "text-brand" : "text-foreground"
         }`}
       >
         {value}
@@ -178,7 +178,7 @@ function Stat({
   );
 }
 
-    <p className="mt-4 text-xs text-zinc-400">
+    <p className="mt-4 text-xs text-text-muted">
         These are made-up examples to show how payouts work as the studio
         releases more titles. They are not projections or promises. Real
         payouts depend entirely on actual sales and will vary a lot from

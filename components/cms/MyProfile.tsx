@@ -15,7 +15,7 @@ type Member = {
 }
 
 const inputClass =
-  'w-full rounded-lg border border-border-default bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-neutral-500 focus:outline-none focus:border-neutral-500'
+  'w-full rounded-lg border border-border-default bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-text-muted focus:outline-none focus:border-brand'
 
 export default function MyProfile() {
   const [member, setMember] = useState<Member | null>(null)
@@ -125,7 +125,7 @@ export default function MyProfile() {
         {/* Editor */}
         <div className="rounded-lg border border-border-default p-6">
           <div className="mb-5 flex items-center gap-4">
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-800 text-2xl text-neutral-400">
+            <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-elevated text-2xl text-text-muted">
               {photoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={photoUrl} alt="" className="h-full w-full object-cover" />
@@ -145,7 +145,7 @@ export default function MyProfile() {
                 />
               </label>
               {photoUrl && (
-                <button onClick={() => setPhotoUrl('')} className="block text-xs text-neutral-500 hover:text-red-400">
+                <button onClick={() => setPhotoUrl('')} className="block text-xs text-text-muted hover:text-red-400">
                   Remove photo
                 </button>
               )}
@@ -180,7 +180,7 @@ export default function MyProfile() {
             <button
               onClick={save}
               disabled={saving || uploading}
-              className="bg-brand text-black text-sm font-semibold rounded px-4 py-2 disabled:opacity-50"
+              className="bg-brand text-background text-sm font-semibold rounded px-4 py-2 disabled:opacity-50"
             >
               {saving ? 'Saving...' : 'Save'}
             </button>
@@ -189,9 +189,9 @@ export default function MyProfile() {
 
         {/* Live preview */}
         <div>
-          <p className="mb-3 text-xs uppercase tracking-wider text-neutral-500">Preview</p>
+          <p className="mb-3 text-xs uppercase tracking-wider text-text-muted">Preview</p>
           <div className="flex gap-6 rounded-lg border border-border-default p-6">
-            <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-800 text-3xl text-neutral-400">
+            <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-elevated text-3xl text-text-muted">
               {photoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={photoUrl} alt="" className="h-full w-full object-cover" />

@@ -83,7 +83,7 @@ const panelClass = 'rounded-xl border border-border-default bg-elevated/20 p-5'
 const panelSticky = 'min-[1800px]:sticky min-[1800px]:top-8 self-start'
 
 const inputClass =
-  'w-full rounded-lg border border-border-default bg-elevated px-3 py-2.5 text-sm text-foreground placeholder:text-neutral-500 focus:outline-none focus:border-neutral-500'
+  'w-full rounded-lg border border-border-default bg-elevated px-3 py-2.5 text-sm text-foreground placeholder:text-text-muted focus:outline-none focus:border-brand'
 
 const iconButtonClass = 'rounded-lg p-2 text-text-secondary hover:bg-elevated hover:text-foreground'
 
@@ -91,7 +91,7 @@ const pillClass = (active: boolean) =>
   `rounded-full border px-3 py-1 text-xs font-medium capitalize transition-colors ${
     active
       ? 'border-foreground bg-foreground text-background'
-      : 'border-neutral-800 text-text-secondary hover:border-neutral-600 hover:text-foreground'
+      : 'border-border-default text-text-secondary hover:border-brand-hover hover:text-foreground'
   }`
 
 const navItemClass = (active: boolean) =>
@@ -102,7 +102,7 @@ const navItemClass = (active: boolean) =>
   }`
 
 const countBadge = (active: boolean) =>
-  `rounded-md px-1.5 text-xs tabular-nums ${active ? 'bg-neutral-700 text-foreground' : 'text-neutral-500'}`
+  `rounded-md px-1.5 text-xs tabular-nums ${active ? 'bg-elevated text-foreground' : 'text-text-muted'}`
 
 /* ---------- icons ---------- */
 
@@ -558,7 +558,7 @@ export default function ResourcePage() {
     const embed = youtubeEmbed(r.url)
 
     const media = (
-      <div className="relative aspect-video overflow-hidden bg-neutral-900">
+      <div className="relative aspect-video overflow-hidden bg-elevated">
         {thumb ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -567,35 +567,35 @@ export default function ResourcePage() {
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-neutral-800 via-neutral-900 to-black">
-            <span className="text-neutral-600 transition-colors group-hover:text-neutral-400">
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-elevated via-surface to-background">
+            <span className="text-text-muted transition-colors group-hover:text-brand-hover">
               <PlayIcon />
             </span>
-            {r.creator && <span className="text-xs uppercase tracking-widest text-neutral-600">{r.creator}</span>}
+            {r.creator && <span className="text-xs uppercase tracking-widest text-text-muted">{r.creator}</span>}
           </div>
         )}
 
         {embed && (
-          <div className="absolute inset-0 flex items-center justify-center transition-colors group-hover:bg-black/40">
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-black opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+          <div className="absolute inset-0 flex items-center justify-center transition-colors group-hover:bg-foreground/40">
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-surface/90 text-foreground opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
               <PlayIcon className="ml-1 h-6 w-6" />
             </span>
           </div>
         )}
 
         <div className="absolute left-3 top-3 flex gap-1.5">
-          <span className="rounded-md bg-black/75 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-neutral-200 backdrop-blur">
+          <span className="rounded-md bg-foreground/75 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-background backdrop-blur">
             {r.type}
           </span>
           {isNew(r.created_at) && (
-            <span className="rounded-md bg-blue-600 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-white">
+            <span className="rounded-md bg-blue-600 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-background">
               New
             </span>
           )}
         </div>
 
         {r.pinned && (
-          <span className="absolute right-3 top-3 rounded-md bg-amber-500 p-1 text-black">
+          <span className="absolute right-3 top-3 rounded-md bg-amber-500 p-1 text-foreground">
             <PinIcon filled />
           </span>
         )}
@@ -605,7 +605,7 @@ export default function ResourcePage() {
     return (
       <article
         key={r.id}
-        className="group flex flex-col overflow-hidden rounded-xl border border-border-default bg-elevated/20 transition-colors hover:border-neutral-600"
+        className="group flex flex-col overflow-hidden rounded-xl border border-border-default bg-elevated/20 transition-colors hover:border-brand-hover"
       >
         {embed ? (
           <button onClick={() => setPlaying(r)} className="block w-full text-left">
@@ -652,7 +652,7 @@ export default function ResourcePage() {
                   <button
                     key={rc.category_id}
                     onClick={() => setActiveCategory(cat.id)}
-                    className="rounded-md bg-neutral-800/80 px-2 py-0.5 text-[11px] text-neutral-300 hover:bg-neutral-700"
+                    className="rounded-md bg-elevated px-2 py-0.5 text-[11px] text-text-secondary hover:bg-surface"
                   >
                     {cat.name}
                   </button>
@@ -705,12 +705,12 @@ export default function ResourcePage() {
     const thumb = youtubeThumb(r.url)
     const inner = (
       <>
-        <div className="flex aspect-video w-16 shrink-0 items-center justify-center overflow-hidden rounded-md bg-neutral-900">
+        <div className="flex aspect-video w-16 shrink-0 items-center justify-center overflow-hidden rounded-md bg-elevated">
           {thumb ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={thumb} alt="" className="h-full w-full object-cover" />
           ) : (
-            <span className="text-neutral-700">
+            <span className="text-text-muted">
               <PlayIcon className="h-4 w-4" />
             </span>
           )}
@@ -792,7 +792,7 @@ export default function ResourcePage() {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_300px] min-[1800px]:grid-cols-[220px_minmax(0,1fr)_270px_290px_300px]">
           {/* 1. Browse */}
           <nav className="self-start lg:sticky lg:top-8">
-            <p className="mb-3 px-3 text-xs font-medium uppercase tracking-wider text-neutral-500">Browse</p>
+            <p className="mb-3 px-3 text-xs font-medium uppercase tracking-wider text-text-muted">Browse</p>
 
             <div className="space-y-0.5">
               <button onClick={() => setActiveCategory(null)} className={navItemClass(activeCategory === null)}>
@@ -811,7 +811,7 @@ export default function ResourcePage() {
                       <button
                         onClick={() => deleteCategory(c)}
                         title="Delete category"
-                        className="absolute -left-5 top-1/2 -translate-y-1/2 text-neutral-600 opacity-0 hover:text-red-400 group-hover/cat:opacity-100"
+                        className="absolute -left-5 top-1/2 -translate-y-1/2 text-text-muted opacity-0 hover:text-red-400 group-hover/cat:opacity-100"
                       >
                         <CloseIcon small />
                       </button>
@@ -819,7 +819,7 @@ export default function ResourcePage() {
                   </div>
 
                   {activeParent === c.id && categories.some((s) => s.parent_id === c.id) && (
-                    <div className="my-1 ml-4 space-y-0.5 border-l border-neutral-800 pl-2">
+                    <div className="my-1 ml-4 space-y-0.5 border-l border-border-default pl-2">
                       {categories
                         .filter((sub) => sub.parent_id === c.id)
                         .map((sub) => (
@@ -835,7 +835,7 @@ export default function ResourcePage() {
                               <button
                                 onClick={() => deleteCategory(sub)}
                                 title="Delete category"
-                                className="absolute -left-5 top-1/2 -translate-y-1/2 text-neutral-600 opacity-0 hover:text-red-400 group-hover/cat:opacity-100"
+                                className="absolute -left-5 top-1/2 -translate-y-1/2 text-text-muted opacity-0 hover:text-red-400 group-hover/cat:opacity-100"
                               >
                                 <CloseIcon small />
                               </button>
@@ -849,7 +849,7 @@ export default function ResourcePage() {
             </div>
 
             {isAdmin && (
-              <div className="mt-4 border-t border-neutral-800 pt-4">
+              <div className="mt-4 border-t border-border-default pt-4">
                 {showNewCategory ? (
                   <div className="space-y-2 px-1">
                     <input
@@ -879,7 +879,7 @@ export default function ResourcePage() {
                       </button>
                       <button
                         onClick={() => setShowNewCategory(false)}
-                        className="flex-1 rounded-lg border border-border-default px-3 py-1.5 text-xs hover:border-neutral-500"
+                        className="flex-1 rounded-lg border border-border-default px-3 py-1.5 text-xs hover:border-brand-hover"
                       >
                         Cancel
                       </button>
@@ -888,7 +888,7 @@ export default function ResourcePage() {
                 ) : (
                   <button
                     onClick={() => setShowNewCategory(true)}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-neutral-500 hover:text-foreground"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-muted hover:text-foreground"
                   >
                     <PlusIcon />
                     New category
@@ -914,7 +914,7 @@ export default function ResourcePage() {
 
             <div className="mb-4 flex flex-col gap-3 sm:flex-row">
               <div className="relative flex-1">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">
                   <SearchIcon />
                 </span>
                 <input
@@ -949,8 +949,8 @@ export default function ResourcePage() {
             )}
 
             {filtered.length === 0 ? (
-              <div className="mt-6 flex flex-col items-center justify-center rounded-xl border border-dashed border-neutral-800 px-6 py-20 text-center">
-                <div className="mb-4 text-neutral-700">
+              <div className="mt-6 flex flex-col items-center justify-center rounded-xl border border-dashed border-border-default px-6 py-20 text-center">
+                <div className="mb-4 text-text-muted">
                   <PlayIcon />
                 </div>
                 <p className="font-medium">
@@ -1005,7 +1005,7 @@ export default function ResourcePage() {
                       >
                         <span
                           className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold tabular-nums ${
-                            count > 0 ? 'bg-foreground text-background' : 'border border-neutral-700 text-neutral-500'
+                            count > 0 ? 'bg-foreground text-background' : 'border border-border-default text-text-muted'
                           }`}
                         >
                           {i + 1}
@@ -1013,7 +1013,7 @@ export default function ResourcePage() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-baseline justify-between gap-2">
                             <span className="text-sm">{stage.name}</span>
-                            <span className="text-xs tabular-nums text-neutral-500">{count}</span>
+                            <span className="text-xs tabular-nums text-text-muted">{count}</span>
                           </div>
                           <p className="text-xs text-text-secondary">{stage.desc}</p>
                           {isAdmin && !cat && (
@@ -1022,7 +1022,7 @@ export default function ResourcePage() {
                                 e.stopPropagation()
                                 createStageCategory(stage)
                               }}
-                              className="mt-1 flex items-center gap-1 text-[11px] text-neutral-500 hover:text-foreground"
+                              className="mt-1 flex items-center gap-1 text-[11px] text-text-muted hover:text-foreground"
                             >
                               <PlusIcon className="h-3 w-3" />
                               Create category
@@ -1048,7 +1048,7 @@ export default function ResourcePage() {
 
               <div className="mt-3 space-y-1">
                 {pinned.length === 0 ? (
-                  <p className="py-2 text-sm text-neutral-500">
+                  <p className="py-2 text-sm text-text-muted">
                     {isAdmin ? 'Pin resources from their cards to show them here.' : 'Nothing pinned yet.'}
                   </p>
                 ) : (
@@ -1056,14 +1056,14 @@ export default function ResourcePage() {
                 )}
               </div>
 
-              <div className="mt-5 border-t border-neutral-800 pt-5">
+              <div className="mt-5 border-t border-border-default pt-5">
                 <div className="flex items-baseline justify-between">
                   <h2 className="font-semibold">Recently Added</h2>
                   {newCount > 0 && <span className="text-xs text-blue-400">{newCount} this week</span>}
                 </div>
                 <div className="mt-3 space-y-1">
                   {recent.length === 0 ? (
-                    <p className="py-2 text-sm text-neutral-500">Nothing yet.</p>
+                    <p className="py-2 text-sm text-text-muted">Nothing yet.</p>
                   ) : (
                     recent.map(renderMini)
                   )}
@@ -1079,7 +1079,7 @@ export default function ResourcePage() {
                   <span className="text-xs text-text-secondary">{totalTools} tools</span>
                 </div>
 
-                <p className="mb-6 border-l-2 border-neutral-700 pl-3 text-xs leading-relaxed text-text-secondary">
+                <p className="mb-6 border-l-2 border-border-default pl-3 text-xs leading-relaxed text-text-secondary">
                   The development stack depends on the project. Unity and Unreal are both used, since the choice of
                   engine comes down to what each game needs, they&apos;re tools, not a fixed pipeline. Everything else in
                   the stack is flexible for future team members to bring their own preferred tools; engine choice per
@@ -1089,7 +1089,7 @@ export default function ResourcePage() {
                 <div className="space-y-5">
                   {Object.entries(devStack).map(([category, tools]) => (
                     <div key={category}>
-                      <h3 className="mb-2 text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+                      <h3 className="mb-2 text-[11px] font-medium uppercase tracking-wider text-text-muted">
                         {category}
                       </h3>
                       <div className="flex flex-wrap gap-1.5">
@@ -1098,7 +1098,7 @@ export default function ResourcePage() {
                             key={`${category}-${tool}`}
                             onClick={() => setSearch(tool)}
                             title={`Search the library for ${tool}`}
-                            className="rounded-md border border-neutral-800 bg-neutral-900 px-2 py-0.5 text-xs text-neutral-300 hover:border-neutral-600 hover:text-foreground"
+                            className="rounded-md border border-border-default bg-elevated px-2 py-0.5 text-xs text-text-secondary hover:border-brand-hover hover:text-foreground"
                           >
                             {tool}
                           </button>
@@ -1137,7 +1137,7 @@ export default function ResourcePage() {
       {/* Editor modal */}
       {isAdmin && editingId !== null && (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 pt-20 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-foreground/70 p-4 pt-20 backdrop-blur-sm"
           onMouseDown={(e) => e.target === e.currentTarget && closeEditor()}
         >
           <div className="w-full max-w-lg rounded-xl border border-border-default bg-background p-5 shadow-2xl">
@@ -1185,7 +1185,7 @@ export default function ResourcePage() {
                 <p className="mb-2 text-xs text-text-secondary">Categories</p>
                 <div className="flex flex-wrap gap-2">
                   {categories.length === 0 && (
-                    <p className="text-sm text-neutral-500">None yet. Add some from the sidebar.</p>
+                    <p className="text-sm text-text-muted">None yet. Add some from the sidebar.</p>
                   )}
                   {categories.map((c) => (
                     <button
@@ -1204,7 +1204,7 @@ export default function ResourcePage() {
             <div className="mt-5 flex justify-end gap-2">
               <button
                 onClick={closeEditor}
-                className="rounded-lg border border-border-default px-4 py-2 text-sm hover:border-neutral-500"
+                className="rounded-lg border border-border-default px-4 py-2 text-sm hover:border-brand-hover"
               >
                 Cancel
               </button>
@@ -1223,7 +1223,7 @@ export default function ResourcePage() {
       {/* Video player modal */}
       {playing && playingEmbed && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/85 p-4 backdrop-blur-sm"
           onMouseDown={(e) => e.target === e.currentTarget && closePlayer()}
         >
           <div
@@ -1260,7 +1260,7 @@ export default function ResourcePage() {
             </div>
 
             <div className={`flex min-h-0 flex-col ${theater ? '' : 'lg:flex-row'}`}>
-              <div className={`w-full bg-black ${theater ? 'mx-auto max-w-[calc(82vh*16/9)]' : 'lg:flex-1'}`}>
+              <div className={`w-full bg-foreground ${theater ? 'mx-auto max-w-[calc(82vh*16/9)]' : 'lg:flex-1'}`}>
                 <div className="aspect-video w-full">
                   <iframe
                     key={playing.id}
@@ -1276,7 +1276,7 @@ export default function ResourcePage() {
               {!theater && (
                 <aside className="w-full shrink-0 space-y-5 overflow-y-auto border-t border-border-default p-5 lg:w-80 lg:border-l lg:border-t-0">
                   <div>
-                    <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-neutral-500">Notes</p>
+                    <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-text-muted">Notes</p>
                     <p className="whitespace-pre-wrap text-sm text-text-secondary">
                       {playing.notes || 'No notes yet.'}
                     </p>
@@ -1284,7 +1284,7 @@ export default function ResourcePage() {
 
                   {playing.resource_categories.length > 0 && (
                     <div>
-                      <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+                      <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-text-muted">
                         Categories
                       </p>
                       <div className="flex flex-wrap gap-1.5">
@@ -1297,7 +1297,7 @@ export default function ResourcePage() {
                                 setActiveCategory(cat.id)
                                 closePlayer()
                               }}
-                              className="rounded-md bg-neutral-800/80 px-2 py-0.5 text-[11px] text-neutral-300 hover:bg-neutral-700"
+                              className="rounded-md bg-elevated px-2 py-0.5 text-[11px] text-text-secondary hover:bg-surface"
                             >
                               {cat.name}
                             </button>
@@ -1307,10 +1307,10 @@ export default function ResourcePage() {
                     </div>
                   )}
 
-                  <div className="flex flex-wrap gap-2 border-t border-neutral-800 pt-4">
+                  <div className="flex flex-wrap gap-2 border-t border-border-default pt-4">
                     <button
                       onClick={() => copyLink(playing)}
-                      className="flex items-center gap-1.5 rounded-lg border border-neutral-800 px-3 py-1.5 text-xs text-text-secondary hover:border-neutral-600 hover:text-foreground"
+                      className="flex items-center gap-1.5 rounded-lg border border-border-default px-3 py-1.5 text-xs text-text-secondary hover:border-brand-hover hover:text-foreground"
                     >
                       <LinkIcon />
                       {copiedId === playing.id ? 'Copied!' : 'Copy link'}
@@ -1322,7 +1322,7 @@ export default function ResourcePage() {
                           closePlayer()
                           startEdit(r)
                         }}
-                        className="rounded-lg border border-neutral-800 px-3 py-1.5 text-xs text-text-secondary hover:border-neutral-600 hover:text-foreground"
+                        className="rounded-lg border border-border-default px-3 py-1.5 text-xs text-text-secondary hover:border-brand-hover hover:text-foreground"
                       >
                         Edit
                       </button>

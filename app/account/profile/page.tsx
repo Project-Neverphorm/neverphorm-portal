@@ -125,7 +125,7 @@ export default function ProfilePage() {
         action={
           <button
             disabled
-            className="bg-brand text-black font-semibold rounded px-4 py-2 text-sm disabled:opacity-50"
+            className="bg-brand text-background font-semibold rounded px-4 py-2 text-sm disabled:opacity-50"
             title="Coming soon"
           >
             Edit profile
@@ -137,7 +137,7 @@ export default function ProfilePage() {
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="flex flex-col items-center text-center">
           <div className="flex flex-col items-center">
-            <div className="w-28 h-28 rounded-full bg-brand text-black font-bold flex items-center justify-center text-4xl ring-4 ring-background mb-4">
+            <div className="w-28 h-28 rounded-full bg-brand text-background font-bold flex items-center justify-center text-4xl ring-4 ring-background mb-4">
               {initials}
             </div>
             <p className="text-xl font-bold">{name}</p>
@@ -268,7 +268,7 @@ export default function ProfilePage() {
             <button
               type="submit"
               disabled={saving}
-              className="w-full bg-brand text-black font-semibold rounded py-2 text-sm disabled:opacity-50"
+              className="w-full bg-brand text-background font-semibold rounded py-2 text-sm disabled:opacity-50"
             >
               {saving ? 'Updating...' : 'Update password'}
             </button>
