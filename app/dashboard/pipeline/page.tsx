@@ -703,15 +703,6 @@ export default function PipelinePage() {
               realistically weighing out survivability and weakness of idea/concept.
             </p>
           </div>
-
-           {/* 👉 PASTE #1 HERE */}
-          <aside className="hidden md:block ml-auto w-72 shrink-0 border border-brand/40 rounded-lg p-5 bg-elevated/40">
-            <h2 className="text-xs uppercase tracking-wide text-brand mb-2">Announcements</h2>
-            <div className="flex items-start gap-3">
-              <span className="text-lg leading-none" aria-hidden="true">🔒</span>
-              <p className="text-sm text-neutral-300">Will not reveal until after our 3rd game.</p>
-            </div>
-          </aside>
           
           {isOwner && (
             <button

@@ -116,6 +116,7 @@ export default function PayPage() {
       </div>
 
       <PaystubGrowthExample poolMembers={4} />
+      
 
       <Card title="Road to salary" action={<ExampleTag />}>
         <div className="grid gap-6 md:grid-cols-3">
