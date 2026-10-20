@@ -375,7 +375,7 @@ export default function DashboardPage() {
         return (
           <div key={member.id}>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-full bg-brand text-background font-bold flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-full bg-brand text-black font-bold flex items-center justify-center shrink-0">
                 {initials}
               </div>
               <div className="min-w-0">
@@ -471,7 +471,7 @@ export default function DashboardPage() {
               </div>
               <p className="text-sm text-text-secondary mb-6">Lvl {myLevel.level} · {myLevel.progress} / {myLevel.needed} XP · {myCompletedCount} tasks completed</p>
 
-              <div className="divide-y divide-border-default lg:max-h-80 lg:overflow-y-auto lg:pr-2">
+              <div className="divide-y divide-neutral-800 lg:max-h-80 lg:overflow-y-auto lg:pr-2">
                 {myTasks.length === 0 && (
                   <p className="text-sm text-text-secondary py-4">No active tasks. Log one from the admin panel.</p>
                 )}
@@ -482,7 +482,7 @@ export default function DashboardPage() {
                         <button
                           onClick={() => completeTask(task.id)}
                           aria-label={`Mark "${task.name}" complete`}
-                          className="mt-0.5 w-6 h-6 lg:w-5 lg:h-5 rounded border border-border-default hover:border-brand flex items-center justify-center shrink-0 transition-colors"
+                          className="mt-0.5 w-6 h-6 lg:w-5 lg:h-5 rounded border border-neutral-600 hover:border-brand flex items-center justify-center shrink-0 transition-colors"
                         />
                         <button
                           type="button"
@@ -504,7 +504,7 @@ export default function DashboardPage() {
                         <button
                           onClick={() => deleteTask(task.id)}
                           aria-label={`Delete "${task.name}"`}
-                          className="p-1 text-text-muted hover:text-red-500 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
+                          className="p-1 text-neutral-600 hover:text-red-500 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
                         >
                           ✕
                         </button>
@@ -522,7 +522,7 @@ export default function DashboardPage() {
 
               <div className="mt-6 border-l-2 border-brand bg-elevated/40 rounded-r px-4 py-3">
                 <p className="text-xs uppercase tracking-wide text-brand mb-1">Before you check it off</p>
-                <p className="text-sm text-text-secondary">
+                <p className="text-sm text-neutral-300">
                   Only check off a task once it&apos;s actually done. Checking tasks off is how everyone stays up to date visually with where the studio is at, so please keep it accurate. Thank you and good day!
                 </p>
               </div>
@@ -532,7 +532,7 @@ export default function DashboardPage() {
               <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">Responsibilities</h2>
               <div className="space-y-2">
                 {(RESPONSIBILITIES[myProfile?.title ?? ''] ?? []).map((item) => (
-                  <p key={item} className="text-sm text-text-secondary flex items-start gap-2">
+                  <p key={item} className="text-sm text-neutral-300 flex items-start gap-2">
                     <span className="text-brand mt-1">•</span>
                     {item}
                   </p>
@@ -549,7 +549,7 @@ export default function DashboardPage() {
                     <div className="flex items-center justify-between mb-3">
                       <h2 className="text-sm uppercase tracking-wide text-text-secondary">What&apos;s New</h2>
                       {isNew && (
-                        <span className="text-[10px] font-bold uppercase tracking-wide bg-brand text-background rounded px-1.5 py-0.5">
+                        <span className="text-[10px] font-bold uppercase tracking-wide bg-brand text-black rounded px-1.5 py-0.5">
                           New
                         </span>
                       )}
@@ -581,13 +581,13 @@ export default function DashboardPage() {
                 <div className="flex flex-col gap-2 mb-8">
                   <button
                     onClick={() => setShowLogTask(true)}
-                    className="text-sm text-left border border-border-default hover:border-brand rounded px-4 py-3 lg:py-2 transition-colors"
+                    className="text-sm text-left border border-neutral-700 hover:border-brand rounded px-4 py-3 lg:py-2 transition-colors"
                   >
                     + Log Task
                   </button>
                   <button
                     onClick={() => setShowArchive(true)}
-                    className="text-sm text-left border border-border-default hover:border-brand rounded px-4 py-3 lg:py-2 transition-colors flex items-center justify-between"
+                    className="text-sm text-left border border-neutral-700 hover:border-brand rounded px-4 py-3 lg:py-2 transition-colors flex items-center justify-between"
                   >
                     <span>Archived Tasks</span>
                     <span className="text-text-secondary">{archivedTasks.length}</span>
@@ -635,7 +635,7 @@ export default function DashboardPage() {
       <Footer />
 
       {showLogTask && (
-        <div className="fixed inset-0 bg-foreground/60 flex items-center justify-center z-50 px-4">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
           <div className="w-full max-w-sm bg-elevated border border-border-default rounded-lg p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-semibold">Log a new task</h3>
@@ -694,7 +694,7 @@ export default function DashboardPage() {
                 </select>
               </div>
 
-              <button type="submit" className="w-full bg-brand text-background font-semibold rounded py-2 text-sm mt-2">
+              <button type="submit" className="w-full bg-brand text-black font-semibold rounded py-2 text-sm mt-2">
                 Add task
               </button>
             </form>
@@ -703,7 +703,7 @@ export default function DashboardPage() {
       )}
 
       {showArchive && (
-        <div className="fixed inset-0 bg-foreground/60 flex items-center justify-center z-50 px-4">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
           <div className="w-full max-w-md bg-elevated border border-border-default rounded-lg p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-semibold">Archived tasks</h3>
@@ -712,7 +712,7 @@ export default function DashboardPage() {
               </button>
             </div>
 
-            <div className="max-h-80 overflow-y-auto divide-y divide-border-default mb-4">
+            <div className="max-h-80 overflow-y-auto divide-y divide-neutral-800 mb-4">
               {archivedTasks.length === 0 && (
                 <p className="text-sm text-text-secondary py-4">Nothing archived yet.</p>
               )}
@@ -724,7 +724,7 @@ export default function DashboardPage() {
                       <p className={`text-sm ${task.status === 'completed' ? 'line-through text-text-muted' : ''}`}>
                         {task.name}
                       </p>
-                      <span className="text-sm text-text-muted">+{task.xp} XP</span>
+                      <span className="text-sm text-neutral-600">+{task.xp} XP</span>
                     </div>
                     <div className="flex items-center justify-between mt-1">
                       <p className="text-xs text-text-secondary">
@@ -760,7 +760,7 @@ export default function DashboardPage() {
 
       {viewingMember && (
         <div
-          className="fixed inset-0 bg-foreground/60 flex items-center justify-center z-50 px-4"
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4"
           onClick={closeMemberModal}
         >
           <div
@@ -784,7 +784,7 @@ export default function DashboardPage() {
               )
             })()}
 
-            <div className="divide-y divide-border-default">
+            <div className="divide-y divide-neutral-800">
               {tasks.filter((t) => t.assigned_to_id === viewingMember.id).length === 0 && (
                 <p className="text-sm text-text-secondary py-4">No active tasks.</p>
               )}
@@ -824,7 +824,7 @@ export default function DashboardPage() {
                         </button>
                         <button
                           onClick={saveTaskEdit}
-                          className="text-xs bg-brand text-background font-semibold rounded px-3 py-1.5"
+                          className="text-xs bg-brand text-black font-semibold rounded px-3 py-1.5"
                         >
                           Save
                         </button>
@@ -844,7 +844,7 @@ export default function DashboardPage() {
                         <button
                           onClick={() => removeTaskFromModal(task.id, task.name)}
                           aria-label={`Remove "${task.name}"`}
-                          className="text-text-muted hover:text-red-500 transition-colors"
+                          className="text-neutral-500 hover:text-red-500 transition-colors"
                         >
                           ✕
                         </button>
@@ -859,7 +859,7 @@ export default function DashboardPage() {
 
       {showStudioLevels && (
         <div
-          className="fixed inset-0 bg-foreground/60 flex items-center justify-center z-50 px-4"
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4"
           onClick={() => setShowStudioLevels(false)}
         >
           <div
@@ -871,7 +871,7 @@ export default function DashboardPage() {
               <button onClick={() => setShowStudioLevels(false)} aria-label="Close" className="text-text-secondary hover:text-foreground">X</button>
             </div>
 
-            <div className="space-y-4 text-sm text-text-secondary">
+            <div className="space-y-4 text-sm text-neutral-300">
               <p>
                 Every completed task earns XP, which feeds two separate progress bars: your own personal level and the studio&apos;s overall level.
               </p>

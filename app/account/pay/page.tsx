@@ -67,7 +67,7 @@ export default function PayPage() {
               ['You get paid', 'Monthly, once platform funds arrive.'],
             ].map(([t, d], i) => (
               <li key={t} className="flex gap-3">
-                <span className="w-6 h-6 shrink-0 rounded-full bg-brand text-background text-xs font-bold flex items-center justify-center">
+                <span className="w-6 h-6 shrink-0 rounded-full bg-brand text-black text-xs font-bold flex items-center justify-center">
                   {i + 1}
                 </span>
                 <div>

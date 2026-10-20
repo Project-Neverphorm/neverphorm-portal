@@ -37,7 +37,7 @@ const formatDate = (iso: string) => {
 }
 
 const inputClass =
-  'w-full rounded-lg border border-border-default bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-text-muted focus:outline-none focus:border-brand'
+  'w-full rounded-lg border border-border-default bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-neutral-500 focus:outline-none focus:border-neutral-500'
 
 export default function UpdatesPage() {
   const router = useRouter()
@@ -151,7 +151,7 @@ export default function UpdatesPage() {
   }
 
   const editor = (
-    <div className="rounded-lg border border-border-default bg-elevated p-6">
+    <div className="rounded-lg border border-neutral-600 bg-elevated p-6">
       <div className="space-y-3">
         <div className="flex flex-col gap-3 sm:flex-row">
           <input
@@ -181,7 +181,7 @@ export default function UpdatesPage() {
       <div className="mt-4 flex justify-end gap-2">
         <button
           onClick={cancelEdit}
-          className="rounded-lg border border-border-default px-4 py-2 text-sm hover:border-brand-hover"
+          className="rounded-lg border border-border-default px-4 py-2 text-sm hover:border-neutral-500"
         >
           Cancel
         </button>
@@ -250,7 +250,7 @@ export default function UpdatesPage() {
                 </div>
 
                 {u.items.length > 0 && (
-                  <ul className="mt-4 list-disc space-y-2 pl-6 text-text-secondary marker:text-text-muted">
+                  <ul className="mt-4 list-disc space-y-2 pl-6 text-text-secondary marker:text-neutral-500">
                     {u.items.map((item, i) => (
                       <li key={i}>{item}</li>
                     ))}

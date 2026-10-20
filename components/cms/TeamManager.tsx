@@ -28,7 +28,7 @@ type Form = {
 const emptyForm: Form = { name: '', role: '', bio: '', favorite_games: '', photo_url: '', published: true }
 
 const inputClass =
-  'w-full rounded-lg border border-border-default bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-text-muted focus:outline-none focus:border-brand'
+  'w-full rounded-lg border border-border-default bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-neutral-500 focus:outline-none focus:border-neutral-500'
 
 const nullIfEmpty = (s: string) => (s.trim() === '' ? null : s.trim())
 
@@ -150,10 +150,10 @@ export default function TeamManager() {
   }
 
   const editor = (
-    <div className="rounded-lg border border-border-default bg-elevated p-5">
+    <div className="rounded-lg border border-neutral-600 bg-elevated p-5">
       <div className="flex flex-col gap-5 sm:flex-row">
         <div className="flex flex-col items-center gap-2">
-          <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-elevated text-2xl text-text-muted">
+          <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-neutral-800 text-2xl text-neutral-400">
             {form.photo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={form.photo_url} alt="" className="h-full w-full object-cover" />
@@ -174,7 +174,7 @@ export default function TeamManager() {
           {form.photo_url && (
             <button
               onClick={() => setForm({ ...form, photo_url: '' })}
-              className="text-xs text-text-muted hover:text-red-400"
+              className="text-xs text-neutral-500 hover:text-red-400"
             >
               Remove
             </button>
@@ -223,7 +223,7 @@ export default function TeamManager() {
       {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
 
       <div className="mt-4 flex justify-end gap-2">
-        <button onClick={cancel} className="rounded-lg border border-border-default px-4 py-2 text-sm hover:border-brand-hover">
+        <button onClick={cancel} className="rounded-lg border border-border-default px-4 py-2 text-sm hover:border-neutral-500">
           Cancel
         </button>
         <button
@@ -265,7 +265,7 @@ export default function TeamManager() {
             <div key={m.id}>{editor}</div>
           ) : (
             <div key={m.id} className="flex items-center gap-4 rounded-lg border border-border-default p-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-elevated text-text-muted">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-800 text-neutral-400">
                 {m.photo_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={m.photo_url} alt="" className="h-full w-full object-cover" />
@@ -277,7 +277,7 @@ export default function TeamManager() {
                 <p className="font-medium">
                   {m.name}
                   {!m.published && (
-                    <span className="ml-2 rounded bg-elevated px-1.5 py-0.5 text-[11px] text-text-muted">Hidden</span>
+                    <span className="ml-2 rounded bg-neutral-800 px-1.5 py-0.5 text-[11px] text-neutral-400">Hidden</span>
                   )}
                 </p>
                 <p className="text-sm text-text-secondary">{m.role}</p>

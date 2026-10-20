@@ -329,15 +329,15 @@ export default function TrainingPage() {
                         }
                         className={`w-6 h-6 rounded border shrink-0 flex items-center justify-center text-xs transition-colors ${
                           complete
-                            ? 'bg-brand border-brand text-background'
-                            : 'border-border-default hover:border-brand'
+                            ? 'bg-brand border-brand text-black'
+                            : 'border-neutral-600 hover:border-brand'
                         } ${saving ? 'opacity-50' : ''}`}
                       >
                         {complete ? '✓' : ''}
                       </button>
                     </div>
 
-                    <p className="text-sm text-text-secondary mb-4">{pathway.description}</p>
+                    <p className="text-sm text-neutral-300 mb-4">{pathway.description}</p>
 
                     <a
                       href={pathway.url}
@@ -388,14 +388,14 @@ export default function TrainingPage() {
                           {mod.department ?? 'Everyone'} · ~{mod.minutes} min
                         </p>
                         {done && (
-                          <span className="w-5 h-5 rounded bg-brand text-background text-xs flex items-center justify-center shrink-0">
+                          <span className="w-5 h-5 rounded bg-brand text-black text-xs flex items-center justify-center shrink-0">
                             ✓
                           </span>
                         )}
                       </div>
                       <h3 className="font-semibold mb-1">{mod.title}</h3>
                       {mod.summary && (
-                        <p className="text-sm text-text-secondary mb-3">{mod.summary}</p>
+                        <p className="text-sm text-neutral-300 mb-3">{mod.summary}</p>
                       )}
                       <span className="text-sm text-brand">
                         {done ? 'Review →' : 'Start →'}
@@ -423,7 +423,7 @@ export default function TrainingPage() {
                     {cert.org}
                   </p>
                   <h3 className="text-lg font-semibold mb-2">{cert.title}</h3>
-                  <p className="text-sm text-text-secondary mb-4">{cert.description}</p>
+                  <p className="text-sm text-neutral-300 mb-4">{cert.description}</p>
                   <a
                     href={cert.url}
                     target="_blank"
@@ -457,7 +457,7 @@ export default function TrainingPage() {
               return (
                 <div key={member.id}>
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-full bg-brand text-background font-bold flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-brand text-black font-bold flex items-center justify-center shrink-0">
                       {initials}
                     </div>
                     <div>
@@ -500,7 +500,7 @@ export default function TrainingPage() {
             <h2 className="text-sm uppercase tracking-wide text-text-secondary mb-3">
               Why this matters
             </h2>
-            <p className="text-sm text-text-secondary leading-relaxed">
+            <p className="text-sm text-neutral-300 leading-relaxed">
               These pathways exist so nobody on the team is left figuring out an engine or
               a business fundamental on their own. Complete the ones that apply to your
               role, this page is the record of where everyone stands, checked off for
@@ -514,7 +514,7 @@ export default function TrainingPage() {
 
       {openModule && (
         <div
-          className="fixed inset-0 bg-foreground/60 flex items-center justify-center z-50 px-4"
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4"
           onClick={() => setOpenModule(null)}
         >
           <div
@@ -537,7 +537,7 @@ export default function TrainingPage() {
               </button>
             </div>
 
-            <div className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap mb-6">
+            <div className="text-sm text-neutral-300 leading-relaxed whitespace-pre-wrap mb-6">
               {openModule.content}
             </div>
 
@@ -561,7 +561,7 @@ export default function TrainingPage() {
                 <button
                   onClick={() => completeModule(openModule.id)}
                   disabled={completingId === openModule.id}
-                  className="w-full bg-brand text-background font-semibold rounded py-2 text-sm disabled:opacity-50"
+                  className="w-full bg-brand text-black font-semibold rounded py-2 text-sm disabled:opacity-50"
                 >
                   {completingId === openModule.id ? 'Saving...' : 'Mark complete'}
                 </button>
