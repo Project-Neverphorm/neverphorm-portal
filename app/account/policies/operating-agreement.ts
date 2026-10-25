@@ -146,7 +146,7 @@ export const operatingAgreement: Part[] = [
             bullets: [
               "7.1 The Studio plans to replace revenue share with salaried positions once revenue supports it, expected around the Studio's first $1 million in revenue.",
               '7.2 At the switch, any revenue share earned but not yet paid is paid in full.',
-              '7.3 Salaries are intended to be competitive pay across the industry standard pay, slightly higher due to us being a small team. Benefits, such as health insurance, will be discussed as a team in a meeting when the Studio goes full-time.',
+              '7.3 Salaries are intended to be competitive with industry-standard pay, and slightly above it, since the Studio is a small team. Benefits, such as health insurance, will be discussed as a team in a meeting when the Studio goes full-time.',
               '7.4 Anyone who accepts a salaried position signs new employment terms, which replace Section 6.',
             ],
           },
