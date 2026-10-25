@@ -19,8 +19,6 @@ type Profile = {
   time_zone: string | null
   preferred_contact: string | null
   availability: string | null
-  bio: string | null
-  favorite_games: string | null
   skills: string[] | null
   portfolio_url: string | null
   github_url: string | null
@@ -35,8 +33,6 @@ type Draft = {
   time_zone: string
   preferred_contact: string
   availability: string
-  bio: string
-  favorite_games: string
   skills: string // comma separated while editing
   portfolio_url: string
   github_url: string
@@ -45,7 +41,7 @@ type Draft = {
 }
 
 const PROFILE_SELECT =
-  'id, full_name, title, status, department, employment, start_date, location, time_zone, preferred_contact, availability, bio, favorite_games, skills, portfolio_url, github_url, artstation_url, discord_handle'
+  'id, full_name, title, status, department, employment, start_date, location, time_zone, preferred_contact, availability, skills, portfolio_url, github_url, artstation_url, discord_handle'
 
 const NOT_SET = 'Not set'
 
@@ -59,8 +55,6 @@ function toDraft(p: Profile): Draft {
     time_zone: p.time_zone ?? '',
     preferred_contact: p.preferred_contact ?? '',
     availability: p.availability ?? '',
-    bio: p.bio ?? '',
-    favorite_games: p.favorite_games ?? '',
     skills: (p.skills ?? []).join(', '),
     portfolio_url: p.portfolio_url ?? '',
     github_url: p.github_url ?? '',
@@ -183,8 +177,6 @@ export default function ProfilePage() {
       time_zone: clean(draft.time_zone),
       preferred_contact: clean(draft.preferred_contact),
       availability: clean(draft.availability),
-      bio: clean(draft.bio),
-      favorite_games: clean(draft.favorite_games),
       skills: draft.skills
         .split(',')
         .map((s) => s.trim())
@@ -343,21 +335,7 @@ export default function ProfilePage() {
               <p className="text-xs text-text-secondary mt-3">
                 Title, department, start date, and employment are set by the Studio Head.
               </p>
-              <div className="mt-5 pt-5 border-t border-border-default grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="block text-xs text-text-secondary mb-1.5">Team page bio</label>
-                  <textarea
-                    value={draft.bio}
-                    onChange={(e) => updateDraft('bio')(e.target.value)}
-                    rows={4}
-                    maxLength={600}
-                    placeholder="What you do at Neverphorm, what you love making, and a fun fact or two."
-                    className={inputClass}
-                  />
-                  <p className="text-xs text-text-secondary mt-1 text-right">{draft.bio.length}/600</p>
-                </div>
-                <EditField label="Favorite games" value={draft.favorite_games} onChange={updateDraft('favorite_games')} maxLength={200} />
-              </div>
+              
             </>
           ) : (
             <>
@@ -371,15 +349,6 @@ export default function ProfilePage() {
                 <Field label="Time zone" value={profile?.time_zone || NOT_SET} />
                 <Field label="Preferred contact" value={profile?.preferred_contact || NOT_SET} />
                 <Field label="Availability" value={profile?.availability || NOT_SET} />
-              </div>
-              <div className="mt-5 pt-5 border-t border-border-default grid gap-4 sm:grid-cols-2">
-                <div>
-                  <p className="text-xs text-text-secondary mb-1">Team page bio</p>
-                  <p className="text-text-secondary whitespace-pre-line">
-                    {profile?.bio || 'No bio yet. Click Edit profile to add one.'}
-                  </p>
-                </div>
-                <Field label="Favorite games" value={profile?.favorite_games || NOT_SET} />
               </div>
             </>
           )}
