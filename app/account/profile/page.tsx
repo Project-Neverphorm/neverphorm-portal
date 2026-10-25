@@ -9,79 +9,26 @@ import { getLevelInfo } from '@/lib/levels'
 
 type Profile = {
   id: string
-  full_name: string | null
-  title: string | null
-  status: string | null
-  department: string | null
-  employment: string | null
-  start_date: string | null
-  location: string | null
-  time_zone: string | null
-  preferred_contact: string | null
-  availability: string | null
-  skills: string[] | null
-  portfolio_url: string | null
-  github_url: string | null
-  artstation_url: string | null
-  discord_handle: string | null
-}
-
-// Only the fields team members are allowed to edit (matches the DB column grants)
-type Draft = {
   full_name: string
-  location: string
-  time_zone: string
-  preferred_contact: string
-  availability: string
-  skills: string // comma separated while editing
-  portfolio_url: string
-  github_url: string
-  artstation_url: string
-  discord_handle: string
+  title: string
 }
 
-const PROFILE_SELECT =
-  'id, full_name, title, status, department, employment, start_date, location, time_zone, preferred_contact, availability, skills, portfolio_url, github_url, artstation_url, discord_handle'
-
-const NOT_SET = 'Not set'
-
-const inputClass =
-  'w-full bg-background border border-border-default rounded px-3 py-2 text-sm outline-none focus:border-brand'
-
-function toDraft(p: Profile): Draft {
-  return {
-    full_name: p.full_name ?? '',
-    location: p.location ?? '',
-    time_zone: p.time_zone ?? '',
-    preferred_contact: p.preferred_contact ?? '',
-    availability: p.availability ?? '',
-    skills: (p.skills ?? []).join(', '),
-    portfolio_url: p.portfolio_url ?? '',
-    github_url: p.github_url ?? '',
-    artstation_url: p.artstation_url ?? '',
-    discord_handle: p.discord_handle ?? '',
-  }
-}
-
-// Returns a clean URL, null if empty, or undefined if invalid
-function normalizeUrl(raw: string): string | null | undefined {
-  const value = raw.trim()
-  if (!value) return null
-  const withProtocol = /^https?:\/\//i.test(value) ? value : `https://${value}`
-  try {
-    return new URL(withProtocol).toString()
-  } catch {
-    return undefined
-  }
-}
-
-function displayUrl(url: string) {
-  return url.replace(/^https?:\/\//i, '').replace(/\/$/, '')
-}
-
-function formatStartDate(date: string | null) {
-  if (!date) return NOT_SET
-  return new Date(`${date}T00:00:00`).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+// Placeholder content until these fields live in Supabase
+const placeholder = {
+  department: 'Production',
+  startDate: 'Oct 2026',
+  location: 'Illinois, USA',
+  timezone: 'Central (CT)',
+  employment: 'Collaborator · Revenue share',
+  contact: 'Discord',
+  availability: 'Evenings & weekends',
+  skills: ['Unity', 'Unreal Engine', 'Blender', 'Figma', 'Clip Studio Paint', 'GitHub', 'Notion', 'Photoshop'],
+  links: [
+    { label: 'Portfolio', value: 'yourportfolio.com' },
+    { label: 'GitHub', value: 'github.com/username' },
+    { label: 'ArtStation', value: 'artstation.com/username' },
+    { label: 'Discord', value: 'username' },
+  ],
 }
 
 export default function ProfilePage() {
@@ -90,12 +37,6 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [totalXP, setTotalXP] = useState(0)
   const [tasksDone, setTasksDone] = useState(0)
-
-  // Edit mode: draft is null when not editing
-  const [draft, setDraft] = useState<Draft | null>(null)
-  const [savingProfile, setSavingProfile] = useState(false)
-  const [editError, setEditError] = useState<string | null>(null)
-  const editing = draft !== null
 
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -108,12 +49,11 @@ export default function ProfilePage() {
       if (!user) return // layout handles the redirect
       setUser(user)
 
-      const { data: profile, error: profileError } = await supabase
+      const { data: profile } = await supabase
         .from('profiles')
-        .select(PROFILE_SELECT)
+        .select('id, full_name, title')
         .eq('id', user.id)
         .single()
-      if (profileError) console.error('Failed to load profile:', profileError)
       setProfile(profile)
 
       // Real XP from the permanent ledger (same source as the dashboard).
@@ -134,77 +74,6 @@ export default function ProfilePage() {
     }
     loadProfile()
   }, [])
-
-  const updateDraft = (key: keyof Draft) => (value: string) =>
-    setDraft((d) => (d ? { ...d, [key]: value } : d))
-
-  const startEditing = () => {
-    if (!profile) return
-    setEditError(null)
-    setDraft(toDraft(profile))
-  }
-
-  const cancelEditing = () => {
-    setEditError(null)
-    setDraft(null)
-  }
-
-  const handleSaveProfile = async () => {
-    if (!profile || !draft) return
-    setEditError(null)
-
-    const full_name = draft.full_name.trim()
-    if (!full_name) {
-      setEditError('Name is required.')
-      return
-    }
-
-    const links = {
-      portfolio_url: normalizeUrl(draft.portfolio_url),
-      github_url: normalizeUrl(draft.github_url),
-      artstation_url: normalizeUrl(draft.artstation_url),
-    }
-    if (Object.values(links).includes(undefined)) {
-      setEditError('One of your links is not a valid URL.')
-      return
-    }
-
-    const clean = (v: string) => v.trim() || null
-
-    const update = {
-      full_name,
-      location: clean(draft.location),
-      time_zone: clean(draft.time_zone),
-      preferred_contact: clean(draft.preferred_contact),
-      availability: clean(draft.availability),
-      skills: draft.skills
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean)
-        .slice(0, 20),
-      ...links,
-      discord_handle: clean(draft.discord_handle),
-      updated_at: new Date().toISOString(),
-    }
-
-    setSavingProfile(true)
-    const { data, error } = await supabase
-      .from('profiles')
-      .update(update)
-      .eq('id', profile.id)
-      .select(PROFILE_SELECT)
-      .single()
-    setSavingProfile(false)
-
-    if (error) {
-      console.error('Failed to save profile:', error)
-      setEditError('Could not save your profile. Try again.')
-      return
-    }
-
-    setProfile(data)
-    setDraft(null)
-  }
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -238,30 +107,13 @@ export default function ProfilePage() {
   }
 
   const levelInfo = getLevelInfo(totalXP)
-  const name = profile?.full_name || 'Team member'
-  const title = profile?.title || 'Role title'
-  const initials = (profile?.full_name || user?.email || '?')
+  const name = profile?.full_name ?? 'Team member'
+  const initials = (profile?.full_name ?? user?.email ?? '?')
     .split(' ')
     .map((n) => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2)
-
-  const status = (profile?.status || 'active').toLowerCase()
-  const statusLabel = status.charAt(0).toUpperCase() + status.slice(1)
-  const skills = profile?.skills ?? []
-
-  const links = [
-    { label: 'Portfolio', url: profile?.portfolio_url },
-    { label: 'GitHub', url: profile?.github_url },
-    { label: 'ArtStation', url: profile?.artstation_url },
-  ]
-    .filter((l): l is { label: string; url: string } => Boolean(l.url))
-    .map((l) => ({ label: l.label, text: displayUrl(l.url), href: l.url }))
-
-  if (profile?.discord_handle) {
-    links.push({ label: 'Discord', text: profile.discord_handle, href: '' })
-  }
 
   return (
     <div className="space-y-4">
@@ -269,36 +121,15 @@ export default function ProfilePage() {
         title="Profile"
         description="Your info, how you appear on the studio site, and your login details."
         action={
-          editing ? (
-            <div className="flex gap-2">
-              <button
-                onClick={cancelEditing}
-                disabled={savingProfile}
-                className="border border-border-default rounded px-4 py-2 text-sm disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveProfile}
-                disabled={savingProfile}
-                className="bg-brand text-black font-semibold rounded px-4 py-2 text-sm disabled:opacity-50"
-              >
-                {savingProfile ? 'Saving...' : 'Save'}
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={startEditing}
-              disabled={!profile}
-              className="bg-brand text-black font-semibold rounded px-4 py-2 text-sm disabled:opacity-50"
-            >
-              Edit profile
-            </button>
-          )
+          <button
+            disabled
+            className="bg-brand text-black font-semibold rounded px-4 py-2 text-sm disabled:opacity-50"
+            title="Coming soon"
+          >
+            Edit profile
+          </button>
         }
       />
-
-      {editError && <p className="text-sm text-red-400">{editError}</p>}
 
       {/* Row 1: identity + details */}
       <div className="grid gap-4 lg:grid-cols-3">
@@ -308,50 +139,28 @@ export default function ProfilePage() {
               {initials}
             </div>
             <p className="text-xl font-bold">{name}</p>
-            <p className="text-brand text-sm mb-1">{title}</p>
+            <p className="text-brand text-sm mb-1">{profile?.title ?? 'Role title'}</p>
             <p className="text-text-secondary text-xs mb-4">{user?.email}</p>
             <div className="flex flex-wrap justify-center gap-2">
-              <Badge tone={status === 'active' ? 'success' : undefined}>● {statusLabel}</Badge>
-              {profile?.department && <Badge tone="brand">{profile.department}</Badge>}
-              {profile?.start_date && <Badge>Since {formatStartDate(profile.start_date)}</Badge>}
+              <Badge tone="success">● Active</Badge>
+              <Badge tone="brand">{placeholder.department}</Badge>
+              <Badge>Since {placeholder.startDate}</Badge>
             </div>
           </div>
         </Card>
 
         <Card title="Bio & details" className="lg:col-span-2">
-          {editing && draft ? (
-            <>
-              <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
-                <EditField label="Full name" value={draft.full_name} onChange={updateDraft('full_name')} />
-                <Field label="Title" value={title} />
-                <Field label="Department" value={profile?.department || NOT_SET} />
-                <Field label="Start date" value={formatStartDate(profile?.start_date ?? null)} />
-                <Field label="Employment" value={profile?.employment || NOT_SET} />
-                <EditField label="Location" value={draft.location} onChange={updateDraft('location')} placeholder="Illinois, USA" />
-                <EditField label="Time zone" value={draft.time_zone} onChange={updateDraft('time_zone')} placeholder="Central (CT)" />
-                <EditField label="Preferred contact" value={draft.preferred_contact} onChange={updateDraft('preferred_contact')} placeholder="Discord" />
-                <EditField label="Availability" value={draft.availability} onChange={updateDraft('availability')} placeholder="Evenings & weekends" />
-              </div>
-              <p className="text-xs text-text-secondary mt-3">
-                Title, department, start date, and employment are set by the Studio Head.
-              </p>
-              
-            </>
-          ) : (
-            <>
-              <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
-                <Field label="Full name" value={name} />
-                <Field label="Title" value={title} />
-                <Field label="Department" value={profile?.department || NOT_SET} />
-                <Field label="Start date" value={formatStartDate(profile?.start_date ?? null)} />
-                <Field label="Employment" value={profile?.employment || NOT_SET} />
-                <Field label="Location" value={profile?.location || NOT_SET} />
-                <Field label="Time zone" value={profile?.time_zone || NOT_SET} />
-                <Field label="Preferred contact" value={profile?.preferred_contact || NOT_SET} />
-                <Field label="Availability" value={profile?.availability || NOT_SET} />
-              </div>
-            </>
-          )}
+          <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
+            <Field label="Full name" value={name} />
+            <Field label="Title" value={profile?.title ?? 'Role title'} />
+            <Field label="Department" value={placeholder.department} />
+            <Field label="Start date" value={placeholder.startDate} />
+            <Field label="Employment" value={placeholder.employment} />
+            <Field label="Location" value={placeholder.location} />
+            <Field label="Time zone" value={placeholder.timezone} />
+            <Field label="Preferred contact" value={placeholder.contact} />
+            <Field label="Availability" value={placeholder.availability} />
+          </div>
         </Card>
       </div>
 
@@ -380,58 +189,25 @@ export default function ProfilePage() {
         </Card>
 
         <Card title="Skills & tools">
-          {editing && draft ? (
-            <div>
-              <label className="block text-xs text-text-secondary mb-1.5">Comma separated</label>
-              <textarea
-                value={draft.skills}
-                onChange={(e) => updateDraft('skills')(e.target.value)}
-                rows={4}
-                placeholder="Unity, Blender, Figma"
-                className={inputClass}
-              />
-              <p className="text-xs text-text-secondary mt-1">Up to 20 skills.</p>
-            </div>
-          ) : skills.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {skills.map((s) => (
-                <Badge key={s}>{s}</Badge>
-              ))}
-            </div>
-          ) : (
-            <p className="text-text-secondary text-sm">No skills added yet.</p>
-          )}
+          <div className="flex flex-wrap gap-2">
+            {placeholder.skills.map((s) => (
+              <Badge key={s}>{s}</Badge>
+            ))}
+          </div>
         </Card>
 
         <Card title="Links">
-          {editing && draft ? (
-            <div className="space-y-3">
-              <EditField label="Portfolio" value={draft.portfolio_url} onChange={updateDraft('portfolio_url')} placeholder="yourportfolio.com" maxLength={300} />
-              <EditField label="GitHub" value={draft.github_url} onChange={updateDraft('github_url')} placeholder="github.com/username" maxLength={300} />
-              <EditField label="ArtStation" value={draft.artstation_url} onChange={updateDraft('artstation_url')} placeholder="artstation.com/username" maxLength={300} />
-              <EditField label="Discord" value={draft.discord_handle} onChange={updateDraft('discord_handle')} placeholder="username" maxLength={40} />
-            </div>
-          ) : links.length > 0 ? (
-            <ul className="space-y-3">
-              {links.map((l) => (
-                <li key={l.label} className="flex items-center gap-3">
-                  <span className="text-brand"><LinkIcon className="w-4 h-4" /></span>
-                  <div className="min-w-0">
-                    <p className="text-xs text-text-secondary">{l.label}</p>
-                    {l.href ? (
-                      <a href={l.href} target="_blank" rel="noopener noreferrer" className="truncate block hover:text-brand">
-                        {l.text}
-                      </a>
-                    ) : (
-                      <p className="truncate">{l.text}</p>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-text-secondary text-sm">No links added yet.</p>
-          )}
+          <ul className="space-y-3">
+            {placeholder.links.map((l) => (
+              <li key={l.label} className="flex items-center gap-3">
+                <span className="text-brand"><LinkIcon className="w-4 h-4" /></span>
+                <div className="min-w-0">
+                  <p className="text-xs text-text-secondary">{l.label}</p>
+                  <p className="truncate">{l.value}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </Card>
       </div>
 
@@ -441,7 +217,7 @@ export default function ProfilePage() {
           <Table
             headers={['Title', 'Your role', 'Status', 'Credited as']}
             rows={[
-              ['Duskline', title, <Badge key="s1" tone="brand">In development</Badge>, name],
+              ['Duskline', profile?.title ?? 'Role title', <Badge key="s1" tone="brand">In development</Badge>, name],
               ['Next title', 'TBD', <Badge key="s2">Planned</Badge>, 'TBD'],
             ]}
           />
@@ -458,7 +234,7 @@ export default function ProfilePage() {
                 placeholder="At least 8 characters"
                 required
                 minLength={8}
-                className={inputClass}
+                className="w-full bg-background border border-border-default rounded px-3 py-2 text-sm outline-none focus:border-brand"
               />
             </div>
             <div>
@@ -470,7 +246,7 @@ export default function ProfilePage() {
                 placeholder="Re-enter password"
                 required
                 minLength={8}
-                className={inputClass}
+                className="w-full bg-background border border-border-default rounded px-3 py-2 text-sm outline-none focus:border-brand"
               />
             </div>
 
@@ -490,33 +266,6 @@ export default function ProfilePage() {
           </form>
         </Card>
       </div>
-    </div>
-  )
-}
-
-function EditField({
-  label,
-  value,
-  onChange,
-  placeholder,
-  maxLength = 80,
-}: {
-  label: string
-  value: string
-  onChange: (value: string) => void
-  placeholder?: string
-  maxLength?: number
-}) {
-  return (
-    <div>
-      <label className="block text-xs text-text-secondary mb-1.5">{label}</label>
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        maxLength={maxLength}
-        className={inputClass}
-      />
     </div>
   )
 }
